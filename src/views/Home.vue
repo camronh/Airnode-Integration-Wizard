@@ -5,7 +5,7 @@
         <v-card-title>
           <v-text-field placeholder="Title" v-model="title"></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn @click="exportOAS">
+          <v-btn @click="exportOAS" :disabled="!valid">
             Export
           </v-btn>
         </v-card-title>
@@ -158,13 +158,15 @@ export default {
       title: "",
       version: "",
       server: "",
+      valid: false,
+      exporting: false,
       hasAuth: true,
       auth: {
         type: "apiKey",
         in: "query",
         name: "",
       },
-
+      oas: "",
       endpoints: [],
       ep: {
         path: "",
@@ -190,7 +192,23 @@ export default {
       this.ep.params.push(this.param);
       this.param = { name: "", in: "query" };
     },
-    downloadOAS() {},
+    downloadOAS() {
+      // credit: https://www.bitdegree.org/learn/javascript-download
+      let text = this.oas;
+      let filename = `${this.title}.oas.json`;
+      let element = document.createElement("a");
+      element.setAttribute(
+        "href",
+        "data:application/json;charset=utf-8," + encodeURIComponent(text)
+      );
+      element.setAttribute("download", filename);
+
+      element.style.display = "none";
+      document.body.appendChild(element);
+
+      element.click();
+      document.body.removeChild(element);
+    },
     exportOAS() {
       const { title, version, server, hasAuth, auth, endpoints } = this;
       console.log({ title, version, server, hasAuth, auth, endpoints });
@@ -254,6 +272,8 @@ export default {
         };
       }
       console.log({ oas });
+      this.oas = JSON.stringify(oas, null, 2);
+      this.exporting = true;
     },
   },
 
