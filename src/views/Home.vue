@@ -27,10 +27,10 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="6" md="1">
+            <v-col cols="6" md="2">
               <v-checkbox label="Auth" v-model="hasAuth"> </v-checkbox>
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="12" md="2">
               <v-select
                 v-model="auth.type"
                 :disabled="!hasAuth"
@@ -39,7 +39,7 @@
                 required
               ></v-select>
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="12" md="2">
               <v-select
                 :disabled="!hasAuth"
                 v-model="auth.in"
@@ -63,11 +63,11 @@
           </v-card-title>
           <v-card-text>
             <v-list>
-              <v-list-item
-                v-for="endpoint of endpoints"
-                :key="endpoint.name"
-              ></v-list-item>
+              <v-list-item v-for="endpoint of endpoints" :key="endpoint.path">
+                {{ endpoint.path }}
+              </v-list-item>
             </v-list>
+            <br />
             <v-card>
               <v-row align="center" justify="center">
                 <v-col cols="12" md="4">
@@ -89,14 +89,14 @@
               <v-card-subtitle>
                 Params
               </v-card-subtitle>
+              <v-list>
+                <v-list-item v-for="p of ep.params" :key="p.name">
+                  <v-list-item-title>
+                    {{ p.name }} - {{ p.in }}
+                  </v-list-item-title>
+                </v-list-item>
+              </v-list>
               <v-row align="center" justify="center">
-                <v-list>
-                  <v-list-item v-for="p of ep.params" :key="p.name">
-                    <v-list-item-title>
-                      {{ p.name }} - {{ p.method }}
-                    </v-list-item-title>
-                  </v-list-item>
-                </v-list>
                 <v-col cols="12" md="4">
                   <v-text-field
                     v-model="param.name"
@@ -112,7 +112,7 @@
                   ></v-select>
                 </v-col>
                 <v-col cols="12" md="1">
-                  <v-btn icon>
+                  <v-btn icon @click="addParam">
                     <v-icon>
                       mdi-plus
                     </v-icon>
@@ -121,7 +121,7 @@
               </v-row>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn>
+                <v-btn @click="addEndpoint">
                   Add Endpoint
                 </v-btn>
                 <v-spacer></v-spacer>
@@ -149,17 +149,36 @@ export default {
         name: "",
       },
       ep: {
-        name: "",
         path: "",
         method: "GET",
-        params: [],
+        params: [{ name: "token", in: "query" }],
       },
       param: {
         name: "",
         in: "query",
       },
-      endpoints: [],
+      endpoints: [
+        {
+          path: "/testing",
+          method: "GET",
+          params: [{ name: "token", in: "query" }],
+        },
+      ],
     };
+  },
+  methods: {
+    addEndpoint() {
+      this.endpoints.push(this.ep);
+      this.ep = {
+        path: "",
+        method: "GET",
+        params: [],
+      };
+    },
+    addParam() {
+      this.ep.params.push(this.param);
+      this.param = { name: "", in: "query" };
+    },
   },
 
   components: {},
