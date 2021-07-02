@@ -131,6 +131,14 @@
         </v-container>
       </v-form>
     </v-card>
+    <v-dialog v-model="exporting">
+      <v-card>
+        <v-card-title>
+          OAS
+        </v-card-title>
+        <v-textarea :value="oas" readonly> </v-textarea>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -142,7 +150,9 @@ export default {
       title: "",
       version: "",
       server: "",
+      exporting: false,
       hasAuth: true,
+      oas: "",
       auth: {
         type: "apiKey",
         in: "query",
@@ -237,6 +247,8 @@ export default {
         };
       }
       console.log({ oas });
+      this.oas = JSON.stringify(oas, null, 2);
+      this.exporting = true;
     },
   },
 
