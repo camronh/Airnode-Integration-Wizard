@@ -1,16 +1,13 @@
 <template>
   <v-container>
     <v-card>
-      <v-card-title>
-        Swagger Maker
-      </v-card-title>
-      <v-card-subtitle>
-        Fill out the fields below to generate a Swagger file
-      </v-card-subtitle>
-      <v-divider></v-divider>
       <v-form v-model="valid">
         <v-card-title>
           <v-text-field placeholder="Title" v-model="title"></v-text-field>
+          <v-spacer></v-spacer>
+          <v-btn @click="exportOAS">
+            Export
+          </v-btn>
         </v-card-title>
         <v-container>
           <v-row align="center" justify="center">
@@ -44,7 +41,7 @@
                 :disabled="!hasAuth"
                 v-model="auth.in"
                 label="In"
-                :items="['query']"
+                :items="['query', 'header']"
                 required
               ></v-select>
             </v-col>
@@ -69,6 +66,9 @@
             </v-list>
             <br />
             <v-card>
+              <v-card-title>
+                New Endpoint
+              </v-card-title>
               <v-row align="center" justify="center">
                 <v-col cols="12" md="4">
                   <v-text-field
@@ -81,7 +81,7 @@
                   <v-select
                     v-model="ep.method"
                     label="Method"
-                    :items="['GET', 'POST']"
+                    :items="['get', 'post']"
                     required
                   ></v-select>
                 </v-col>
@@ -148,22 +148,17 @@ export default {
         in: "query",
         name: "",
       },
+
+      endpoints: [],
       ep: {
         path: "",
         method: "GET",
-        params: [{ name: "token", in: "query" }],
+        params: [],
       },
       param: {
         name: "",
         in: "query",
       },
-      endpoints: [
-        {
-          path: "/testing",
-          method: "GET",
-          params: [{ name: "token", in: "query" }],
-        },
-      ],
     };
   },
   methods: {
@@ -171,13 +166,77 @@ export default {
       this.endpoints.push(this.ep);
       this.ep = {
         path: "",
-        method: "GET",
+        method: "get",
         params: [],
       };
     },
     addParam() {
       this.ep.params.push(this.param);
       this.param = { name: "", in: "query" };
+    },
+    exportOAS() {
+      const { title, version, server, hasAuth, auth, endpoints } = this;
+      console.log({ title, version, server, hasAuth, auth, endpoints });
+      let oas = {
+        openapi: "3.0.1",
+        info: {
+          title,
+          version,
+        },
+        servers: [{ url: server }],
+        paths: [],
+      };
+      for (let endpoint of endpoints) {
+        let params = endpoint.params.map(param => {
+          return {
+            name: param.name,
+            in: param.in,
+            required: false,
+            style: "form",
+            explode: true,
+            schema: {
+              type: "string",
+            },
+          };
+        });
+
+        let path = {
+          [endpoint.path]: {
+            [endpoint.method]: {
+              description: "API Endpoint",
+              parameters: params,
+              responses: {
+                "200": {
+                  description: "Auto generated using Swagger Inspector",
+                  content: {
+                    "application/json;charset=utf-8": {
+                      schema: {
+                        type: "string",
+                      },
+                      examples: {},
+                    },
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        oas.paths.push(path);
+      }
+
+      if (hasAuth) {
+        oas.components = {
+          securitySchemes: {
+            key: {
+              type: auth.type,
+              name: auth.name,
+              in: auth.in,
+            },
+          },
+        };
+      }
+      console.log({ oas });
     },
   },
 
