@@ -131,6 +131,22 @@
         </v-container>
       </v-form>
     </v-card>
+    <v-dialog v-model="exporting" max-width="50%">
+      <v-card>
+        <v-card-title>
+          OAS
+        </v-card-title>
+        <v-card-text>
+          <v-textarea :value="oas" readonly auto-grow> </v-textarea>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="downloadOAS">
+            Download
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -174,6 +190,7 @@ export default {
       this.ep.params.push(this.param);
       this.param = { name: "", in: "query" };
     },
+    downloadOAS() {},
     exportOAS() {
       const { title, version, server, hasAuth, auth, endpoints } = this;
       console.log({ title, version, server, hasAuth, auth, endpoints });
