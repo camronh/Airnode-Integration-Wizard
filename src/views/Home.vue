@@ -5,7 +5,7 @@
         <v-card-title>
           <v-text-field placeholder="Title" v-model="title"></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn @click="exportOAS">
+          <v-btn @click="exportOAS" :disabled="!valid">
             Export
           </v-btn>
         </v-card-title>
@@ -131,12 +131,20 @@
         </v-container>
       </v-form>
     </v-card>
-    <v-dialog v-model="exporting">
+    <v-dialog v-model="exporting" max-width="50%">
       <v-card>
         <v-card-title>
           OAS
         </v-card-title>
-        <v-textarea :value="oas" readonly> </v-textarea>
+        <v-card-text>
+          <v-textarea :value="oas" readonly auto-grow> </v-textarea>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="downloadOAS">
+            Download
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-container>
@@ -150,6 +158,7 @@ export default {
       title: "",
       version: "",
       server: "",
+      valid: false,
       exporting: false,
       hasAuth: true,
       oas: "",
@@ -158,7 +167,7 @@ export default {
         in: "query",
         name: "",
       },
-
+      oas: "",
       endpoints: [],
       ep: {
         path: "",
@@ -183,6 +192,23 @@ export default {
     addParam() {
       this.ep.params.push(this.param);
       this.param = { name: "", in: "query" };
+    },
+    downloadOAS() {
+      // credit: https://www.bitdegree.org/learn/javascript-download
+      let text = this.oas;
+      let filename = `${this.title}.oas.json`;
+      let element = document.createElement("a");
+      element.setAttribute(
+        "href",
+        "data:application/json;charset=utf-8," + encodeURIComponent(text)
+      );
+      element.setAttribute("download", filename);
+
+      element.style.display = "none";
+      document.body.appendChild(element);
+
+      element.click();
+      document.body.removeChild(element);
     },
     exportOAS() {
       const { title, version, server, hasAuth, auth, endpoints } = this;
