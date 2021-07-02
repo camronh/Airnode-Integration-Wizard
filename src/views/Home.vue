@@ -79,14 +79,15 @@
                 New Endpoint
               </v-card-title>
               <v-row align="center" justify="center">
-                <v-col cols="12" md="4">
+                <v-col cols="12" md="6">
                   <v-text-field
                     v-model="ep.path"
                     label="Path"
+                    placeholder="/endpoint/{pathParam}"
                     required
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="4">
+                <v-col cols="12" md="2">
                   <v-select
                     v-model="ep.method"
                     label="Method"
@@ -96,7 +97,7 @@
                 </v-col>
               </v-row>
               <v-card-subtitle>
-                Params
+                Params:
               </v-card-subtitle>
               <v-list>
                 <v-list-item v-for="p of ep.params" :key="p.name">
@@ -112,7 +113,7 @@
                     label="Name"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="4">
+                <v-col cols="12" md="2">
                   <v-select
                     v-model="param.in"
                     label="In"
@@ -121,7 +122,12 @@
                   ></v-select>
                 </v-col>
                 <v-col cols="12" md="1">
-                  <v-btn icon @click="addParam">
+                  <v-btn
+                    icon
+                    @click="addParam"
+                    color="blue"
+                    :disabled="!param.name"
+                  >
                     <v-icon>
                       mdi-plus
                     </v-icon>
@@ -130,7 +136,7 @@
               </v-row>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn @click="addEndpoint">
+                <v-btn @click="addEndpoint" :disabled="!validEndpoint">
                   Add Endpoint
                 </v-btn>
                 <v-spacer></v-spacer>
@@ -179,7 +185,7 @@ export default {
       endpoints: [],
       ep: {
         path: "",
-        method: "GET",
+        method: "get",
         params: [],
       },
       param: {
@@ -291,6 +297,11 @@ export default {
     },
   },
 
-  components: {},
+  computed: {
+    validEndpoint() {
+      if (this.ep.path) return true;
+      else return false;
+    },
+  },
 };
 </script>
