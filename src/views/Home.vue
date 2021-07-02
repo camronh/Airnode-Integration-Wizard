@@ -3,9 +3,13 @@
     <v-card>
       <v-form v-model="valid">
         <v-card-title>
-          <v-text-field placeholder="Title" v-model="title"></v-text-field>
+          <v-text-field
+            placeholder="Title"
+            v-model="title"
+            :rules="required"
+          ></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn @click="exportOAS" :disabled="!valid">
+          <v-btn @click="exportOAS" :disabled="!valid || !endpoints.length">
             Export
           </v-btn>
         </v-card-title>
@@ -19,6 +23,7 @@
               <v-text-field
                 v-model="server"
                 label="Server"
+                :rules="serverRules"
                 required
               ></v-text-field>
             </v-col>
@@ -51,6 +56,7 @@
                 v-model="auth.name"
                 label="Name"
                 placeholder="X-API-KEY"
+                :rules="hasAuth ? required : false"
                 required
               ></v-text-field>
             </v-col>
@@ -59,11 +65,14 @@
             Endpoints
           </v-card-title>
           <v-card-text>
-            <v-list>
+            <v-list v-if="endpoints.length">
               <v-list-item v-for="endpoint of endpoints" :key="endpoint.path">
                 {{ endpoint.path }}
               </v-list-item>
             </v-list>
+            <v-card-text v-else disabled>
+              Add Endpoints below...
+            </v-card-text>
             <br />
             <v-card>
               <v-card-title>
@@ -161,7 +170,6 @@ export default {
       valid: false,
       exporting: false,
       hasAuth: true,
-      oas: "",
       auth: {
         type: "apiKey",
         in: "query",
@@ -178,6 +186,11 @@ export default {
         name: "",
         in: "query",
       },
+      required: [v => !!v || "Required"],
+      serverRules: [
+        v => !!v || "Required",
+        v => v.includes("https://") || "Invalid Server",
+      ],
     };
   },
   methods: {
