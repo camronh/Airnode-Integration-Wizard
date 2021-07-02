@@ -66,8 +66,15 @@
           </v-card-title>
           <v-card-text>
             <v-list v-if="endpoints.length">
-              <v-list-item v-for="endpoint of endpoints" :key="endpoint.path">
-                {{ endpoint.path }}
+              <v-list-item v-for="(endpoint, i) of endpoints" :key="i">
+                <v-list-item-content>
+                  <v-list-item-title v-text="endpoint.path"></v-list-item-title>
+                </v-list-item-content>
+                <v-list-item-icon>
+                  <v-icon @click="deleteEndpoint(i)" color="red">
+                    mdi-minus
+                  </v-icon>
+                </v-list-item-icon>
               </v-list-item>
             </v-list>
             <v-card-text v-else disabled>
@@ -96,16 +103,23 @@
                   ></v-select>
                 </v-col>
               </v-row>
-              <v-card-subtitle>
-                Params:
-              </v-card-subtitle>
-              <v-list>
-                <v-list-item v-for="p of ep.params" :key="p.name">
-                  <v-list-item-title>
-                    {{ p.name }} - {{ p.in }}
-                  </v-list-item-title>
-                </v-list-item>
-              </v-list>
+              <v-card-text>
+                <h2 class="text-h6 mb-2">
+                  Params
+                </h2>
+
+                <v-chip-group v-model="ep.params" column multiple>
+                  <v-chip
+                    outlined
+                    v-for="(param, i) of ep.params"
+                    :key="param.name"
+                    close
+                    @click:close="deleteParam(i)"
+                  >
+                    {{ param.name }} - {{ param.in }}
+                  </v-chip>
+                </v-chip-group>
+              </v-card-text>
               <v-row align="center" justify="center">
                 <v-col cols="12" md="4">
                   <v-text-field
@@ -228,6 +242,13 @@ export default {
 
       element.click();
       document.body.removeChild(element);
+    },
+    deleteParam(i) {
+      this.ep.params.splice(i, 1);
+    },
+
+    deleteEndpoint(i) {
+      this.endpoints.splice(i, 1);
     },
     exportOAS() {
       const { title, version, server, hasAuth, auth, endpoints } = this;
