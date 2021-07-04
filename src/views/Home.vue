@@ -6,30 +6,47 @@
           <v-text-field
             placeholder="Title"
             v-model="title"
+            class="titleField"
             :rules="required"
+            height="40px"
           ></v-text-field>
           <v-spacer></v-spacer>
-          <v-btn @click="exportOAS" :disabled="!valid || !endpoints.length">
+          <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+          <v-btn
+            @click="exportOAS"
+            outlined
+            color="primary"
+            :disabled="!valid || !endpoints.length"
+          >
             Export
+            <v-icon right>
+              mdi-export
+            </v-icon>
           </v-btn>
         </v-card-title>
         <v-container>
           <v-row align="center" justify="center">
-            <v-col cols="12" md="4">
-              <v-text-field v-model="version" label="Version"></v-text-field>
-            </v-col>
-
-            <v-col cols="12" md="4">
+            <v-col cols="12" md="7">
               <v-text-field
                 v-model="server"
+                placeholder="https://api.website.com/v2"
                 label="Server"
                 :rules="serverRules"
                 required
               ></v-text-field>
             </v-col>
+            <v-col cols="12" md="2">
+              <v-text-field
+                v-model="version"
+                label="Version (optional)"
+              ></v-text-field>
+            </v-col>
           </v-row>
-          <v-row>
-            <v-col cols="6" md="2">
+          <v-row align="center" justify="center">
+            <v-col cols="12" md="1">
               <v-checkbox label="Auth" v-model="hasAuth"> </v-checkbox>
             </v-col>
             <v-col cols="12" md="2">
@@ -65,28 +82,43 @@
             Endpoints
           </v-card-title>
           <v-card-text>
-            <v-list v-if="endpoints.length">
-              <v-list-item v-for="(endpoint, i) of endpoints" :key="i">
-                <v-list-item-content>
-                  <v-list-item-title v-text="endpoint.path"></v-list-item-title>
-                </v-list-item-content>
-                <v-list-item-icon>
-                  <v-icon @click="deleteEndpoint(i)" color="red">
-                    mdi-minus
-                  </v-icon>
-                </v-list-item-icon>
-              </v-list-item>
-            </v-list>
-            <v-card-text v-else disabled>
+            <v-chip-group
+              v-model="endpoints"
+              column
+              multiple
+              v-if="endpoints.length"
+            >
+              <v-chip
+                v-for="(endpoint, i) of endpoints"
+                :key="i"
+                close
+                outlined
+                large
+                label
+                @click:close="deleteEndpoint(i)"
+              >
+                {{ endpoint.path }} - {{ endpoint.method }}
+              </v-chip>
+            </v-chip-group>
+            <p v-else>
               Add Endpoints below...
-            </v-card-text>
+            </p>
             <br />
             <v-card>
               <v-card-title>
                 New Endpoint
+                <v-spacer></v-spacer>
+                <v-btn
+                  @click="addEndpoint"
+                  :disabled="!validEndpoint"
+                  text
+                  color="primary"
+                >
+                  Add Endpoint
+                </v-btn>
               </v-card-title>
               <v-row align="center" justify="center">
-                <v-col cols="12" md="6">
+                <v-col cols="12" md="5">
                   <v-text-field
                     v-model="ep.path"
                     label="Path"
@@ -107,24 +139,28 @@
                 <h2 class="text-h6 mb-2">
                   Params
                 </h2>
-
-                <v-chip-group v-model="ep.params" column multiple>
+                <template v-if="ep.params.length">
                   <v-chip
-                    outlined
                     v-for="(param, i) of ep.params"
                     :key="param.name"
                     close
+                    outlined
                     @click:close="deleteParam(i)"
                   >
                     {{ param.name }} - {{ param.in }}
                   </v-chip>
-                </v-chip-group>
+                </template>
+                <p v-else>
+                  No params...
+                </p>
               </v-card-text>
               <v-row align="center" justify="center">
                 <v-col cols="12" md="4">
                   <v-text-field
                     v-model="param.name"
-                    label="Name"
+                    label="Param Name"
+                    placeholder="ex. currency"
+                    @keypress.enter="addParam"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" md="2">
@@ -136,23 +172,28 @@
                   ></v-select>
                 </v-col>
                 <v-col cols="12" md="1">
-                  <v-btn
-                    icon
-                    @click="addParam"
-                    color="blue"
-                    :disabled="!param.name"
-                  >
-                    <v-icon>
-                      mdi-plus
-                    </v-icon>
-                  </v-btn>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        icon
+                        @click="addParam"
+                        color="primary"
+                        :disabled="!param.name"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon>
+                          mdi-plus
+                        </v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Add Param</span>
+                  </v-tooltip>
                 </v-col>
               </v-row>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn @click="addEndpoint" :disabled="!validEndpoint">
-                  Add Endpoint
-                </v-btn>
+
                 <v-spacer></v-spacer>
               </v-card-actions>
             </v-card>
@@ -166,12 +207,16 @@
           OAS
         </v-card-title>
         <v-card-text>
-          <v-textarea :value="oas" readonly auto-grow> </v-textarea>
+          <v-textarea :value="oas" readonly rows="20" autofocus no-resize>
+          </v-textarea>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="downloadOAS">
+          <v-btn @click="downloadOAS" text color="primary" block>
             Download
+            <v-icon right>
+              mdi-download
+            </v-icon>
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -260,7 +305,7 @@ export default {
           version,
         },
         servers: [{ url: server }],
-        paths: [],
+        paths: {},
       };
       for (let endpoint of endpoints) {
         let params = endpoint.params.map(param => {
@@ -298,7 +343,7 @@ export default {
           },
         };
 
-        oas.paths.push(path);
+        oas.paths[endpoint.path] = path[endpoint.path];
       }
 
       if (hasAuth) {
@@ -326,3 +371,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.titleField {
+  font-size: 1.6em;
+}
+</style>
