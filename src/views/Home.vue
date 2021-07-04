@@ -302,11 +302,11 @@ export default {
         openapi: "3.0.1",
         info: {
           title,
-          version,
         },
         servers: [{ url: server }],
         paths: {},
       };
+      if (version) oas.info.version = version;
       for (let endpoint of endpoints) {
         let params = endpoint.params.map(param => {
           return {
