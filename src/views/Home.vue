@@ -41,7 +41,9 @@
             <v-col cols="12" md="2">
               <v-text-field
                 v-model="version"
-                label="Version (optional)"
+                label="Version"
+                required
+                :rules="required"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -82,12 +84,7 @@
             Endpoints
           </v-card-title>
           <v-card-text>
-            <v-chip-group
-              v-model="endpoints"
-              column
-              multiple
-              v-if="endpoints.length"
-            >
+            <template v-if="endpoints.length">
               <v-chip
                 v-for="(endpoint, i) of endpoints"
                 :key="i"
@@ -95,11 +92,12 @@
                 outlined
                 large
                 label
+                @click="ep = endpoint"
                 @click:close="deleteEndpoint(i)"
               >
                 {{ endpoint.path }} - {{ endpoint.method }}
               </v-chip>
-            </v-chip-group>
+            </template>
             <p v-else>
               Add Endpoints below...
             </p>
@@ -108,6 +106,14 @@
               <v-card-title>
                 New Endpoint
                 <v-spacer></v-spacer>
+                <v-btn
+                  @click="clearEndpoint"
+                  :disabled="!validEndpoint"
+                  text
+                  color="red"
+                >
+                  Clear
+                </v-btn>
                 <v-btn
                   @click="addEndpoint"
                   :disabled="!validEndpoint"
@@ -290,6 +296,13 @@ export default {
     },
     deleteParam(i) {
       this.ep.params.splice(i, 1);
+    },
+    clearEndpoint() {
+      this.ep = {
+        path: "",
+        method: "get",
+        params: [],
+      };
     },
 
     deleteEndpoint(i) {
