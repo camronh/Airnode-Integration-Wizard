@@ -87,7 +87,7 @@
             <template v-if="endpoints.length">
               <v-chip
                 v-for="(endpoint, i) of endpoints"
-                :key="i"
+                :key="endpoint.path"
                 close
                 outlined
                 large
