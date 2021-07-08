@@ -233,12 +233,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            @click="download"
-            text
-            color="primary"
-            block
-          >
+          <v-btn @click="download" text color="primary" block>
             Download
             <v-icon right>
               mdi-download
@@ -317,8 +312,10 @@ export default {
         text = this.oas;
         filename = `${this.title}.oas.json`;
       } else {
-        text = this.config;
-        filename = `${this.title}.config.json`;
+        utils.zipDeploymentPackage(this);
+        return;
+        // text = this.config;
+        // filename = `${this.title}.config.json`;
       }
       let element = document.createElement("a");
       element.setAttribute(

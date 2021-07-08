@@ -195,7 +195,40 @@ function makeConfig(state) {
   return JSON.stringify(config, null, 2);
 }
 
+// Download Zip
+async function zipDeploymentPackage(state) {
+  const JSZip = require("jszip");
+  const FileSaver = require("file-saver");
+  let zip = new JSZip();
+  zip.file("config.json", state.config);
+  const config = JSON.parse(state.config);
+
+  // Add Securty.json
+  let security = {
+    apiCredentials: {
+      [state.title]: [],
+    },
+    id: config.id,
+  };
+  console.log({ security });
+  const securitySchemes =
+    config.ois[0].apiSpecifications.components.securitySchemes;
+  for (let scheme in securitySchemes) {
+    security.apiCredentials[state.title].push({
+      securitySchemeName: scheme,
+      value: "XXXAPIKEYXXX",
+    });
+  }
+
+  zip.file("security.json", JSON.stringify(security, null, 2));
+  zip.file(".env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_KEY=`);
+  zip.generateAsync({ type: "blob" }).then(function(content) {
+    FileSaver.saveAs(content, `${state.title}-Deployment.zip`);
+  });
+}
+
 module.exports = {
   makeOAS,
   makeConfig,
+  zipDeploymentPackage,
 };
