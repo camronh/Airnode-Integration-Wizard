@@ -115,14 +115,15 @@
                 v-for="(endpoint, i) of endpoints"
                 :key="endpoint.path"
                 close
+                class="ma-1"
                 outlined
-                large
+                label
                 @click="editEndpoint(i)"
                 @click:close="deleteEndpoint(i)"
               >
                 {{ endpoint.path }} - {{ endpoint.method }}
               </v-chip>
-              <v-chip outlined large color="primary" @click="newEndpoint">
+              <v-chip outlined label color="primary" @click="newEndpoint">
                 <v-icon left>mdi-plus</v-icon>
                 Add Endpoint
               </v-chip>
