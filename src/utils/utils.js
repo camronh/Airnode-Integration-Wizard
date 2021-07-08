@@ -69,36 +69,43 @@ function makeOAS(state) {
 
 // parse oas to state variables
 function parseOAS(oas) {
-  console.log({ oas });
   let state = {
     title: oas.info.title,
     version: oas.info.version,
     server: oas.servers[0].url,
   };
-  const securitySchemes = Object.keys(oas.components.securitySchemes);
-  if (securitySchemes.length > 0) {
-    state.hasAuth = true;
-    state.auth = {
-      type: oas.components.securitySchemes[securitySchemes[0]].type,
-      in: oas.components.securitySchemes[securitySchemes[0]].in,
-      name: oas.components.securitySchemes[securitySchemes[0]].name,
-    };
+  if (oas.components.securitySchemes) {
+    const securitySchemes = Object.keys(oas.components.securitySchemes);
+    if (securitySchemes.length > 0) {
+      state.hasAuth = true;
+      state.auth = {
+        type: oas.components.securitySchemes[securitySchemes[0]].type,
+        in: oas.components.securitySchemes[securitySchemes[0]].in,
+        name: oas.components.securitySchemes[securitySchemes[0]].name,
+      };
+    }
   }
+
   const paths = Object.keys(oas.paths);
+  console.log({ paths });
   state.endpoints = [];
   for (let path of paths) {
     const methods = Object.keys(oas.paths[path]);
     for (let method of methods) {
-      state.endpoints.push({
+      let ep = {
         path,
         method,
-        params: oas.paths[path][method].parameters.map(param => {
-          return {
+        params: [],
+      };
+      if (oas.paths[path][method].parameters) {
+        for (let param of oas.paths[path][method].parameters) {
+          ep.params.push({
             name: param.name,
             in: param.in,
-          };
-        }),
-      });
+          });
+        }
+      }
+      state.endpoints.push(ep);
     }
   }
   console.log({ state });
