@@ -252,35 +252,42 @@ function parseConfig(config) {
   const securitySchemes = Object.keys(
     ois.apiSpecifications.components.securitySchemes
   );
+  console.log({ securitySchemes });
   if (securitySchemes.length > 0) {
     state.hasAuth = true;
     state.auth = {
-      type: ois.components.securitySchemes[securitySchemes[0]].type,
-      in: ois.components.securitySchemes[securitySchemes[0]].in,
-      name: ois.components.securitySchemes[securitySchemes[0]].name,
+      type:
+        ois.apiSpecifications.components.securitySchemes[securitySchemes[0]]
+          .type,
+      in:
+        ois.apiSpecifications.components.securitySchemes[securitySchemes[0]].in,
+      name:
+        ois.apiSpecifications.components.securitySchemes[securitySchemes[0]]
+          .name,
     };
   } else state.hasAuth = false;
   console.log({ state });
 
-  const paths = Object.keys(ois.apiSpecifications.paths);
   state.endpoints = [];
-  for (let path of paths) {
-    const methods = Object.keys(ois.apiSpecifications.paths[path]);
-    for (let method of methods) {
-      state.endpoints.push({
-        path,
-        method,
-        params: ois.apiSpecifications.paths[path][method].parameters.map(
-          param => {
-            return {
-              name: param.name,
-              in: param.in,
-            };
-          }
-        ),
-      });
-    }
+  for (let endpoint of ois.endpoints) {
+    state.endpoints.push({
+      path: endpoint.name,
+      method: endpoint.operation.method,
+      params: endpoint.parameters.map(param => {
+        return {
+          name: param.operationParameter.name,
+          in: param.operationParameter.in,
+        };
+      }),
+      reservedParam: {
+        type: endpoint.reservedParameters[0].fixed,
+        path: endpoint.reservedParameters[1].fixed,
+        times: endpoint.reservedParameters[2] ? true : false,
+      },
+    });
   }
+  console.log({ state });
+
   state.RPC = config.nodeSettings.chains[0].providers[0].url;
   console.log({ state });
   return state;
