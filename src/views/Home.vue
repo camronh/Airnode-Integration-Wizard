@@ -117,6 +117,7 @@
                 close
                 class="ma-1"
                 outlined
+                :color="endpoint.reservedParam.path ? '' : 'red'"
                 label
                 @click="editEndpoint(i)"
                 @click:close="deleteEndpoint(i)"
