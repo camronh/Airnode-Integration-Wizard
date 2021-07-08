@@ -6,7 +6,6 @@
           Airnode Integrations
         </h1>
       </div>
-
       <v-spacer></v-spacer>
       <!-- <v-btn icon color="primary" @click="infoDialog = true">
         <v-icon>
