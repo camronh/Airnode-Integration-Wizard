@@ -166,11 +166,11 @@
               <v-card-text>
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-card>
+                    <v-card height="100%" flat>
                       <v-card-title>
                         Params
                       </v-card-title>
-                      <v-card-subtitle>
+                      <v-card-text>
                         <template v-if="ep.params.length">
                           <v-chip
                             v-for="(param, i) of ep.params"
@@ -185,9 +185,9 @@
                         <p v-else>
                           No params...
                         </p>
-                      </v-card-subtitle>
+                      </v-card-text>
                       <v-card-text>
-                        <v-row align="center" justify="center">
+                        <v-row>
                           <v-col cols="12" md="7">
                             <v-text-field
                               v-model="param.name"
@@ -222,6 +222,50 @@
                               </template>
                               <span>Add Param</span>
                             </v-tooltip>
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-divider vertical></v-divider>
+                  <v-col cols="12" md="6">
+                    <v-card flat height="100%">
+                      <v-card-title>
+                        Reserved Params
+                      </v-card-title>
+                      <v-card-text>
+                        <v-row>
+                          <v-col cols="12" md="4">
+                            <v-select
+                              v-model="ep.reservedParam.type"
+                              label="__type"
+                              :items="['int256', 'bytes32', 'bool']"
+                              required
+                            ></v-select>
+                          </v-col>
+                          <v-col cols="12" md="1"></v-col>
+                          <v-col cols="12" md="4">
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-checkbox
+                                  v-model="ep.reservedParam.times"
+                                  label="Add __times?"
+                                  v-bind="attrs"
+                                  v-on="on"
+                                >
+                                </v-checkbox>
+                              </template>
+                              <span>Add Param</span>
+                            </v-tooltip>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col cols="12" md="9">
+                            <v-text-field
+                              label="__path"
+                              placeholder="data.prices.0.ask"
+                            >
+                            </v-text-field>
                           </v-col>
                         </v-row>
                       </v-card-text>
@@ -298,6 +342,11 @@ export default {
         path: "",
         method: "get",
         params: [],
+        reservedParam: {
+          type: "int256",
+          path: "",
+          times: false,
+        },
       },
       param: {
         name: "",
