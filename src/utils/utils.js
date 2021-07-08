@@ -96,6 +96,11 @@ function parseOAS(oas) {
         path,
         method,
         params: [],
+        reservedParam: {
+          type: "",
+          path: "",
+          times: false,
+        },
       };
       if (oas.paths[path][method].parameters) {
         for (let param of oas.paths[path][method].parameters) {

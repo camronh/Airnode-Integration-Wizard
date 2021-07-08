@@ -24,7 +24,7 @@
             @click="exportOAS"
             text
             color="primary"
-            :disabled="!valid || !endpoints.length"
+            :disabled="!valid || !endpoints.length || missingReservedParam"
           >
             Export
             <v-icon right>
@@ -532,6 +532,7 @@ export default {
       this.editing = true;
       this.endpointMenu = true;
     },
+    // check if any of endpoints are missing reservedParam
 
     clearEndpoint() {
       this.ep = {
@@ -601,6 +602,16 @@ export default {
     endpointPath() {
       console.log(this.ep);
       return this.ep.path;
+    },
+    missingReservedParam() {
+      let missing = false;
+      for (let i = 0; i < this.endpoints.length; i++) {
+        if (!this.endpoints[i].reservedParam.path) {
+          missing = true;
+          break;
+        }
+      }
+      return missing;
     },
   },
 };
