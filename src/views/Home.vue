@@ -310,7 +310,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="parseImport" text color="primary" block>
+          <v-btn @click="importing = false" text color="primary" block>
             Import
             <v-icon right>
               mdi-import
@@ -488,11 +488,23 @@ export default {
       this.config = utils.makeConfig(this);
       this.exporting = true;
     },
+
     parseImport() {
       try {
         const json = JSON.parse(this.importString);
         console.log({ json });
         console.log("Parsing");
+        let state;
+        if (this.importType == "OAS") {
+          state = utils.parseOAS(json);
+        } else {
+          state = utils.parseConfig(json);
+        }
+        console.log({ state });
+        // set keys from state in this
+        Object.keys(state).forEach(key => {
+          this[key] = state[key];
+        });
       } catch (error) {
         console.log(error);
         this.importError = true;

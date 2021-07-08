@@ -67,6 +67,44 @@ function makeOAS(state) {
   return JSON.stringify(oas, null, 2);
 }
 
+// parse oas to state variables
+function parseOAS(oas) {
+  console.log({ oas });
+  let state = {
+    title: oas.info.title,
+    version: oas.info.version,
+    server: oas.servers[0].url,
+  };
+  const securitySchemes = Object.keys(oas.components.securitySchemes);
+  if (securitySchemes.length > 0) {
+    state.hasAuth = true;
+    state.auth = {
+      type: oas.components.securitySchemes[securitySchemes[0]].type,
+      in: oas.components.securitySchemes[securitySchemes[0]].in,
+      name: oas.components.securitySchemes[securitySchemes[0]].name,
+    };
+  }
+  const paths = Object.keys(oas.paths);
+  state.endpoints = [];
+  for (let path of paths) {
+    const methods = Object.keys(oas.paths[path]);
+    for (let method of methods) {
+      state.endpoints.push({
+        path,
+        method,
+        params: oas.paths[path][method].parameters.map(param => {
+          return {
+            name: param.name,
+            in: param.in,
+          };
+        }),
+      });
+    }
+  }
+  console.log({ state });
+  return state;
+}
+
 function makeConfig(state) {
   const { title, endpoints, server, hasAuth, auth, version } = state;
 
@@ -236,6 +274,7 @@ async function zipDeploymentPackage(state) {
 
 module.exports = {
   makeOAS,
+  parseOAS,
   makeConfig,
   zipDeploymentPackage,
 };
