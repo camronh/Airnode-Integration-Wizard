@@ -81,6 +81,19 @@
               ></v-text-field>
             </v-col>
           </v-row>
+          <v-row align="center" justify="center">
+            <v-col cols="12" md="8">
+              <v-text-field
+                :disabled="!hasAuth"
+                v-model="auth.value"
+                label="Value"
+                placeholder="xxxxxxxxxapi_keyxxxxxxx"
+                :rules="hasAuth ? required : false"
+                required
+              ></v-text-field>
+            </v-col>
+          </v-row>
+
           <v-card-title>
             Endpoints
           </v-card-title>
@@ -263,6 +276,7 @@ export default {
         type: "apiKey",
         in: "query",
         name: "",
+        value: "",
       },
       oas: "",
       config: "",

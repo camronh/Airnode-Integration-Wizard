@@ -216,7 +216,7 @@ async function zipDeploymentPackage(state) {
   for (let scheme in securitySchemes) {
     security.apiCredentials[state.title].push({
       securitySchemeName: scheme,
-      value: "XXXAPIKEYXXX",
+      value: state.auth.value,
     });
   }
 
