@@ -117,13 +117,12 @@
                 close
                 outlined
                 large
-                label
                 @click="editEndpoint(i)"
                 @click:close="deleteEndpoint(i)"
               >
                 {{ endpoint.path }} - {{ endpoint.method }}
               </v-chip>
-              <v-chip outlined large color="primary" label @click="newEndpoint">
+              <v-chip outlined large color="primary" @click="newEndpoint">
                 <v-icon left>mdi-plus</v-icon>
                 Add Endpoint
               </v-chip>
@@ -367,7 +366,7 @@
               </v-btn>
             </v-col>
             <v-col cols="12" md="4">
-              <v-btn @click="download" text color="primary" block disabled>
+              <v-btn @click="downloadReadme" text color="primary" block>
                 Readme.md
                 <v-icon right>
                   mdi-download
@@ -473,6 +472,23 @@ export default {
         return 0;
       });
     },
+    downloadReadme() {
+      const text = utils.makeReadme(JSON.parse(this.config));
+      let filename = `${this.title}-Readme.md`;
+      let element = document.createElement("a");
+      element.setAttribute(
+        "href",
+        "data:application/json;charset=utf-8," + encodeURIComponent(text)
+      );
+      element.setAttribute("download", filename);
+
+      element.style.display = "none";
+      document.body.appendChild(element);
+
+      element.click();
+      document.body.removeChild(element);
+    },
+
     downloadOAS() {
       // credit: https://www.bitdegree.org/learn/javascript-download
       let text = this.oas;

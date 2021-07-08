@@ -325,10 +325,56 @@ async function zipDeploymentPackage(state) {
   });
 }
 
+function makeReadme(config) {
+  // Create Markup Endpoints
+  let endpoints = config.triggers.request.map(endpoint => {
+    let endpoints = config.ois[0].endpoints;
+    let correctParams = endpoints.find(e => e.name == endpoint.endpointName);
+    if (!correctParams) return endpoint.endpointName;
+    return {
+      endpointName: endpoint.endpointName,
+      endpointId: endpoint.endpointId,
+      reservedParameters: correctParams.reservedParameters,
+      parameters: correctParams.parameters.map(p => p.name),
+    };
+  });
+
+  // Create Markup String
+
+  let configStr = `# ${config.ois[0].title} Endpoints
+
+__URL:__ ${config.ois[0].apiSpecifications.servers[0].url}
+
+__ProviderID:__ *****\n\n`;
+
+  function makeReturnsStr(params) {
+    let param = Object.assign(
+      {},
+      ...params.map(p => {
+        return { [p.name]: p.fixed };
+      })
+    );
+    let returnsStr = `${param._path}`;
+    if (param._times) returnsStr += ` x ${param._times}`;
+    return returnsStr;
+  }
+
+  for (let endpoint of endpoints) {
+    configStr += `\n## ${endpoint.endpointName}
+__EndpointId:__ ${endpoint.endpointId}
+
+__Params:__ {${endpoint.parameters.join("} | {")}}
+
+__Returns:__ ${makeReturnsStr(endpoint.reservedParameters)}\n`;
+  }
+  return configStr;
+}
+
 module.exports = {
   makeOAS,
   parseOAS,
   makeConfig,
   parseConfig,
   zipDeploymentPackage,
+  makeReadme,
 };
