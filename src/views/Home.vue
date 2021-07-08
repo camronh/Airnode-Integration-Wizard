@@ -49,6 +49,17 @@
             </v-col>
           </v-row>
           <v-row align="center" justify="center">
+            <v-col cols="12" md="9">
+              <v-text-field
+                v-model="RPC"
+                placeholder="https://rinkeby.infura.io/v3/{ FILL }"
+                label="RPC URL"
+                :rules="serverRules"
+                required
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row align="center" justify="center">
             <v-col cols="12" md="1">
               <v-checkbox label="Auth" v-model="hasAuth"> </v-checkbox>
             </v-col>
@@ -79,10 +90,6 @@
                 :rules="hasAuth ? required : false"
                 required
               ></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row align="center" justify="center">
-            <v-col cols="12" md="8">
               <v-text-field
                 :disabled="!hasAuth"
                 v-model="auth.value"
@@ -93,6 +100,7 @@
               ></v-text-field>
             </v-col>
           </v-row>
+          <v-row align="center" justify="center"> </v-row>
 
           <v-card-title>
             Endpoints
