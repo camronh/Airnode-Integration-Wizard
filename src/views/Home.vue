@@ -164,66 +164,71 @@
                 </v-col>
               </v-row>
               <v-card-text>
-                <h2 class="text-h6 mb-2">
-                  Params
-                </h2>
-                <template v-if="ep.params.length">
-                  <v-chip
-                    v-for="(param, i) of ep.params"
-                    :key="param.name"
-                    close
-                    outlined
-                    @click:close="deleteParam(i)"
-                  >
-                    {{ param.name }} - {{ param.in }}
-                  </v-chip>
-                </template>
-                <p v-else>
-                  No params...
-                </p>
+                <v-row>
+                  <v-col cols="12" md="6">
+                    <v-card>
+                      <v-card-title>
+                        Params
+                      </v-card-title>
+                      <v-card-subtitle>
+                        <template v-if="ep.params.length">
+                          <v-chip
+                            v-for="(param, i) of ep.params"
+                            :key="param.name"
+                            close
+                            outlined
+                            @click:close="deleteParam(i)"
+                          >
+                            {{ param.name }} - {{ param.in }}
+                          </v-chip>
+                        </template>
+                        <p v-else>
+                          No params...
+                        </p>
+                      </v-card-subtitle>
+                      <v-card-text>
+                        <v-row align="center" justify="center">
+                          <v-col cols="12" md="7">
+                            <v-text-field
+                              v-model="param.name"
+                              label="Param Name"
+                              placeholder="ex. currency"
+                              @keypress.enter="addParam"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" md="3">
+                            <v-select
+                              v-model="param.in"
+                              label="In"
+                              :items="['query', 'header', 'path', 'cookie']"
+                              required
+                            ></v-select>
+                          </v-col>
+                          <v-col cols="12" md="1">
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-btn
+                                  icon
+                                  @click="addParam"
+                                  color="primary"
+                                  :disabled="!param.name"
+                                  v-bind="attrs"
+                                  v-on="on"
+                                >
+                                  <v-icon>
+                                    mdi-plus
+                                  </v-icon>
+                                </v-btn>
+                              </template>
+                              <span>Add Param</span>
+                            </v-tooltip>
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                </v-row>
               </v-card-text>
-              <v-row align="center" justify="center">
-                <v-col cols="12" md="4">
-                  <v-text-field
-                    v-model="param.name"
-                    label="Param Name"
-                    placeholder="ex. currency"
-                    @keypress.enter="addParam"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="2">
-                  <v-select
-                    v-model="param.in"
-                    label="In"
-                    :items="['query', 'header', 'path', 'cookie']"
-                    required
-                  ></v-select>
-                </v-col>
-                <v-col cols="12" md="1">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn
-                        icon
-                        @click="addParam"
-                        color="primary"
-                        :disabled="!param.name"
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        <v-icon>
-                          mdi-plus
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Add Param</span>
-                  </v-tooltip>
-                </v-col>
-              </v-row>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-
-                <v-spacer></v-spacer>
-              </v-card-actions>
             </v-card>
           </v-card-text>
         </v-container>
