@@ -240,6 +240,52 @@ function makeConfig(state) {
   return JSON.stringify(config, null, 2);
 }
 
+// parse config to state variables
+function parseConfig(config) {
+  console.log({ config });
+  const ois = config.ois[0];
+  let state = {
+    title: ois.title,
+    version: ois.version,
+    server: ois.apiSpecifications.servers[0].url,
+  };
+  const securitySchemes = Object.keys(
+    ois.apiSpecifications.components.securitySchemes
+  );
+  if (securitySchemes.length > 0) {
+    state.hasAuth = true;
+    state.auth = {
+      type: ois.components.securitySchemes[securitySchemes[0]].type,
+      in: ois.components.securitySchemes[securitySchemes[0]].in,
+      name: ois.components.securitySchemes[securitySchemes[0]].name,
+    };
+  } else state.hasAuth = false;
+  console.log({ state });
+
+  const paths = Object.keys(ois.apiSpecifications.paths);
+  state.endpoints = [];
+  for (let path of paths) {
+    const methods = Object.keys(ois.apiSpecifications.paths[path]);
+    for (let method of methods) {
+      state.endpoints.push({
+        path,
+        method,
+        params: ois.apiSpecifications.paths[path][method].parameters.map(
+          param => {
+            return {
+              name: param.name,
+              in: param.in,
+            };
+          }
+        ),
+      });
+    }
+  }
+  state.RPC = config.nodeSettings.chains[0].providers[0].url;
+  console.log({ state });
+  return state;
+}
+
 // Download Zip
 async function zipDeploymentPackage(state) {
   const JSZip = require("jszip");
@@ -276,5 +322,6 @@ module.exports = {
   makeOAS,
   parseOAS,
   makeConfig,
+  parseConfig,
   zipDeploymentPackage,
 };

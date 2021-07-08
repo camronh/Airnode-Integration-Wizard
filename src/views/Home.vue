@@ -310,7 +310,13 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="importing = false" text color="primary" block>
+          <v-btn
+            @click="importing = false"
+            :disabled="importError"
+            text
+            color="primary"
+            block
+          >
             Import
             <v-icon right>
               mdi-import
@@ -490,6 +496,9 @@ export default {
     },
 
     parseImport() {
+
+
+
       try {
         const json = JSON.parse(this.importString);
         console.log({ json });
