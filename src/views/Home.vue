@@ -14,14 +14,19 @@
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
-          <v-spacer></v-spacer>
+          <v-btn text @click="importing = true" color="primary">
+            Import
+            <v-icon right>
+              mdi-import
+            </v-icon>
+          </v-btn>
           <!-- <v-btn
             @click="exportOAS"
             outlined
             color="primary"
             :disabled="!valid || !endpoints.length"
           > -->
-          <v-btn @click="exportOAS" outlined color="primary">
+          <v-btn @click="exportOAS" text color="primary">
             Export
             <v-icon right>
               mdi-export
@@ -258,6 +263,7 @@ export default {
       valid: false,
       exportType: "oas",
       exporting: false,
+      importing: false,
       hasAuth: true,
       auth: {
         type: "apiKey",
