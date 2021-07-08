@@ -284,6 +284,41 @@
         </v-container>
       </v-form>
     </v-card>
+    <v-dialog v-model="importing" max-width="50%">
+      <v-card>
+        <v-card-title>
+          Import {{ importType }}
+          <v-spacer></v-spacer>
+          <v-btn-toggle v-model="importType" tile color="primary" group>
+            <v-btn value="OAS">
+              OAS / Swagger
+            </v-btn>
+            <v-btn value=".Config">
+              Config
+            </v-btn>
+          </v-btn-toggle>
+        </v-card-title>
+        <v-card-text>
+          <v-textarea
+            v-model="importString"
+            rows="20"
+            autofocus
+            no-resize
+            :error="importError"
+          >
+          </v-textarea>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="parseImport" text color="primary" block>
+            Import
+            <v-icon right>
+              mdi-import
+            </v-icon>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="exporting" max-width="50%">
       <v-card>
         <v-card-title>
@@ -331,9 +366,12 @@ export default {
       title: "",
       version: "",
       server: "",
+      importString: "",
       valid: false,
       RPC: "",
+      importError: false,
       exportType: "oas",
+      importType: "OAS",
       exporting: false,
       importing: false,
       hasAuth: true,
@@ -368,6 +406,11 @@ export default {
     };
   },
   watch: {
+    importString() {
+      console.log("Changed");
+      this.importError = false;
+      this.parseImport();
+    },
     // sort ep.params by name
   },
   methods: {
@@ -444,6 +487,16 @@ export default {
       this.oas = utils.makeOAS(this);
       this.config = utils.makeConfig(this);
       this.exporting = true;
+    },
+    parseImport() {
+      try {
+        const json = JSON.parse(this.importString);
+        console.log({ json });
+        console.log("Parsing");
+      } catch (error) {
+        console.log(error);
+        this.importError = true;
+      }
     },
   },
 
