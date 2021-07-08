@@ -3,7 +3,7 @@
     <v-app-bar app color="dark" dark>
       <div class="d-flex align-center">
         <h1>
-          Swagger Maker
+          Airnode Integrations
         </h1>
       </div>
 
@@ -21,7 +21,7 @@
     <v-dialog v-model="infoDialog">
       <v-card>
         <v-card-title>
-          Swagger Maker
+          Airnode Integrations
         </v-card-title>
         <v-card-subtitle>
           Generate Swagger/OpenAPI Specs quickly and easily from API Documents

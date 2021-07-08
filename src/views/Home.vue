@@ -134,27 +134,16 @@
         </v-container>
       </v-form>
     </v-card>
-    <v-dialog v-model="endpointMenu" max-width="75%">
+    <v-dialog
+      v-model="endpointMenu"
+      max-width="75%"
+      :overlay-opacity="75"
+      overlay-color="black"
+    >
       <v-card>
         <v-card-title>
           {{ editing ? "Edit" : "New" }} Endpoint
           <v-spacer></v-spacer>
-          <v-btn
-            @click="clearEndpoint"
-            :disabled="!validEndpoint"
-            text
-            color="red"
-          >
-            Clear
-          </v-btn>
-          <v-btn
-            @click="addEndpoint"
-            :disabled="!validEndpoint"
-            text
-            color="primary"
-          >
-            Add Endpoint
-          </v-btn>
         </v-card-title>
         <v-row align="center" justify="center">
           <v-col cols="12" md="5">
@@ -274,7 +263,9 @@
                     <v-col cols="12" md="9">
                       <v-text-field
                         label="__path"
+                        :autofocus="!rp.path"
                         v-model="rp.path"
+                        :error="!rp.path"
                         placeholder="data.prices.0.ask"
                       >
                       </v-text-field>
@@ -285,6 +276,20 @@
             </v-col>
           </v-row>
         </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn @click="endpointMenu = false" text color="red">
+            Close
+          </v-btn>
+          <v-btn
+            @click="saveEndpoint"
+            :disabled="!validEndpoint"
+            text
+            color="primary"
+          >
+            Save
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
     <v-dialog v-model="importing" max-width="50%">
@@ -430,8 +435,10 @@ export default {
     // sort ep.params by name
   },
   methods: {
-    addEndpoint() {
-      this.endpoints.push(this.ep);
+    saveEndpoint() {
+      this.ep.reservedParam = this.rp;
+      if (!this.editing) this.endpoints.push(this.ep);
+      else this.endpoints[this.editIndex] = this.ep;
       this.ep = {
         path: "",
         method: "get",
@@ -442,6 +449,7 @@ export default {
           times: false,
         },
       };
+      this.endpointMenu = false;
     },
     addParam() {
       if (!this.param.name) return;
@@ -485,6 +493,7 @@ export default {
     },
     editEndpoint(i) {
       this.ep = this.endpoints[i];
+      this.editIndex = i;
       if (!this.ep.reservedParam) {
         console.log("No reserved param");
         console.log(this.ep);
@@ -562,7 +571,7 @@ export default {
 
   computed: {
     validEndpoint() {
-      if (this.ep.path) return true;
+      if (this.ep.path && this.rp.path) return true;
       else return false;
     },
     endpointPath() {
