@@ -20,13 +20,12 @@
               mdi-import
             </v-icon>
           </v-btn>
-          <!-- <v-btn
+          <v-btn
             @click="exportOAS"
-            outlined
+            text
             color="primary"
             :disabled="!valid || !endpoints.length"
-          > -->
-          <v-btn @click="exportOAS" text color="primary">
+          >
             Export
             <v-icon right>
               mdi-export
@@ -250,6 +249,7 @@
                           <v-checkbox
                             v-model="rp.times"
                             label="Add __times?"
+                            :disabled="rp.type != 'int256'"
                             v-bind="attrs"
                             v-on="on"
                           >
@@ -336,15 +336,7 @@
     <v-dialog v-model="exporting" max-width="50%">
       <v-card>
         <v-card-title>
-          <v-spacer></v-spacer>
-          <v-btn-toggle v-model="exportType" tile color="primary" group>
-            <v-btn value="oas">
-              OAS
-            </v-btn>
-            <v-btn value="config">
-              Config
-            </v-btn>
-          </v-btn-toggle>
+          Export
         </v-card-title>
         <v-card-text>
           <v-textarea
@@ -357,13 +349,32 @@
           </v-textarea>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn @click="download" text color="primary" block>
-            Download
-            <v-icon right>
-              mdi-download
-            </v-icon>
-          </v-btn>
+          <v-row>
+            <v-col cols="12" md="4">
+              <v-btn @click="downloadOAS" text color="primary" block>
+                OAS / Swagger
+                <v-icon right>
+                  mdi-download
+                </v-icon>
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-btn @click="downloadDeployment" text color="primary" block>
+                Deployment Package
+                <v-icon right>
+                  mdi-download
+                </v-icon>
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-btn @click="download" text color="primary" block disabled>
+                Readme.md
+                <v-icon right>
+                  mdi-download
+                </v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -462,18 +473,10 @@ export default {
         return 0;
       });
     },
-    download() {
+    downloadOAS() {
       // credit: https://www.bitdegree.org/learn/javascript-download
-      let text, filename;
-      if (this.exportType === "oas") {
-        text = this.oas;
-        filename = `${this.title}.oas.json`;
-      } else {
-        utils.zipDeploymentPackage(this);
-        return;
-        // text = this.config;
-        // filename = `${this.title}.config.json`;
-      }
+      let text = this.oas;
+      let filename = `${this.title}.oas.json`;
       let element = document.createElement("a");
       element.setAttribute(
         "href",
@@ -486,6 +489,9 @@ export default {
 
       element.click();
       document.body.removeChild(element);
+    },
+    downloadDeployment() {
+      utils.zipDeploymentPackage(this);
     },
 
     deleteParam(i) {
@@ -537,6 +543,7 @@ export default {
           times: false,
         },
       };
+      this.rp = this.ep.reservedParam;
       this.editing = false;
       this.endpointMenu = true;
     },
