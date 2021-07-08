@@ -234,7 +234,7 @@
                         Reserved Params
                       </v-card-title>
                       <v-card-text>
-                        <v-row>
+                        <v-row align="center" justify="center">
                           <v-col cols="12" md="4">
                             <v-select
                               v-model="ep.reservedParam.type"
@@ -259,10 +259,11 @@
                             </v-tooltip>
                           </v-col>
                         </v-row>
-                        <v-row>
+                        <v-row align="center" justify="center">
                           <v-col cols="12" md="9">
                             <v-text-field
                               label="__path"
+                              v-model="ep.reservedParam.path"
                               placeholder="data.prices.0.ask"
                             >
                             </v-text-field>
@@ -326,6 +327,7 @@ export default {
       version: "",
       server: "",
       valid: false,
+      RPC: "",
       exportType: "oas",
       exporting: false,
       hasAuth: true,
@@ -369,9 +371,15 @@ export default {
         path: "",
         method: "get",
         params: [],
+        reservedParam: {
+          type: "int256",
+          path: "",
+          times: false,
+        },
       };
     },
     addParam() {
+      if (!this.param.name) return;
       this.ep.params.push(this.param);
       this.param = { name: "", in: "query" };
       // sort this.ep.params by name
@@ -415,6 +423,11 @@ export default {
         path: "",
         method: "get",
         params: [],
+        reservedParam: {
+          type: "int256",
+          path: "",
+          times: false,
+        },
       };
     },
 
