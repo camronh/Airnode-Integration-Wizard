@@ -15,12 +15,13 @@
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
-          <v-btn
+          <!-- <v-btn
             @click="exportOAS"
             outlined
             color="primary"
             :disabled="!valid || !endpoints.length"
-          >
+          > -->
+          <v-btn @click="exportOAS" outlined color="primary">
             Export
             <v-icon right>
               mdi-export
@@ -210,15 +211,34 @@
     <v-dialog v-model="exporting" max-width="50%">
       <v-card>
         <v-card-title>
-          OAS
+          <v-spacer></v-spacer>
+          <v-btn-toggle v-model="exportType" tile color="primary" group>
+            <v-btn value="oas">
+              OAS
+            </v-btn>
+            <v-btn value="config">
+              Config
+            </v-btn>
+          </v-btn-toggle>
         </v-card-title>
         <v-card-text>
-          <v-textarea :value="oas" readonly rows="20" autofocus no-resize>
+          <v-textarea
+            :value="exportType == 'config' ? config : oas"
+            readonly
+            rows="20"
+            autofocus
+            no-resize
+          >
           </v-textarea>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="downloadOAS" text color="primary" block>
+          <v-btn
+            @click="download"
+            text
+            color="primary"
+            block
+          >
             Download
             <v-icon right>
               mdi-download
@@ -231,6 +251,8 @@
 </template>
 
 <script>
+import utils from "../utils/utils";
+
 export default {
   name: "Home",
   data() {
@@ -239,6 +261,7 @@ export default {
       version: "",
       server: "",
       valid: false,
+      exportType: "oas",
       exporting: false,
       hasAuth: true,
       auth: {
@@ -247,6 +270,7 @@ export default {
         name: "",
       },
       oas: "",
+      config: "",
       endpoints: [],
       ep: {
         path: "",
@@ -264,6 +288,9 @@ export default {
       ],
     };
   },
+  watch: {
+    // sort ep.params by name
+  },
   methods: {
     addEndpoint() {
       this.endpoints.push(this.ep);
@@ -276,11 +303,23 @@ export default {
     addParam() {
       this.ep.params.push(this.param);
       this.param = { name: "", in: "query" };
+      // sort this.ep.params by name
+      this.ep.params.sort((a, b) => {
+        if (a.name < b.name) return -1;
+        if (a.name > b.name) return 1;
+        return 0;
+      });
     },
-    downloadOAS() {
+    download() {
       // credit: https://www.bitdegree.org/learn/javascript-download
-      let text = this.oas;
-      let filename = `${this.title}.oas.json`;
+      let text, filename;
+      if (this.exportType === "oas") {
+        text = this.oas;
+        filename = `${this.title}.oas.json`;
+      } else {
+        text = this.config;
+        filename = `${this.title}.config.json`;
+      }
       let element = document.createElement("a");
       element.setAttribute(
         "href",
@@ -294,6 +333,7 @@ export default {
       element.click();
       document.body.removeChild(element);
     },
+
     deleteParam(i) {
       this.ep.params.splice(i, 1);
     },
@@ -309,69 +349,8 @@ export default {
       this.endpoints.splice(i, 1);
     },
     exportOAS() {
-      const { title, version, server, hasAuth, auth, endpoints } = this;
-      console.log({ title, version, server, hasAuth, auth, endpoints });
-      let oas = {
-        openapi: "3.0.1",
-        info: {
-          title,
-        },
-        servers: [{ url: server }],
-        paths: {},
-      };
-      if (version) oas.info.version = version;
-      for (let endpoint of endpoints) {
-        let params = endpoint.params.map(param => {
-          return {
-            name: param.name,
-            in: param.in,
-            required: false,
-            style: "form",
-            explode: true,
-            schema: {
-              type: "string",
-            },
-          };
-        });
-
-        let path = {
-          [endpoint.path]: {
-            [endpoint.method]: {
-              description: "API Endpoint",
-              parameters: params,
-              responses: {
-                "200": {
-                  description: "Auto generated using Swagger Inspector",
-                  content: {
-                    "application/json;charset=utf-8": {
-                      schema: {
-                        type: "string",
-                      },
-                      examples: {},
-                    },
-                  },
-                },
-              },
-            },
-          },
-        };
-
-        oas.paths[endpoint.path] = path[endpoint.path];
-      }
-
-      if (hasAuth) {
-        oas.components = {
-          securitySchemes: {
-            key: {
-              type: auth.type,
-              name: auth.name,
-              in: auth.in,
-            },
-          },
-        };
-      }
-      console.log({ oas });
-      this.oas = JSON.stringify(oas, null, 2);
+      this.oas = utils.makeOAS(this);
+      this.config = utils.makeConfig(this);
       this.exporting = true;
     },
   },
