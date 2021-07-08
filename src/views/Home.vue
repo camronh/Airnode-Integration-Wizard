@@ -54,6 +54,17 @@
             </v-col>
           </v-row>
           <v-row align="center" justify="center">
+            <v-col cols="12" md="9">
+              <v-text-field
+                v-model="RPC"
+                placeholder="https://rinkeby.infura.io/v3/{ FILL }"
+                label="RPC URL"
+                :rules="serverRules"
+                required
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row align="center" justify="center">
             <v-col cols="12" md="1">
               <v-checkbox label="Auth" v-model="hasAuth"> </v-checkbox>
             </v-col>
@@ -84,8 +95,18 @@
                 :rules="hasAuth ? required : false"
                 required
               ></v-text-field>
+              <v-text-field
+                :disabled="!hasAuth"
+                v-model="auth.value"
+                label="Value"
+                placeholder="xxxxxxxxxapi_keyxxxxxxx"
+                :rules="hasAuth ? required : false"
+                required
+              ></v-text-field>
             </v-col>
           </v-row>
+          <v-row align="center" justify="center"> </v-row>
+
           <v-card-title>
             Endpoints
           </v-card-title>
@@ -148,66 +169,116 @@
                 </v-col>
               </v-row>
               <v-card-text>
-                <h2 class="text-h6 mb-2">
-                  Params
-                </h2>
-                <template v-if="ep.params.length">
-                  <v-chip
-                    v-for="(param, i) of ep.params"
-                    :key="param.name"
-                    close
-                    outlined
-                    @click:close="deleteParam(i)"
-                  >
-                    {{ param.name }} - {{ param.in }}
-                  </v-chip>
-                </template>
-                <p v-else>
-                  No params...
-                </p>
+                <v-row>
+                  <v-col cols="12" md="6">
+                    <v-card height="100%" flat>
+                      <v-card-title>
+                        Params
+                      </v-card-title>
+                      <v-card-text>
+                        <template v-if="ep.params.length">
+                          <v-chip
+                            v-for="(param, i) of ep.params"
+                            :key="param.name"
+                            close
+                            outlined
+                            @click:close="deleteParam(i)"
+                          >
+                            {{ param.name }} - {{ param.in }}
+                          </v-chip>
+                        </template>
+                        <p v-else>
+                          No params...
+                        </p>
+                      </v-card-text>
+                      <v-card-text>
+                        <v-row>
+                          <v-col cols="12" md="7">
+                            <v-text-field
+                              v-model="param.name"
+                              label="Param Name"
+                              placeholder="ex. currency"
+                              @keypress.enter="addParam"
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" md="3">
+                            <v-select
+                              v-model="param.in"
+                              label="In"
+                              :items="['query', 'header', 'path', 'cookie']"
+                              required
+                            ></v-select>
+                          </v-col>
+                          <v-col cols="12" md="1">
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-btn
+                                  icon
+                                  @click="addParam"
+                                  color="primary"
+                                  :disabled="!param.name"
+                                  v-bind="attrs"
+                                  v-on="on"
+                                >
+                                  <v-icon>
+                                    mdi-plus
+                                  </v-icon>
+                                </v-btn>
+                              </template>
+                              <span>Add Param</span>
+                            </v-tooltip>
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-divider vertical></v-divider>
+                  <v-col cols="12" md="6">
+                    <v-card flat height="100%">
+                      <v-card-title>
+                        Reserved Params
+                      </v-card-title>
+                      <v-card-text>
+                        <v-row align="center" justify="center">
+                          <v-col cols="12" md="4">
+                            <v-select
+                              v-model="ep.reservedParam.type"
+                              label="__type"
+                              :items="['int256', 'bytes32', 'bool']"
+                              required
+                            ></v-select>
+                          </v-col>
+                          <v-col cols="12" md="1"></v-col>
+                          <v-col cols="12" md="4">
+                            <v-tooltip bottom>
+                              <template v-slot:activator="{ on, attrs }">
+                                <v-checkbox
+                                  v-model="ep.reservedParam.times"
+                                  label="Add __times?"
+                                  v-bind="attrs"
+                                  v-on="on"
+                                >
+                                </v-checkbox>
+                              </template>
+                              <span>Add Param</span>
+                            </v-tooltip>
+                          </v-col>
+                        </v-row>
+                        <v-row align="center" justify="center">
+                          <v-col cols="12" md="9">
+                            <v-text-field
+                              label="__path"
+                              v-model="ep.reservedParam.path"
+                              placeholder="data.prices.0.ask"
+                            >
+                            </v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                </v-row>
               </v-card-text>
-              <v-row align="center" justify="center">
-                <v-col cols="12" md="4">
-                  <v-text-field
-                    v-model="param.name"
-                    label="Param Name"
-                    placeholder="ex. currency"
-                    @keypress.enter="addParam"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="2">
-                  <v-select
-                    v-model="param.in"
-                    label="In"
-                    :items="['query', 'header', 'path', 'cookie']"
-                    required
-                  ></v-select>
-                </v-col>
-                <v-col cols="12" md="1">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn
-                        icon
-                        @click="addParam"
-                        color="primary"
-                        :disabled="!param.name"
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        <v-icon>
-                          mdi-plus
-                        </v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Add Param</span>
-                  </v-tooltip>
-                </v-col>
-              </v-row>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-
-                <v-spacer></v-spacer>
-              </v-card-actions>
             </v-card>
           </v-card-text>
         </v-container>
@@ -261,6 +332,7 @@ export default {
       version: "",
       server: "",
       valid: false,
+      RPC: "",
       exportType: "oas",
       exporting: false,
       importing: false,
@@ -269,6 +341,7 @@ export default {
         type: "apiKey",
         in: "query",
         name: "",
+        value: "",
       },
       oas: "",
       config: "",
@@ -277,6 +350,11 @@ export default {
         path: "",
         method: "get",
         params: [],
+        reservedParam: {
+          type: "int256",
+          path: "",
+          times: false,
+        },
       },
       param: {
         name: "",
@@ -299,9 +377,15 @@ export default {
         path: "",
         method: "get",
         params: [],
+        reservedParam: {
+          type: "int256",
+          path: "",
+          times: false,
+        },
       };
     },
     addParam() {
+      if (!this.param.name) return;
       this.ep.params.push(this.param);
       this.param = { name: "", in: "query" };
       // sort this.ep.params by name
@@ -345,6 +429,11 @@ export default {
         path: "",
         method: "get",
         params: [],
+        reservedParam: {
+          type: "int256",
+          path: "",
+          times: false,
+        },
       };
     },
 

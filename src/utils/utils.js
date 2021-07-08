@@ -85,7 +85,7 @@ function makeConfig(state) {
           providers: [
             {
               name: "rinkeby-alchemy",
-              url: "https://rinkeby.infura.io/v3/{ FILL }",
+              url: state.RPC,
             },
           ],
           contracts: {
@@ -159,7 +159,7 @@ function makeConfig(state) {
     };
   }
   config.ois[0].endpoints = endpoints.map(endpoint => {
-    return {
+    let ep = {
       name: endpoint.path,
       operation: {
         method: endpoint.method,
@@ -168,11 +168,11 @@ function makeConfig(state) {
       reservedParameters: [
         {
           name: "_type",
-          fixed: "{ FILL }",
+          fixed: endpoint.reservedParam.type,
         },
         {
           name: "_path",
-          fixed: "{ FILL }",
+          fixed: endpoint.reservedParam.path,
         },
       ],
       parameters: endpoint.params.map(param => {
@@ -185,6 +185,13 @@ function makeConfig(state) {
         };
       }),
     };
+    if (endpoint.reservedParam.times) {
+      ep.reservedParameters.push({
+        name: "_times",
+        fixed: "100000000000000000",
+      });
+    }
+    return ep;
   });
 
   //   remove duplicate endpointId from config.triggers.request
@@ -216,7 +223,7 @@ async function zipDeploymentPackage(state) {
   for (let scheme in securitySchemes) {
     security.apiCredentials[state.title].push({
       securitySchemeName: scheme,
-      value: "XXXAPIKEYXXX",
+      value: state.auth.value,
     });
   }
 
