@@ -369,7 +369,15 @@
           Export
         </v-card-title>
         <v-card-text>
-          <v-textarea
+          <v-jsoneditor
+            v-model="exportJson"
+            :plus="true"
+            @error="importError = true"
+            height="600px"
+            :options="options"
+          />
+
+          <!-- <v-textarea
             v-model="exportStr"
             :error="importError"
             rows="20"
@@ -379,7 +387,7 @@
             :readonly="!editingConfig"
             autofocus
           >
-          </v-textarea>
+          </v-textarea> -->
         </v-card-text>
         <v-card-actions>
           <v-row>
@@ -389,7 +397,7 @@
                 text
                 color="primary"
                 block
-                :disabled="importError"
+                :disabled="importError || !valid || !endpoints.length || missingReservedParam"
               >
                 OAS / Swagger
                 <v-icon right>
@@ -403,7 +411,7 @@
                 text
                 color="primary"
                 block
-                :disabled="importError"
+                :disabled="importError || !valid || !endpoints.length || missingReservedParam"
               >
                 Deployment Package
                 <v-icon right>
@@ -417,7 +425,7 @@
                 text
                 color="primary"
                 block
-                :disabled="importError"
+                :disabled="importError || !valid || !endpoints.length || missingReservedParam"
               >
                 Readme.md
                 <v-icon right>
@@ -434,17 +442,24 @@
 
 <script>
 import utils from "../utils/utils";
+import VJsoneditor from "v-jsoneditor/src/index";
 
 export default {
   name: "Home",
+  components: {
+    VJsoneditor,
+  },
   data() {
     return {
       title: "",
       version: "",
       server: "",
       importString: "",
-      exportStr: "",
+      exportStr: "{}",
       valid: false,
+      options: {
+        mode: "code",
+      },
       RPC: "",
       importError: false,
       exportType: "oas",
@@ -452,6 +467,7 @@ export default {
       exporting: false,
       importing: false,
       editing: false,
+      exportJson: {},
       editingConfig: false,
       endpointMenu: false,
       hasAuth: true,
@@ -495,8 +511,9 @@ export default {
       this.importError = false;
       this.parseImport();
     },
-    exportStr() {
+    exportJson() {
       console.log("Changed");
+      this.exportStr = JSON.stringify(this.exportJson, null, 2);
       this.importString = this.exportStr;
       this.importError = false;
       this.parseImport();
@@ -620,6 +637,7 @@ export default {
     exportConfig() {
       this.oas = utils.makeOAS(this);
       this.exportStr = utils.makeConfig(this);
+      this.exportJson = JSON.parse(this.exportStr);
       this.importType = ".Config";
       this.exporting = true;
     },
@@ -658,6 +676,7 @@ export default {
       console.log(this.ep);
       return this.ep.path;
     },
+
     missingReservedParam() {
       let missing = false;
       for (let i = 0; i < this.endpoints.length; i++) {
