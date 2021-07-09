@@ -528,7 +528,7 @@ export default {
 
     downloadOAS() {
       // credit: https://www.bitdegree.org/learn/javascript-download
-      let text = this.oas;
+      let text = utils.makeOAS(this);
       let filename = `${this.title}.oas.json`;
       let element = document.createElement("a");
       element.setAttribute(
