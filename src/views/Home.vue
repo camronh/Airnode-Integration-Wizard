@@ -3,16 +3,14 @@
     <v-card>
       <v-form v-model="valid">
         <v-card-title>
+          <v-spacer></v-spacer>
           <v-text-field
             placeholder="Title"
             v-model="title"
-            class="titleField"
+            class="titleField ma-1"
             :rules="required"
             height="40px"
           ></v-text-field>
-          <v-spacer></v-spacer>
-          <v-spacer></v-spacer>
-          <v-spacer></v-spacer>
           <v-spacer></v-spacer>
           <v-btn text @click="importing = true" color="primary">
             Import
@@ -31,6 +29,7 @@
               mdi-export
             </v-icon>
           </v-btn>
+          <v-spacer></v-spacer>
         </v-card-title>
         <v-container>
           <v-row align="center" justify="center">
@@ -106,33 +105,44 @@
               ></v-text-field>
             </v-col>
           </v-row>
-          <v-row align="center" justify="center"> </v-row>
-
-          <v-card-title>
-            Endpoints
-          </v-card-title>
-          <v-card-text>
-            <template>
-              <v-chip
-                v-for="(endpoint, i) of endpoints"
-                :key="endpoint.path"
-                close
-                class="ma-1"
-                outlined
-                :color="endpoint.reservedParam.path ? '' : 'red'"
-                label
-                @click="editEndpoint(i)"
-                @click:close="deleteEndpoint(i)"
-              >
-                {{ endpoint.path }} - {{ endpoint.method }}
-              </v-chip>
-              <v-chip outlined label color="primary" @click="newEndpoint">
-                <v-icon left>mdi-plus</v-icon>
-                Add Endpoint
-              </v-chip>
-            </template>
-            <br />
-          </v-card-text>
+          <v-row align="left" justify="left">
+            <v-spacer></v-spacer>
+            <v-col cols="12" md="9">
+              <v-card-title>
+                Endpoints
+              </v-card-title>
+              <v-card-text>
+                <template>
+                  <v-chip
+                    v-for="(endpoint, i) of endpoints"
+                    :key="endpoint.path"
+                    close
+                    class="ma-1"
+                    outlined
+                    :color="endpoint.reservedParam.path ? '' : 'red'"
+                    label
+                    @click="editEndpoint(i)"
+                    @click:close="deleteEndpoint(i)"
+                  >
+                    {{ endpoint.path }} - {{ endpoint.method }}
+                  </v-chip>
+                  <v-chip
+                    outlined
+                    label
+                    color="primary"
+                    @click="newEndpoint"
+                    class="ma-1"
+                  >
+                    <v-icon left>mdi-plus</v-icon>
+                    Add Endpoint
+                  </v-chip>
+                </template>
+                <br />
+              </v-card-text>
+            </v-col>
+            <v-spacer></v-spacer>
+          </v-row>
+          <br />
         </v-container>
       </v-form>
     </v-card>

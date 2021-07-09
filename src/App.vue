@@ -3,7 +3,7 @@
     <v-app-bar app color="dark" dark>
       <div class="d-flex align-center">
         <h1>
-          Airnode Integrations
+          A I T
         </h1>
       </div>
       <v-spacer></v-spacer>
