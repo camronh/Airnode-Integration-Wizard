@@ -286,8 +286,8 @@
                         required
                       ></v-select>
                     </v-col>
-                    <v-col cols="12" md="3"></v-col>
-                    <v-col cols="12" md="4">
+                    <v-col cols="12" md="2"></v-col>
+                    <v-col cols="12" md="5">
                       <v-tooltip bottom>
                         <template v-slot:activator="{ on, attrs }">
                           <v-checkbox
