@@ -369,13 +369,7 @@
           Export
         </v-card-title>
         <v-card-text>
-          <v-textarea
-            :value="exportType == 'config' ? config : oas"
-            readonly
-            rows="20"
-            autofocus
-            no-resize
-          >
+          <v-textarea :value="config" readonly rows="20" autofocus no-resize>
           </v-textarea>
         </v-card-text>
         <v-card-actions>
@@ -463,7 +457,7 @@ export default {
       required: [v => !!v || "Required"],
       serverRules: [
         v => !!v || "Required",
-        v => v.includes("https://") || "Invalid Server",
+        v => v.includes("://") || "Invalid Server",
       ],
     };
   },
