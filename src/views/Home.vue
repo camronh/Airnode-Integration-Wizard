@@ -373,8 +373,11 @@
             v-model="exportStr"
             :error="importError"
             rows="20"
+            :color="editingConfig ? 'primary' : 'grey'"
+            append-icon="mdi-pencil"
+            @click:append="editingConfig = !editingConfig"
+            :readonly="!editingConfig"
             autofocus
-            no-resize
           >
           </v-textarea>
         </v-card-text>
@@ -449,6 +452,7 @@ export default {
       exporting: false,
       importing: false,
       editing: false,
+      editingConfig: false,
       endpointMenu: false,
       hasAuth: true,
       auth: {
