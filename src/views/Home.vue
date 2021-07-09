@@ -15,7 +15,7 @@
               </v-icon>
             </v-btn>
             <v-btn
-              @click="exportOAS"
+              @click="exportConfig"
               text
               color="primary"
               :disabled="!valid || !endpoints.length || missingReservedParam"
@@ -370,18 +370,27 @@
         </v-card-title>
         <v-card-text>
           <v-textarea
-            :value="exportType == 'config' ? config : oas"
-            readonly
+            v-model="exportStr"
+            :error="importError"
             rows="20"
+            :color="editingConfig ? 'primary' : 'grey'"
+            append-icon="mdi-pencil"
+            @click:append="editingConfig = !editingConfig"
+            :readonly="!editingConfig"
             autofocus
-            no-resize
           >
           </v-textarea>
         </v-card-text>
         <v-card-actions>
           <v-row>
             <v-col cols="12" md="4">
-              <v-btn @click="downloadOAS" text color="primary" block>
+              <v-btn
+                @click="downloadOAS"
+                text
+                color="primary"
+                block
+                :disabled="importError"
+              >
                 OAS / Swagger
                 <v-icon right>
                   mdi-download
@@ -389,7 +398,13 @@
               </v-btn>
             </v-col>
             <v-col cols="12" md="4">
-              <v-btn @click="downloadDeployment" text color="primary" block>
+              <v-btn
+                @click="downloadDeployment"
+                text
+                color="primary"
+                block
+                :disabled="importError"
+              >
                 Deployment Package
                 <v-icon right>
                   mdi-download
@@ -397,7 +412,13 @@
               </v-btn>
             </v-col>
             <v-col cols="12" md="4">
-              <v-btn @click="downloadReadme" text color="primary" block>
+              <v-btn
+                @click="downloadReadme"
+                text
+                color="primary"
+                block
+                :disabled="importError"
+              >
                 Readme.md
                 <v-icon right>
                   mdi-download
@@ -422,6 +443,7 @@ export default {
       version: "",
       server: "",
       importString: "",
+      exportStr: "",
       valid: false,
       RPC: "",
       importError: false,
@@ -430,6 +452,7 @@ export default {
       exporting: false,
       importing: false,
       editing: false,
+      editingConfig: false,
       endpointMenu: false,
       hasAuth: true,
       auth: {
@@ -439,7 +462,6 @@ export default {
         value: "",
       },
       oas: "",
-      config: "",
       endpoints: [],
       ep: {
         path: "",
@@ -463,7 +485,7 @@ export default {
       required: [v => !!v || "Required"],
       serverRules: [
         v => !!v || "Required",
-        v => v.includes("https://") || "Invalid Server",
+        v => v.includes("://") || "Invalid Server",
       ],
     };
   },
@@ -473,7 +495,12 @@ export default {
       this.importError = false;
       this.parseImport();
     },
-    // sort ep.params by name
+    exportStr() {
+      console.log("Changed");
+      this.importString = this.exportStr;
+      this.importError = false;
+      this.parseImport();
+    },
   },
   methods: {
     saveEndpoint() {
@@ -504,7 +531,7 @@ export default {
       });
     },
     downloadReadme() {
-      const text = utils.makeReadme(JSON.parse(this.config));
+      const text = utils.makeReadme(JSON.parse(this.exportStr));
       let filename = `${this.title}-Readme.md`;
       let element = document.createElement("a");
       element.setAttribute(
@@ -522,7 +549,7 @@ export default {
 
     downloadOAS() {
       // credit: https://www.bitdegree.org/learn/javascript-download
-      let text = this.oas;
+      let text = utils.makeOAS(this);
       let filename = `${this.title}.oas.json`;
       let element = document.createElement("a");
       element.setAttribute(
@@ -590,13 +617,16 @@ export default {
       this.editing = false;
       this.endpointMenu = true;
     },
-    exportOAS() {
+    exportConfig() {
       this.oas = utils.makeOAS(this);
-      this.config = utils.makeConfig(this);
+      this.exportStr = utils.makeConfig(this);
+      this.importType = ".Config";
       this.exporting = true;
     },
 
     parseImport() {
+      let apiValue;
+      if (this.auth.value) apiValue = this.auth.value;
       try {
         const json = JSON.parse(this.importString);
         console.log({ json });
@@ -608,10 +638,10 @@ export default {
           state = utils.parseConfig(json);
         }
         console.log({ state });
-        // set keys from state in this
         Object.keys(state).forEach(key => {
           this[key] = state[key];
         });
+        this.auth.value = apiValue;
       } catch (error) {
         console.log(error);
         this.importError = true;
