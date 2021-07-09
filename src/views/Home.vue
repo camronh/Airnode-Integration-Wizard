@@ -85,7 +85,7 @@
                 required
               ></v-select>
             </v-col>
-            <v-col cols="12" md="4">
+            <v-col cols="12" md="2">
               <v-text-field
                 :disabled="!hasAuth"
                 v-model="auth.name"
@@ -94,6 +94,8 @@
                 :rules="hasAuth ? required : false"
                 required
               ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="2">
               <v-text-field
                 :disabled="!hasAuth"
                 v-model="auth.value"
@@ -527,14 +529,9 @@ export default {
           times: false,
         };
       } else this.rp = this.ep.reservedParam;
-
-      console.log(this.ep);
-      console.log(this.rp);
       this.editing = true;
       this.endpointMenu = true;
     },
-    // check if any of endpoints are missing reservedParam
-
     clearEndpoint() {
       this.ep = {
         path: "",
