@@ -1,154 +1,162 @@
 <template>
   <v-container>
-    <v-card>
-      <v-form v-model="valid">
-        <v-card-title>
-          <v-spacer></v-spacer>
-          <v-text-field
-            placeholder="Title"
-            v-model="title"
-            class="titleField ma-1"
-            :rules="required"
-            height="40px"
-          ></v-text-field>
-          <v-spacer></v-spacer>
-          <v-btn text @click="importing = true" color="primary">
-            Import
-            <v-icon right>
-              mdi-import
-            </v-icon>
-          </v-btn>
-          <v-btn
-            @click="exportOAS"
-            text
-            color="primary"
-            :disabled="!valid || !endpoints.length || missingReservedParam"
-          >
-            Export
-            <v-icon right>
-              mdi-export
-            </v-icon>
-          </v-btn>
-          <v-spacer></v-spacer>
-        </v-card-title>
-        <v-container>
-          <v-row align="center" justify="center">
-            <v-col cols="12" md="7">
-              <v-text-field
-                v-model="server"
-                placeholder="https://api.website.com/v2"
-                label="Server"
-                :rules="serverRules"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="2">
-              <v-text-field
-                v-model="version"
-                label="Version"
-                required
-                :rules="required"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row align="center" justify="center">
-            <v-col cols="12" md="9">
-              <v-text-field
-                v-model="RPC"
-                placeholder="https://rinkeby.infura.io/v3/{ FILL }"
-                label="RPC URL"
-                :rules="serverRules"
-                required
-              ></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row align="center" justify="center">
-            <v-col cols="12" md="1">
-              <v-checkbox label="Auth" v-model="hasAuth"> </v-checkbox>
-            </v-col>
-            <v-col cols="12" md="2">
-              <v-select
-                v-model="auth.type"
-                :disabled="!hasAuth"
-                label="Type"
-                :items="['apiKey']"
-                required
-              ></v-select>
-            </v-col>
-            <v-col cols="12" md="2">
-              <v-select
-                :disabled="!hasAuth"
-                v-model="auth.in"
-                label="In"
-                :items="['query', 'header']"
-                required
-              ></v-select>
-            </v-col>
-            <v-col cols="12" md="2">
-              <v-text-field
-                :disabled="!hasAuth"
-                v-model="auth.name"
-                label="Name"
-                placeholder="X-API-KEY"
-                :rules="hasAuth ? required : false"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="2">
-              <v-text-field
-                :disabled="!hasAuth"
-                v-model="auth.value"
-                label="Value"
-                placeholder="xxxxxxxxxapi_keyxxxxxxx"
-                :rules="hasAuth ? required : false"
-                required
-              ></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row align="left" justify="left">
+    <br />
+
+    <v-row align="center" justify="center">
+      <v-card max-width="80%" width="90%">
+        <v-form v-model="valid">
+          <v-card-title>
+            API Settings
             <v-spacer></v-spacer>
-            <v-col cols="12" md="9">
-              <v-card-title>
-                Endpoints
-              </v-card-title>
-              <v-card-text>
-                <template>
-                  <v-chip
-                    v-for="(endpoint, i) of endpoints"
-                    :key="endpoint.path"
-                    close
-                    class="ma-1"
-                    outlined
-                    :color="endpoint.reservedParam.path ? '' : 'red'"
-                    label
-                    @click="editEndpoint(i)"
-                    @click:close="deleteEndpoint(i)"
-                  >
-                    {{ endpoint.path }} - {{ endpoint.method }}
-                  </v-chip>
-                  <v-chip
-                    outlined
-                    label
-                    color="primary"
-                    @click="newEndpoint"
-                    class="ma-1"
-                  >
-                    <v-icon left>mdi-plus</v-icon>
-                    Add Endpoint
-                  </v-chip>
-                </template>
-                <br />
-              </v-card-text>
-            </v-col>
+            <v-btn text @click="importing = true" color="primary">
+              Import
+              <v-icon right>
+                mdi-import
+              </v-icon>
+            </v-btn>
+            <v-btn
+              @click="exportOAS"
+              text
+              color="primary"
+              :disabled="!valid || !endpoints.length || missingReservedParam"
+            >
+              Export
+              <v-icon right>
+                mdi-export
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-title>
             <v-spacer></v-spacer>
-          </v-row>
-          <br />
-        </v-container>
-      </v-form>
-    </v-card>
+            <v-text-field
+              placeholder="Title"
+              v-model="title"
+              class="titleField ma-1"
+              :rules="required"
+              height="40px"
+            ></v-text-field>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-container>
+            <v-row align="center" justify="center">
+              <v-col cols="12" md="7">
+                <v-text-field
+                  v-model="server"
+                  placeholder="https://api.website.com/v2"
+                  label="Server"
+                  :rules="serverRules"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="2">
+                <v-text-field
+                  v-model="version"
+                  label="Version"
+                  required
+                  :rules="required"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row align="center" justify="center">
+              <v-col cols="12" md="9">
+                <v-text-field
+                  v-model="RPC"
+                  placeholder="https://rinkeby.infura.io/v3/{ FILL }"
+                  label="RPC URL"
+                  :rules="serverRules"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row align="center" justify="center">
+              <v-col cols="12" md="3">
+                <v-checkbox label="Auth" v-model="hasAuth"> </v-checkbox>
+              </v-col>
+              <v-col cols="12" md="3">
+                <v-select
+                  v-model="auth.type"
+                  :disabled="!hasAuth"
+                  label="Type"
+                  :items="['apiKey']"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="3">
+                <v-select
+                  :disabled="!hasAuth"
+                  v-model="auth.in"
+                  label="In"
+                  :items="['query', 'header']"
+                  required
+                ></v-select>
+              </v-col>
+            </v-row>
+            <v-row align="center" justify="center">
+              <v-col cols="12" md="4">
+                <v-text-field
+                  :disabled="!hasAuth"
+                  v-model="auth.name"
+                  label="Name"
+                  placeholder="X-API-KEY"
+                  :rules="hasAuth ? required : false"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="5">
+                <v-text-field
+                  :disabled="!hasAuth"
+                  v-model="auth.value"
+                  label="Value"
+                  placeholder="xxxxxxxxxapi_keyxxxxxxx"
+                  :rules="hasAuth ? required : false"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row align="center" justify="center">
+              <v-col cols="12" md="1"></v-col>
+              <v-col cols="12" md="11">
+                <v-card-title>
+                  Endpoints
+                </v-card-title>
+                <v-card-text>
+                  <template>
+                    <v-chip
+                      v-for="(endpoint, i) of endpoints"
+                      :key="i"
+                      close
+                      class="ma-1"
+                      outlined
+                      :color="endpoint.reservedParam.path ? '' : 'red'"
+                      label
+                      @click="editEndpoint(i)"
+                      @click:close="deleteEndpoint(i)"
+                    >
+                      {{ endpoint.path }} - {{ endpoint.method }}
+                    </v-chip>
+                    <v-chip
+                      outlined
+                      label
+                      color="primary"
+                      @click="newEndpoint"
+                      class="ma-1"
+                    >
+                      <v-icon left>mdi-plus</v-icon>
+                      Add Endpoint
+                    </v-chip>
+                  </template>
+                  <br />
+                </v-card-text>
+              </v-col>
+            </v-row>
+            <br />
+          </v-container>
+        </v-form>
+      </v-card>
+    </v-row>
     <v-dialog
       v-model="endpointMenu"
-      max-width="75%"
+      max-width="60%"
       :overlay-opacity="75"
       overlay-color="black"
     >
@@ -156,25 +164,41 @@
         <v-card-title>
           {{ editing ? "Edit" : "New" }} Endpoint
           <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+
+          <v-btn
+            @click="saveEndpoint"
+            :disabled="!validEndpoint"
+            text
+            color="primary"
+          >
+            Save
+          </v-btn>
+          <v-btn @click="endpointMenu = false" text color="red">
+            Close
+          </v-btn>
         </v-card-title>
-        <v-row align="center" justify="center">
-          <v-col cols="12" md="5">
-            <v-text-field
-              v-model="ep.path"
-              label="Path"
-              placeholder="/endpoint/{pathParam}"
-              required
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="2">
-            <v-select
-              v-model="ep.method"
-              label="Method"
-              :items="['get', 'post']"
-              required
-            ></v-select>
-          </v-col>
-        </v-row>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" md="5">
+              <v-text-field
+                v-model="ep.path"
+                label="Path"
+                placeholder="/endpoint/{pathParam}"
+                required
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="2">
+              <v-select
+                v-model="ep.method"
+                label="Method"
+                :items="['get', 'post']"
+                required
+              ></v-select>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <br />
         <v-card-text>
           <v-row>
             <v-col cols="12" md="6">
@@ -182,24 +206,9 @@
                 <v-card-title>
                   Params
                 </v-card-title>
+
                 <v-card-text>
-                  <template v-if="ep.params.length">
-                    <v-chip
-                      v-for="(param, i) of ep.params"
-                      :key="param.name"
-                      close
-                      outlined
-                      @click:close="deleteParam(i)"
-                    >
-                      {{ param.name }} - {{ param.in }}
-                    </v-chip>
-                  </template>
-                  <p v-else>
-                    No params...
-                  </p>
-                </v-card-text>
-                <v-card-text>
-                  <v-row>
+                  <v-row align="center">
                     <v-col cols="12" md="7">
                       <v-text-field
                         v-model="param.name"
@@ -237,17 +246,39 @@
                     </v-col>
                   </v-row>
                 </v-card-text>
+                <v-card-text>
+                  <template v-if="ep.params.length">
+                    <v-chip
+                      v-for="(param, i) of ep.params"
+                      :key="param.name"
+                      close
+                      label
+                      class="ma-1"
+                      outlined
+                      @click:close="deleteParam(i)"
+                    >
+                      {{ param.name }} - {{ param.in }}
+                    </v-chip>
+                  </template>
+                  <p v-else>
+                    No params...
+                  </p>
+                </v-card-text>
               </v-card>
             </v-col>
-            <v-divider vertical></v-divider>
             <v-col cols="12" md="6">
               <v-card flat height="100%">
                 <v-card-title>
                   Reserved Params
+                  <v-spacer></v-spacer>
+                  <v-spacer></v-spacer>
+                  <v-spacer></v-spacer>
+                  <v-spacer></v-spacer>
+                  <v-spacer></v-spacer>
                 </v-card-title>
                 <v-card-text>
-                  <v-row align="center" justify="center">
-                    <v-col cols="12" md="4">
+                  <v-row>
+                    <v-col cols="12" md="5">
                       <v-select
                         v-model="rp.type"
                         label="__type"
@@ -255,13 +286,13 @@
                         required
                       ></v-select>
                     </v-col>
-                    <v-col cols="12" md="1"></v-col>
+                    <v-col cols="12" md="3"></v-col>
                     <v-col cols="12" md="4">
                       <v-tooltip bottom>
                         <template v-slot:activator="{ on, attrs }">
                           <v-checkbox
                             v-model="rp.times"
-                            label="Add __times?"
+                            label="Add __times"
                             :disabled="rp.type != 'int256'"
                             v-bind="attrs"
                             v-on="on"
@@ -272,8 +303,8 @@
                       </v-tooltip>
                     </v-col>
                   </v-row>
-                  <v-row align="center" justify="center">
-                    <v-col cols="12" md="9">
+                  <v-row>
+                    <v-col cols="12" md="12">
                       <v-text-field
                         label="__path"
                         :autofocus="!rp.path"
@@ -289,20 +320,6 @@
             </v-col>
           </v-row>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn @click="endpointMenu = false" text color="red">
-            Close
-          </v-btn>
-          <v-btn
-            @click="saveEndpoint"
-            :disabled="!validEndpoint"
-            text
-            color="primary"
-          >
-            Save
-          </v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
     <v-dialog v-model="importing" max-width="50%">
