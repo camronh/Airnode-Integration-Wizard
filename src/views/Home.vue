@@ -15,7 +15,7 @@
               </v-icon>
             </v-btn>
             <v-btn
-              @click="exportOAS"
+              @click="exportConfig"
               text
               color="primary"
               :disabled="!valid || !endpoints.length || missingReservedParam"
@@ -369,7 +369,13 @@
           Export
         </v-card-title>
         <v-card-text>
-          <v-textarea :value="config" readonly rows="20" autofocus no-resize>
+          <v-textarea
+            v-model="exportStr"
+            :error="importError"
+            rows="20"
+            autofocus
+            no-resize
+          >
           </v-textarea>
         </v-card-text>
         <v-card-actions>
@@ -416,6 +422,7 @@ export default {
       version: "",
       server: "",
       importString: "",
+      exportStr: "",
       valid: false,
       RPC: "",
       importError: false,
@@ -467,7 +474,12 @@ export default {
       this.importError = false;
       this.parseImport();
     },
-    // sort ep.params by name
+    exportStr() {
+      console.log("Changed");
+      this.importString = this.exportStr;
+      this.importError = false;
+      this.parseImport();
+    },
   },
   methods: {
     saveEndpoint() {
@@ -584,13 +596,17 @@ export default {
       this.editing = false;
       this.endpointMenu = true;
     },
-    exportOAS() {
+    exportConfig() {
       this.oas = utils.makeOAS(this);
-      this.config = utils.makeConfig(this);
+      this.exportStr = utils.makeConfig(this);
+      this.config = this.exportStr;
+      this.importType = ".Config";
       this.exporting = true;
     },
 
     parseImport() {
+      let apiValue;
+      if (this.auth.value) apiValue = this.auth.value;
       try {
         const json = JSON.parse(this.importString);
         console.log({ json });
@@ -602,10 +618,10 @@ export default {
           state = utils.parseConfig(json);
         }
         console.log({ state });
-        // set keys from state in this
         Object.keys(state).forEach(key => {
           this[key] = state[key];
         });
+        this.auth.value = apiValue;
       } catch (error) {
         console.log(error);
         this.importError = true;
