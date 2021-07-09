@@ -310,8 +310,8 @@ async function zipDeploymentPackage(state) {
   const JSZip = require("jszip");
   const FileSaver = require("file-saver");
   let zip = new JSZip();
-  zip.file("config.json", state.config);
-  const config = JSON.parse(state.config);
+  zip.file("config.json", state.exportStr);
+  const config = JSON.parse(state.exportStr);
 
   // Add Securty.json
   let security = {

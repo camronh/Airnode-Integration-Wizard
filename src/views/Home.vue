@@ -381,7 +381,13 @@
         <v-card-actions>
           <v-row>
             <v-col cols="12" md="4">
-              <v-btn @click="downloadOAS" text color="primary" block>
+              <v-btn
+                @click="downloadOAS"
+                text
+                color="primary"
+                block
+                :disabled="importError"
+              >
                 OAS / Swagger
                 <v-icon right>
                   mdi-download
@@ -389,7 +395,13 @@
               </v-btn>
             </v-col>
             <v-col cols="12" md="4">
-              <v-btn @click="downloadDeployment" text color="primary" block>
+              <v-btn
+                @click="downloadDeployment"
+                text
+                color="primary"
+                block
+                :disabled="importError"
+              >
                 Deployment Package
                 <v-icon right>
                   mdi-download
@@ -397,7 +409,13 @@
               </v-btn>
             </v-col>
             <v-col cols="12" md="4">
-              <v-btn @click="downloadReadme" text color="primary" block>
+              <v-btn
+                @click="downloadReadme"
+                text
+                color="primary"
+                block
+                :disabled="importError"
+              >
                 Readme.md
                 <v-icon right>
                   mdi-download
@@ -440,7 +458,6 @@ export default {
         value: "",
       },
       oas: "",
-      config: "",
       endpoints: [],
       ep: {
         path: "",
@@ -510,7 +527,7 @@ export default {
       });
     },
     downloadReadme() {
-      const text = utils.makeReadme(JSON.parse(this.config));
+      const text = utils.makeReadme(JSON.parse(this.exportStr));
       let filename = `${this.title}-Readme.md`;
       let element = document.createElement("a");
       element.setAttribute(
@@ -599,7 +616,6 @@ export default {
     exportConfig() {
       this.oas = utils.makeOAS(this);
       this.exportStr = utils.makeConfig(this);
-      this.config = this.exportStr;
       this.importType = ".Config";
       this.exporting = true;
     },
