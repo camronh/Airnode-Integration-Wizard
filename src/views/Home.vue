@@ -368,6 +368,9 @@
         <v-card-title>
           Export
         </v-card-title>
+        <v-card-subtitle>
+          Edit your config.json
+        </v-card-subtitle>
         <v-card-text>
           <v-jsoneditor
             v-model="exportJson"
@@ -375,7 +378,8 @@
             @error="importError = true"
             height="600px"
             :options="options"
-          />
+          >
+          </v-jsoneditor>
 
           <!-- <v-textarea
             v-model="exportStr"
@@ -397,7 +401,12 @@
                 text
                 color="primary"
                 block
-                :disabled="importError || !valid || !endpoints.length || missingReservedParam"
+                :disabled="
+                  importError ||
+                    !valid ||
+                    !endpoints.length ||
+                    missingReservedParam
+                "
               >
                 OAS / Swagger
                 <v-icon right>
@@ -411,7 +420,12 @@
                 text
                 color="primary"
                 block
-                :disabled="importError || !valid || !endpoints.length || missingReservedParam"
+                :disabled="
+                  importError ||
+                    !valid ||
+                    !endpoints.length ||
+                    missingReservedParam
+                "
               >
                 Deployment Package
                 <v-icon right>
@@ -425,7 +439,12 @@
                 text
                 color="primary"
                 block
-                :disabled="importError || !valid || !endpoints.length || missingReservedParam"
+                :disabled="
+                  importError ||
+                    !valid ||
+                    !endpoints.length ||
+                    missingReservedParam
+                "
               >
                 Readme.md
                 <v-icon right>
@@ -459,6 +478,7 @@ export default {
       valid: false,
       options: {
         mode: "code",
+        enableTransform: false,
       },
       RPC: "",
       importError: false,
