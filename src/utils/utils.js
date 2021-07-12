@@ -225,6 +225,8 @@ function makeConfig(state) {
           fixed: endpoint.reservedParam.path,
         },
       ],
+      fixedOperationParameters: [],
+
       parameters: endpoint.params.map(param => {
         return {
           name: param.name,
