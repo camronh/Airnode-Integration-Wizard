@@ -226,17 +226,27 @@ function makeConfig(state) {
         },
       ],
       fixedOperationParameters: [],
-
-      parameters: endpoint.params.map(param => {
-        return {
+      parameters: [],
+    };
+    for (let param of endpoint.params) {
+      if (param.fixed) {
+        ep.fixedOperationParameters.push({
+          operationParameter: {
+            name: param.name,
+            in: param.in,
+          },
+          value: param.value,
+        });
+      } else {
+        ep.parameters.push({
           name: param.name,
           operationParameter: {
             name: param.name,
             in: param.in,
           },
-        };
-      }),
-    };
+        });
+      }
+    }
     if (endpoint.reservedParam.times) {
       ep.reservedParameters.push({
         name: "_times",
