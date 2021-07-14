@@ -272,6 +272,7 @@
                       :key="param.name"
                       close
                       label
+                      :color="param.fixed ? 'accent' : ''"
                       class="ma-1"
                       outlined
                       @click:close="deleteParam(i)"

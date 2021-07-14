@@ -294,21 +294,39 @@ function parseConfig(config) {
 
   state.endpoints = [];
   for (let endpoint of ois.endpoints) {
-    state.endpoints.push({
+    let ep = {
       path: endpoint.name,
       method: endpoint.operation.method,
-      params: endpoint.parameters.map(param => {
-        return {
-          name: param.operationParameter.name,
-          in: param.operationParameter.in,
-        };
-      }),
+      params: [],
+      //   params: endpoint.parameters.map(param => {
+      //     return {
+      //       name: param.operationParameter.name,
+      //       in: param.operationParameter.in,
+      //     };
+      //   }),
       reservedParam: {
         type: endpoint.reservedParameters[0].fixed,
         path: endpoint.reservedParameters[1].fixed,
         times: endpoint.reservedParameters[2] ? true : false,
       },
-    });
+    };
+    for (let param of endpoint.parameters) {
+      ep.params.push({
+        name: param.name,
+        in: param.operationParameter.in,
+        fixed: false,
+        value: "",
+      });
+    }
+    for (let param of endpoint.fixedOperationParameters) {
+      ep.params.push({
+        name: param.operationParameter.name,
+        in: param.operationParameter.in,
+        fixed: true,
+        value: param.value,
+      });
+    }
+    state.endpoints.push(ep);
   }
   console.log({ state });
 
