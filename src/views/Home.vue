@@ -232,7 +232,9 @@
                             icon
                             @click="addParam"
                             color="primary"
-                            :disabled="!param.name"
+                            :disabled="
+                              !param.name || (param.fixed && !param.value)
+                            "
                             v-bind="attrs"
                             v-on="on"
                           >
@@ -244,7 +246,24 @@
                         <span>Add Param</span>
                       </v-tooltip>
                     </v-col>
+                    <v-col cols="12" md="3">
+                      <v-checkbox label="Fixed" v-model="param.fixed">
+                      </v-checkbox>
+                    </v-col>
+                    <v-col cols="12" md="9">
+                      <v-text-field
+                        label="Value"
+                        :disabled="!param.fixed"
+                        v-model="param.value"
+                      >
+                      </v-text-field>
+                    </v-col>
                   </v-row>
+                  <!-- <v-row>
+                    <v-col cols="12" md="12">
+                      <v-checkbox label="Fixed"> </v-checkbox>
+                    </v-col>
+                  </v-row> -->
                 </v-card-text>
                 <v-card-text>
                   <template v-if="ep.params.length">
@@ -302,8 +321,6 @@
                         <span>Add Param</span>
                       </v-tooltip>
                     </v-col>
-                  </v-row>
-                  <v-row>
                     <v-col cols="12" md="12">
                       <v-text-field
                         label="__path"
@@ -315,6 +332,7 @@
                       </v-text-field>
                     </v-col>
                   </v-row>
+                  <v-row> </v-row>
                 </v-card-text>
               </v-card>
             </v-col>
@@ -517,6 +535,8 @@ export default {
       param: {
         name: "",
         in: "query",
+        fixed: false,
+        value: "",
       },
       required: [v => !!v || "Required"],
       serverRules: [
@@ -559,7 +579,7 @@ export default {
     addParam() {
       if (!this.param.name) return;
       this.ep.params.push(this.param);
-      this.param = { name: "", in: "query" };
+      this.param = { name: "", in: "query", fixed: false, value: "" };
       // sort this.ep.params by name
       this.ep.params.sort((a, b) => {
         if (a.name < b.name) return -1;
