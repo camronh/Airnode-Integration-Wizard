@@ -591,6 +591,7 @@ export default {
       });
     },
     editParam(param, index) {
+      if (this.param.name || this.param.value) return;
       this.param = param;
       this.ep.params.splice(index, 1);
     },
