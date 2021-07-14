@@ -166,6 +166,9 @@
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
 
+          <v-btn @click="endpointMenu = false" text color="red">
+            Close
+          </v-btn>
           <v-btn
             @click="saveEndpoint"
             :disabled="!validEndpoint"
@@ -173,9 +176,6 @@
             color="primary"
           >
             Save
-          </v-btn>
-          <v-btn @click="endpointMenu = false" text color="red">
-            Close
           </v-btn>
         </v-card-title>
         <v-card-text>
@@ -255,6 +255,7 @@
                         label="Value"
                         :disabled="!param.fixed"
                         v-model="param.value"
+                        @keypress.enter="addParam"
                       >
                       </v-text-field>
                     </v-col>
@@ -268,16 +269,17 @@
                 <v-card-text>
                   <template v-if="ep.params.length">
                     <v-chip
-                      v-for="(param, i) of ep.params"
-                      :key="param.name"
+                      v-for="(p, i) of ep.params"
+                      :key="p.name"
                       close
                       label
-                      :color="param.fixed ? 'accent' : ''"
+                      :color="p.fixed ? 'accent' : ''"
                       class="ma-1"
                       outlined
+                      @click="editParam(p, i)"
                       @click:close="deleteParam(i)"
                     >
-                      {{ param.name }} - {{ param.in }}
+                      {{ p.name }} - {{ p.in }}
                     </v-chip>
                   </template>
                   <p v-else>
@@ -382,7 +384,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="exporting" max-width="50%">
+    <v-dialog v-model="exporting" max-width="50%" :overlay-opacity="75">
       <v-card>
         <v-card-title>
           Export
@@ -578,7 +580,7 @@ export default {
       this.endpointMenu = false;
     },
     addParam() {
-      if (!this.param.name) return;
+      if (!this.param.name || (this.param.fixed && !this.param.value)) return;
       this.ep.params.push(this.param);
       this.param = { name: "", in: "query", fixed: false, value: "" };
       // sort this.ep.params by name
@@ -588,6 +590,11 @@ export default {
         return 0;
       });
     },
+    editParam(param, index) {
+      this.param = param;
+      this.ep.params.splice(index, 1);
+    },
+
     downloadReadme() {
       const text = utils.makeReadme(JSON.parse(this.exportStr));
       let filename = `${this.title}-Readme.md`;
