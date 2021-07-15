@@ -158,6 +158,7 @@
       v-model="endpointMenu"
       max-width="60%"
       :overlay-opacity="75"
+      persistent
       overlay-color="black"
     >
       <v-card>
@@ -166,16 +167,10 @@
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
 
-          <v-btn @click="endpointMenu = false" text color="red">
-            Close
-          </v-btn>
-          <v-btn
-            @click="saveEndpoint"
-            :disabled="!validEndpoint"
-            text
-            color="primary"
-          >
-            Save
+          <v-btn @click="endpointMenu = false" icon>
+            <v-icon>
+              mdi-close
+            </v-icon>
           </v-btn>
         </v-card-title>
         <v-card-text>
@@ -341,6 +336,17 @@
             </v-col>
           </v-row>
         </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            @click="saveEndpoint"
+            :disabled="!validEndpoint"
+            text
+            color="primary"
+          >
+            Save
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
     <v-dialog v-model="importing" max-width="50%">
