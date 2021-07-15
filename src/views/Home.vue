@@ -92,7 +92,7 @@
               </v-col>
             </v-row>
             <v-row align="center" justify="center">
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="3">
                 <v-text-field
                   :disabled="!hasAuth"
                   v-model="auth.name"
@@ -102,7 +102,7 @@
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="5">
+              <v-col cols="12" md="6">
                 <v-text-field
                   :disabled="!hasAuth"
                   v-model="auth.value"
@@ -261,26 +261,6 @@
                     </v-col>
                   </v-row> -->
                 </v-card-text>
-                <v-card-text>
-                  <template v-if="ep.params.length">
-                    <v-chip
-                      v-for="(p, i) of ep.params"
-                      :key="p.name"
-                      close
-                      label
-                      :color="p.fixed ? 'accent' : ''"
-                      class="ma-1"
-                      outlined
-                      @click="editParam(p, i)"
-                      @click:close="deleteParam(i)"
-                    >
-                      {{ p.name }} - {{ p.in }}
-                    </v-chip>
-                  </template>
-                  <p v-else>
-                    No params...
-                  </p>
-                </v-card-text>
               </v-card>
             </v-col>
             <v-col cols="12" md="6">
@@ -309,7 +289,7 @@
                         <template v-slot:activator="{ on, attrs }">
                           <v-checkbox
                             v-model="rp.times"
-                            label="Add _times"
+                            label="_times"
                             :disabled="rp.type != 'int256'"
                             v-bind="attrs"
                             v-on="on"
@@ -336,6 +316,26 @@
             </v-col>
           </v-row>
         </v-card-text>
+        <v-card-text>
+          <template v-if="ep.params.length">
+            <v-chip
+              v-for="(p, i) of ep.params"
+              :key="p.name"
+              close
+              label
+              :color="p.fixed ? 'accent' : ''"
+              class="ma-1"
+              outlined
+              @click="editParam(p, i)"
+              @click:close="deleteParam(i)"
+            >
+              {{ p.name }} - {{ p.in }}
+            </v-chip>
+          </template>
+          <p v-else>
+            No params...
+          </p>
+        </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
@@ -354,7 +354,13 @@
         <v-card-title>
           Import {{ importType }}
           <v-spacer></v-spacer>
-          <v-btn-toggle v-model="importType" tile color="primary" group>
+          <v-btn-toggle
+            v-model="importType"
+            tile
+            color="primary"
+            group
+            @change="parseImport"
+          >
             <v-btn value="OAS">
               OAS / Swagger
             </v-btn>
@@ -368,6 +374,7 @@
             v-model="importString"
             rows="20"
             autofocus
+            @input="parseImport"
             no-resize
             :error="importError"
           >
@@ -555,16 +562,10 @@ export default {
     };
   },
   watch: {
-    importString() {
-      console.log("Changed");
-      this.importError = false;
-      this.parseImport();
-    },
     exportJson() {
       console.log("Changed");
       this.exportStr = JSON.stringify(this.exportJson, null, 2);
       this.importString = this.exportStr;
-      this.importError = false;
       this.parseImport();
     },
   },
@@ -698,6 +699,7 @@ export default {
     },
 
     parseImport() {
+      this.importError = false;
       let apiValue;
       if (this.auth.value) apiValue = this.auth.value;
       try {
