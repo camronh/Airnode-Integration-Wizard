@@ -314,7 +314,7 @@
                         <template v-slot:activator="{ on, attrs }">
                           <v-checkbox
                             v-model="rp.times"
-                            label="Add __times"
+                            label="Add _times"
                             :disabled="rp.type != 'int256'"
                             v-bind="attrs"
                             v-on="on"
@@ -591,6 +591,7 @@ export default {
       });
     },
     editParam(param, index) {
+      if (this.param.name || this.param.value) return;
       this.param = param;
       this.ep.params.splice(index, 1);
     },
