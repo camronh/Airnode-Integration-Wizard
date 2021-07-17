@@ -367,6 +367,63 @@ async function zipDeploymentPackage(state) {
   });
 }
 
+// Download Zip
+async function makeZip(state) {
+  const downloadOptions = state.downloadOptions;
+  const JSZip = require("jszip");
+  const FileSaver = require("file-saver");
+  let zip = new JSZip();
+  const config = JSON.parse(state.exportStr);
+  if (downloadOptions.includes("Deployment")) {
+    //   Add Deployment Package
+    await new Promise(resolve => {
+      let configZip = new JSZip();
+
+      configZip.file("config.json", state.exportStr);
+
+      // Add Securty.json
+      let security = {
+        apiCredentials: {
+          [state.title]: [],
+        },
+        id: config.id,
+      };
+      console.log({ security });
+      const securitySchemes =
+        config.ois[0].apiSpecifications.components.securitySchemes;
+      for (let scheme in securitySchemes) {
+        security.apiCredentials[state.title].push({
+          securitySchemeName: scheme,
+          value: state.auth.value,
+        });
+      }
+      configZip.file("security.json", JSON.stringify(security, null, 2));
+
+      configZip.file(".env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_KEY=`);
+      configZip.generateAsync({ type: "blob" }).then(function(content) {
+        console.log("Generated");
+        zip.file(`${state.title}-Deployment.zip`, content);
+        resolve();
+      });
+    });
+  }
+  if (downloadOptions.includes("Readme")) {
+    const readme = makeReadme(config);
+    zip.file(`${state.title}-Endpoints.md`, readme);
+  }
+  if (downloadOptions.includes("OAS")) {
+    const oas = makeOAS(state);
+    zip.file(`oas.json`, oas);
+  }
+  if (downloadOptions.includes("OIS")) {
+    const ois = config.ois[0];
+    zip.file(`ois.json`, JSON.stringify(ois, null, 2));
+  }
+  zip.generateAsync({ type: "blob" }).then(function(content) {
+    FileSaver.saveAs(content, `${state.title}-Export.zip`);
+  });
+}
+
 function makeReadme(config) {
   // Create Markup Endpoints
   let endpoints = config.triggers.request.map(endpoint => {
@@ -418,5 +475,6 @@ module.exports = {
   makeConfig,
   parseConfig,
   zipDeploymentPackage,
+  makeZip,
   makeReadme,
 };

@@ -27,13 +27,12 @@
                 mdi-import
               </v-icon>
             </v-btn>
-            <!-- <v-btn
+            <v-btn
               @click="exportConfig"
               text
               color="primary"
               :disabled="!valid || !endpoints.length || missingReservedParam"
-            > -->
-            <v-btn @click="exportConfig" text color="primary">
+            >
               Export
               <v-icon right>
                 mdi-export
@@ -505,7 +504,7 @@
         </v-card-title>
         <v-card-text>
           <v-row align="center" justify="center">
-            <v-col cols="12" md="4">
+            <v-col cols="12" md="5">
               <v-checkbox
                 label="OAS"
                 v-model="downloadOptions"
@@ -530,8 +529,13 @@
               ></v-checkbox>
             </v-col>
           </v-row>
-          <v-btn text block>
-            <v-icon color="primary" :disabled="!downloadOptions.length">
+          <v-btn
+            text
+            block
+            @click="download"
+            :disabled="!downloadOptions.length"
+          >
+            <v-icon>
               mdi-download
             </v-icon>
           </v-btn>
@@ -689,6 +693,10 @@ export default {
     },
     downloadDeployment() {
       utils.zipDeploymentPackage(this);
+    },
+    download() {
+      console.log("Donwload");
+      utils.makeZip(this);
     },
 
     deleteParam(i) {
