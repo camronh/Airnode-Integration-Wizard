@@ -6,7 +6,7 @@ test("Import Config", async ({ page }) => {
   await page.click("text=Import");
   await page.click("text=Config");
   const exampleConfig = require("../src/utils/exampleConfig.json");
-  await page.fill("#input-59", JSON.stringify(exampleConfig));
+  await page.fill("[placeholder='Paste Import Here...']", JSON.stringify(exampleConfig));
   await page.click(
     "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
   );
@@ -19,6 +19,6 @@ test("Import Config", async ({ page }) => {
   await page.type("#input-43", "shbfkajnshbjfnabhs");
 
   await page.click("text=Export");
-  await page.focus("text=Deplyoment");
+  await page.click("text=Download");
   await page.waitForTimeout(999999999);
 });

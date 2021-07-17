@@ -388,6 +388,7 @@
             v-model="importString"
             rows="20"
             autofocus
+            placeholder="Paste Import Here..."
             @input="parseImport"
             no-resize
             :error="importError"
@@ -505,22 +506,35 @@
         <v-card-text>
           <v-row align="center" justify="center">
             <v-col cols="12" md="4">
-              <v-checkbox label="OAS"></v-checkbox>
-              <v-checkbox label="OIS"></v-checkbox>
+              <v-checkbox
+                label="OAS"
+                v-model="downloadOptions"
+                value="OAS"
+              ></v-checkbox>
+              <v-checkbox
+                label="OIS"
+                v-model="downloadOptions"
+                value="OIS"
+              ></v-checkbox>
             </v-col>
             <v-col cols="12" md="6">
-              <v-checkbox label="Readme.md"></v-checkbox>
-              <v-checkbox label="Deployment Pkg"></v-checkbox>
+              <v-checkbox
+                label="Readme.md"
+                v-model="downloadOptions"
+                value="Readme"
+              ></v-checkbox>
+              <v-checkbox
+                label="Deployment Pkg"
+                v-model="downloadOptions"
+                value="Deployment"
+              ></v-checkbox>
             </v-col>
           </v-row>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text block>
-              <v-icon color="primary">
-                mdi-download
-              </v-icon>
-            </v-btn>
-          </v-card-actions>
+          <v-btn text block>
+            <v-icon color="primary" :disabled="!downloadOptions.length">
+              mdi-download
+            </v-icon>
+          </v-btn>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -556,13 +570,7 @@ export default {
       importing: false,
       downloading: false,
       editing: false,
-      downloadOptions: {
-        oas: false,
-        ois: false,
-        config: false,
-        readme: false,
-        deployment: false,
-      },
+      downloadOptions: ["OAS", "OIS", "Readme", "Deployment"],
       exportJson: {},
       editingConfig: false,
       endpointMenu: false,
