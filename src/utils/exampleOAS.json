@@ -1,0 +1,1590 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Finchains REST API",
+    "description": "API specification for Finchains [https://crypto.finchains.io](https://crypto.finchains.io)",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "Find out more about Finchains",
+    "url": "http://docs.finchains.io"
+  },
+  "servers": [
+    {
+      "url": "https://api.finchains.io/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "pairs",
+      "description": "Information regarding supported pairs"
+    },
+    {
+      "name": "exchange",
+      "description": "Information regarding exchanges used to source price data"
+    },
+    {
+      "name": "currency",
+      "description": "Price data for currency pairs"
+    },
+    {
+      "name": "discrepancy",
+      "description": "Discrepancy data for currency pairs"
+    }
+  ],
+  "paths": {
+    "/pairs": {
+      "get": {
+        "tags": ["pairs"],
+        "summary": "List supported currency pairs",
+        "description": "Returns full list of currently supported currency base/target pairs",
+        "operationId": "pairsGET",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pair"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {}
+          }
+        },
+        "x-swagger-router-controller": "Pairs"
+      }
+    },
+    "/pairs/bases": {
+      "get": {
+        "tags": ["pairs"],
+        "summary": "List supported currency bases",
+        "description": "Returns a list of currently supported base currencies, which can be used in other endpoints",
+        "operationId": "pairsBasesGET",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "example": ["ETH", "BTC"],
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {}
+          }
+        },
+        "x-swagger-router-controller": "Pairs"
+      }
+    },
+    "/pairs/{base}": {
+      "get": {
+        "tags": ["pairs"],
+        "summary": "List supported targets",
+        "description": "Returns a list of supported target currencies for given base currency",
+        "operationId": "pairsBaseGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "Base currency to query, e.g. ETH, BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "example": ["GBP", "USD"],
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Base not found",
+            "content": {}
+          }
+        },
+        "x-swagger-router-controller": "Pairs"
+      }
+    },
+    "/pairs/{base}/{target}/exchanges": {
+      "get": {
+        "tags": ["pairs"],
+        "summary": "get exchanges from which pair data is currently sourced",
+        "description": "Returns an object with pair info",
+        "operationId": "pairsBaseTargetExchangesGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "Base currency to query, e.g. ETH",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "Target currency to query, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Exchange"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Base not found",
+            "content": {}
+          }
+        },
+        "x-swagger-router-controller": "Pairs"
+      }
+    },
+    "/exchange": {
+      "get": {
+        "tags": ["exchange"],
+        "summary": "get all exchanges",
+        "description": "Returns all exchanges from which price data is currently sourced",
+        "operationId": "exchangeGET",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Exchange"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Exchange"
+      }
+    },
+    "/exchange/{exchange}/pairs": {
+      "get": {
+        "tags": ["exchange"],
+        "summary": "currency pairs supported by exchange oracle",
+        "description": "Returns a list of currency pairs currently monitored by this exchange's oracle. These can be used when querying an exchange oracle's price data",
+        "operationId": "exchangeExchangePairsGET",
+        "parameters": [
+          {
+            "name": "exchange",
+            "in": "path",
+            "description": "exchange ID, e.g. binance",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "binance"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pair"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Exchange"
+      }
+    },
+    "/exchange/{exchange}/bases": {
+      "get": {
+        "tags": ["exchange"],
+        "summary": "base currencies supported by exchange oracle",
+        "description": "Returns a list of base currencies currently monitored by this exchange's oracle. These can be used when querying an exchange oracle's price data",
+        "operationId": "exchangeExchangeBasesGET",
+        "parameters": [
+          {
+            "name": "exchange",
+            "in": "path",
+            "description": "exchange ID, e.g. binance",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "binance"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "example": ["ETH", "BTC"],
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Exchange"
+      }
+    },
+    "/exchange/{exchange}/{base}/targets": {
+      "get": {
+        "tags": ["exchange"],
+        "summary": "tarrget currencies supported by exchange oracle",
+        "description": "Returns a list of targets currencies currently monitored by this exchange's oracle for the given base currency. These can be used when querying an exchange oracle's price data",
+        "operationId": "exchangeExchangeBaseTargetsGET",
+        "parameters": [
+          {
+            "name": "exchange",
+            "in": "path",
+            "description": "exchange ID, e.g. binance",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "binance"
+            }
+          },
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "example": ["GBP", "USD"],
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Exchange"
+      }
+    },
+    "/exchange/{exchange}/{base}/{target}": {
+      "get": {
+        "tags": ["exchange"],
+        "summary": "paginated pair price data",
+        "description": "Returns a paginated list of data submitted to Finchains by the exchange oracle, for the given exchange and currency pair",
+        "operationId": "exchangeExchangeBaseTargetGET",
+        "parameters": [
+          {
+            "name": "exchange",
+            "in": "path",
+            "description": "exchange ID, e.g. binance",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "binance"
+            }
+          },
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "EUR"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Exchange"
+      }
+    },
+    "/exchange/{exchange}/{base}/{target}/discrepancy": {
+      "get": {
+        "tags": ["exchange"],
+        "summary": "paginated discrepancy data",
+        "description": "Returns a paginated list of discrepancies and differences for prices submitted by oracles within a similar timespan, for the given exchange and currency pair",
+        "operationId": "exchangeExchangeBaseTargetDiscrepancyGET",
+        "parameters": [
+          {
+            "name": "exchange",
+            "in": "path",
+            "description": "exchange ID, e.g. binance",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "binance"
+            }
+          },
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "EUR"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Exchange"
+      }
+    },
+    "/currency/{base}/{target}": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "paginated price data",
+        "description": "Returns a paginated list of prices for the given currency pair, with the most recent prices first",
+        "operationId": "currencyBaseTargetGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/currency/{base}/{target}/latest": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "latest price data",
+        "description": "Returns a list of each oracles' latest price for the given currency pair. One result per oracle returned. Data returned is dependent on which oracles are watching the given pair",
+        "operationId": "currencyBaseTargetLatestGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Price"
+                  },
+                  "x-content-type": "application/json"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/currency/{base}/{target}/avg": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "average price data",
+        "description": "Returns average price over the past hour for the given pair. Statistical outliers are not removed",
+        "operationId": "currencyBaseTargetAvgGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Average"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/currency/{base}/{target}/avg/{time}": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "average price data",
+        "description": "Returns average price for the given pair over the given timespan. Statistical outliers are not removed",
+        "operationId": "currencyBaseTargetAvgTimeGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          },
+          {
+            "name": "time",
+            "in": "path",
+            "description": "timespan used to calculate average, e.g. 24H",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "5M",
+                "10M",
+                "30M",
+                "1H",
+                "2H",
+                "6H",
+                "12H",
+                "24H",
+                "48H"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Average"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/currency/{base}/{target}/avg/chauvenet": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "average price data",
+        "description": "Returns average price over the past hour for the given pair. Statistical outliers are removed using the [Chauvenet criterion](https://en.wikipedia.org/wiki/Chauvenet%27s_criterion)",
+        "operationId": "currencyBaseTargetAvgChauvenetGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Average"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/currency/{base}/{target}/avg/chauvenet/{time}": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "average price data",
+        "description": "Returns average price over the given timespan for the given pair. Statistical outliers are removed using the [Chauvenet criterion](https://en.wikipedia.org/wiki/Chauvenet%27s_criterion)",
+        "operationId": "currencyBaseTargetAvgChauvenetTimeGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          },
+          {
+            "name": "time",
+            "in": "path",
+            "description": "timespan used to calculate average, e.g. 24H",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "5M",
+                "10M",
+                "30M",
+                "1H",
+                "2H",
+                "6H",
+                "12H",
+                "24H",
+                "48H"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Average"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/currency/{base}/{target}/avg/chauvenet/{time}/{dmax}": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "average price data",
+        "description": "Returns average price over the given timespan for the given pair, using the given maximum allowable deviation. Statistical outliers are removed using the [Chauvenet criterion](https://en.wikipedia.org/wiki/Chauvenet%27s_criterion)",
+        "operationId": "currencyBaseTargetAvgChauvenetTimeDmaxGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          },
+          {
+            "name": "time",
+            "in": "path",
+            "description": "timespan used to calculate average, e.g. 24H",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "5M",
+                "10M",
+                "30M",
+                "1H",
+                "2H",
+                "6H",
+                "12H",
+                "24H",
+                "48H"
+              ]
+            }
+          },
+          {
+            "name": "dmax",
+            "in": "path",
+            "description": "maximum allowable deviation, e.g. 2",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Average"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/currency/{base}/{target}/avg/iqd": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "average price data",
+        "description": "Returns average price over the past hour for the given pair. Statistical outliers are removed using the [Median and Interquartile Deviation Method](http://www.mathwords.com/o/outlier.htm)",
+        "operationId": "currencyBaseTargetAvgIqdGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Average"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/currency/{base}/{target}/avg/iqd/{time}": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "average price data",
+        "description": "Returns average price over the given timespan for the given pair. Statistical outliers are removed using the [Median and Interquartile Deviation Method](http://www.mathwords.com/o/outlier.htm)",
+        "operationId": "currencyBaseTargetAvgIqdTimeGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          },
+          {
+            "name": "time",
+            "in": "path",
+            "description": "timespan used to calculate average, e.g. 24H",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "5M",
+                "10M",
+                "30M",
+                "1H",
+                "2H",
+                "6H",
+                "12H",
+                "24H",
+                "48H"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Average"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/currency/{base}/{target}/avg/peirce": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "average price data",
+        "description": "Returns average price over the past hour for the given pair. Statistical outliers are removed using [Peirce's criterion](https://en.wikipedia.org/wiki/Peirce%27s_criterion)",
+        "operationId": "currencyBaseTargetAvgPeirceGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Average"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/currency/{base}/{target}/avg/peirce/{time}": {
+      "get": {
+        "tags": ["currency"],
+        "summary": "average price data",
+        "description": "Returns average price over the given timespan for the given pair. Statistical outliers are removed using [Peirce's criterion](https://en.wikipedia.org/wiki/Peirce%27s_criterion)",
+        "operationId": "currencyBaseTargetAvgPeirceTimeGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          },
+          {
+            "name": "time",
+            "in": "path",
+            "description": "timespan used to calculate average, e.g. 24H",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "5M",
+                "10M",
+                "30M",
+                "1H",
+                "2H",
+                "6H",
+                "12H",
+                "24H",
+                "48H"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Average"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Currency"
+      }
+    },
+    "/discrepancy/{base}/{target}": {
+      "get": {
+        "tags": ["discrepancy"],
+        "summary": "paginated discrepancy data",
+        "description": "Returns a paginated list of discrepancies and differences for prices submitted by oracles within a similar timespan, for the given currency pair",
+        "operationId": "discrepancyBaseTargetGET",
+        "parameters": [
+          {
+            "name": "base",
+            "in": "path",
+            "description": "base currency, e.g. BTC",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "BTC"
+            }
+          },
+          {
+            "name": "target",
+            "in": "path",
+            "description": "target currency, e.g. GBP",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string",
+              "example": "GBP"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          }
+        },
+        "x-swagger-router-controller": "Discrepancy"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Average": {
+        "required": [
+          "base",
+          "outlierMethod",
+          "pair",
+          "price",
+          "priceRaw",
+          "target",
+          "time"
+        ],
+        "type": "object",
+        "properties": {
+          "pair": {
+            "type": "string",
+            "description": "Pair name",
+            "example": "BTC/USD"
+          },
+          "base": {
+            "type": "string",
+            "description": "Base currency",
+            "example": "BTC"
+          },
+          "target": {
+            "type": "string",
+            "description": "Target currency",
+            "example": "USD"
+          },
+          "time": {
+            "type": "string",
+            "description": "Timespan for which average was calculated",
+            "example": "1H"
+          },
+          "outlierMethod": {
+            "type": "string",
+            "description": "Statistical method used to remove outliers",
+            "example": "iqd"
+          },
+          "price": {
+            "type": "string",
+            "description": "BigInt value, multiplied 10^18",
+            "example": "36593630000000000000000"
+          },
+          "priceRaw": {
+            "type": "number",
+            "description": "Actual price",
+            "example": 36593.63
+          },
+          "dMax": {
+            "type": "integer",
+            "description": "maximum allowable deviation used in Chauvenet criterion to remove outliers",
+            "example": 3
+          }
+        },
+        "example": {
+          "price": "36593630000000000000000",
+          "priceRaw": 36593.63,
+          "time": "1H",
+          "pair": "BTC/USD",
+          "dMax": 3,
+          "base": "BTC",
+          "target": "USD",
+          "outlierMethod": "iqd"
+        }
+      },
+      "Pair": {
+        "required": ["base", "name", "target"],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Pair name",
+            "example": "ETH/GBP"
+          },
+          "base": {
+            "type": "string",
+            "description": "Base currency",
+            "example": "ETH"
+          },
+          "target": {
+            "type": "string",
+            "description": "Target currency",
+            "example": "GBP"
+          }
+        },
+        "example": {
+          "name": "ETH/GBP",
+          "base": "ETH",
+          "target": "GBP"
+        }
+      },
+      "Exchange": {
+        "required": ["address", "exchange", "name", "tla"],
+        "type": "object",
+        "properties": {
+          "exchange": {
+            "type": "string",
+            "description": "Oracle name",
+            "example": "binance"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address of exchange oracle submitting to Finchains contract",
+            "example": 6.109858521629894e47
+          },
+          "tla": {
+            "type": "string",
+            "description": "Three letter abbreviation for exchange",
+            "example": "BNC"
+          },
+          "name": {
+            "type": "string",
+            "description": "Human readable name for exchange",
+            "example": "Binance"
+          }
+        },
+        "example": {
+          "address": 6.109858521629894e47,
+          "tla": "BNC",
+          "name": "Binance",
+          "exchange": "binance"
+        }
+      },
+      "Price": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "string",
+            "description": "BigInt value, multiplied 10^18",
+            "example": "36593630000000000000000"
+          },
+          "priceRaw": {
+            "type": "string",
+            "description": "Actual price",
+            "example": "36593.63"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Unix epoch of price submission by Oracle to Finchains",
+            "example": "1622547184"
+          },
+          "Pair.name": {
+            "type": "string",
+            "description": "pair name",
+            "example": "BTC/USD"
+          },
+          "Pair.base": {
+            "type": "string",
+            "description": "base currency name",
+            "example": "BTC"
+          },
+          "Pair.target": {
+            "type": "string",
+            "description": "target currency name",
+            "example": "USD"
+          },
+          "ExchangeOracle.exchange": {
+            "type": "string",
+            "description": "exchange oracle ID",
+            "example": "gdax"
+          },
+          "ExchangeOracle.address": {
+            "type": "string",
+            "description": "exchange oracle's wallet address on Finchains",
+            "example": 4.652862717010925e46
+          },
+          "TxHash.txHash": {
+            "type": "string",
+            "description": "Finchains Tx hash in which prices was submitted to Finchains",
+            "example": 1.6176161747220196e76
+          }
+        },
+        "example": {
+          "TxHash.txHash": 1.6176161747220196e76,
+          "ExchangeOracle.address": 4.652862717010925e46,
+          "ExchangeOracle.exchange": "gdax",
+          "Pair.base": "BTC",
+          "Pair.target": "USD",
+          "price": "36593630000000000000000",
+          "priceRaw": "36593.63",
+          "Pair.name": "BTC/USD",
+          "timestamp": "1622547184"
+        }
+      },
+      "Discrepancy": {
+        "type": "object",
+        "properties": {
+          "price1": {
+            "type": "string",
+            "description": "BigInt value of price for Oracle 1, multiplied 10^18",
+            "example": "36727350000000000000000"
+          },
+          "price2": {
+            "type": "string",
+            "description": "BigInt value of price for Oracle 2, multiplied 10^18",
+            "example": "36601480000000000000000"
+          },
+          "diff": {
+            "type": "string",
+            "description": "BigInt diff between price1 and price2, multiplied 10^18",
+            "example": "79180000000000000000"
+          },
+          "timestamp1": {
+            "type": "string",
+            "description": "Unix epoch of price submission by Oracle 1 to Finchains",
+            "example": "1622547542"
+          },
+          "timestamp2": {
+            "type": "string",
+            "description": "Unix epoch of price submission by Oracle 2 to Finchains",
+            "example": "1622547427"
+          },
+          "threshold": {
+            "type": "string",
+            "description": "BigInt value of threshold for which discrepancy event is emitted, multiplied 10^18",
+            "example": "62266358832000000000"
+          },
+          "Pair.name": {
+            "type": "string",
+            "description": "pair name",
+            "example": "BTC/USD"
+          },
+          "Pair.base": {
+            "type": "string",
+            "description": "base currency name",
+            "example": "BTC"
+          },
+          "Pair.target": {
+            "type": "string",
+            "description": "target currency name",
+            "example": "USD"
+          },
+          "ExchangeOracle1.exchange": {
+            "type": "string",
+            "description": "exchange oracle 1 ID",
+            "example": "gdax"
+          },
+          "ExchangeOracle1.address": {
+            "type": "string",
+            "description": "exchange oracle 1's wallet address on Finchains",
+            "example": 4.652862717010925e46
+          },
+          "ExchangeOracle2.exchange": {
+            "type": "string",
+            "description": "exchange oracle 2 ID",
+            "example": "coinsbit"
+          },
+          "ExchangeOracle2.address": {
+            "type": "string",
+            "description": "exchange oracle2 's wallet address on Finchains",
+            "example": 9.980253541490167e47
+          },
+          "TxHash.txHash": {
+            "type": "string",
+            "description": "Finchains Tx hash in which discrepancy was triggered",
+            "example": 1.6176161747220196e76
+          }
+        },
+        "example": {
+          "timestamp1": "1622547542",
+          "TxHash.txHash": 1.6176161747220196e76,
+          "Pair.base": "BTC",
+          "Pair.target": "USD",
+          "timestamp2": "1622547427",
+          "diff": "79180000000000000000",
+          "threshold": "62266358832000000000",
+          "ExchangeOracle1.exchange": "gdax",
+          "ExchangeOracle1.address": 4.652862717010925e46,
+          "Pair.name": "BTC/USD",
+          "ExchangeOracle2.exchange": "coinsbit",
+          "price1": "36727350000000000000000",
+          "ExchangeOracle2.address": 9.980253541490167e47,
+          "price2": "36601480000000000000000"
+        }
+      },
+      "inline_response_200": {
+        "type": "object",
+        "properties": {
+          "totalItems": {
+            "type": "integer",
+            "example": 1234
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 10
+          },
+          "currentPage": {
+            "type": "integer",
+            "example": 2
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Price"
+            }
+          }
+        },
+        "example": {
+          "totalItems": 1234,
+          "totalPages": 10,
+          "currentPage": 2,
+          "results": [
+            {
+              "TxHash.txHash": 1.6176161747220196e76,
+              "ExchangeOracle.address": 4.652862717010925e46,
+              "ExchangeOracle.exchange": "gdax",
+              "Pair.base": "BTC",
+              "Pair.target": "USD",
+              "price": "36593630000000000000000",
+              "priceRaw": "36593.63",
+              "Pair.name": "BTC/USD",
+              "timestamp": "1622547184"
+            },
+            {
+              "TxHash.txHash": 1.6176161747220196e76,
+              "ExchangeOracle.address": 4.652862717010925e46,
+              "ExchangeOracle.exchange": "gdax",
+              "Pair.base": "BTC",
+              "Pair.target": "USD",
+              "price": "36593630000000000000000",
+              "priceRaw": "36593.63",
+              "Pair.name": "BTC/USD",
+              "timestamp": "1622547184"
+            }
+          ]
+        }
+      },
+      "inline_response_200_1": {
+        "type": "object",
+        "properties": {
+          "totalItems": {
+            "type": "integer",
+            "example": 1234
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 10
+          },
+          "currentPage": {
+            "type": "integer",
+            "example": 2
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Discrepancy"
+            }
+          }
+        },
+        "example": {
+          "totalItems": 1234,
+          "totalPages": 10,
+          "currentPage": 2,
+          "results": [
+            {
+              "timestamp1": "1622547542",
+              "TxHash.txHash": 1.6176161747220196e76,
+              "Pair.base": "BTC",
+              "Pair.target": "USD",
+              "timestamp2": "1622547427",
+              "diff": "79180000000000000000",
+              "threshold": "62266358832000000000",
+              "ExchangeOracle1.exchange": "gdax",
+              "ExchangeOracle1.address": 4.652862717010925e46,
+              "Pair.name": "BTC/USD",
+              "ExchangeOracle2.exchange": "coinsbit",
+              "price1": "36727350000000000000000",
+              "ExchangeOracle2.address": 9.980253541490167e47,
+              "price2": "36601480000000000000000"
+            },
+            {
+              "timestamp1": "1622547542",
+              "TxHash.txHash": 1.6176161747220196e76,
+              "Pair.base": "BTC",
+              "Pair.target": "USD",
+              "timestamp2": "1622547427",
+              "diff": "79180000000000000000",
+              "threshold": "62266358832000000000",
+              "ExchangeOracle1.exchange": "gdax",
+              "ExchangeOracle1.address": 4.652862717010925e46,
+              "Pair.name": "BTC/USD",
+              "ExchangeOracle2.exchange": "coinsbit",
+              "price1": "36727350000000000000000",
+              "ExchangeOracle2.address": 9.980253541490167e47,
+              "price2": "36601480000000000000000"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
