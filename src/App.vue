@@ -1,18 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar app color="dark" dark>
-      <div class="d-flex align-center">
-        <h1>
-          A I T
-        </h1>
-      </div>
-      <v-spacer></v-spacer>
-      <!-- <v-btn icon color="primary" @click="infoDialog = true">
-        <v-icon>
-          mdi-information-outline
-        </v-icon>
-      </v-btn> -->
-    </v-app-bar>
+  
 
     <v-main>
       <router-view />

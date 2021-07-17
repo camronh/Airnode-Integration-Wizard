@@ -1,5 +1,18 @@
 <template>
   <v-container>
+    <v-app-bar app color="dark" dark>
+      <div class="d-flex align-center">
+        <h1>
+          A I T
+        </h1>
+      </div>
+      <v-spacer></v-spacer>
+      <!-- <v-btn icon color="primary" @click="infoDialog = true">
+        <v-icon>
+          mdi-information-outline
+        </v-icon>
+      </v-btn> -->
+    </v-app-bar>
     <br />
 
     <v-row align="center" justify="center">
@@ -14,12 +27,13 @@
                 mdi-import
               </v-icon>
             </v-btn>
-            <v-btn
+            <!-- <v-btn
               @click="exportConfig"
               text
               color="primary"
               :disabled="!valid || !endpoints.length || missingReservedParam"
-            >
+            > -->
+            <v-btn @click="exportConfig" text color="primary">
               Export
               <v-icon right>
                 mdi-export
@@ -414,20 +428,13 @@
             :options="options"
           >
           </v-jsoneditor>
-
-          <!-- <v-textarea
-            v-model="exportStr"
-            :error="importError"
-            rows="20"
-            :color="editingConfig ? 'primary' : 'grey'"
-            append-icon="mdi-pencil"
-            @click:append="editingConfig = !editingConfig"
-            :readonly="!editingConfig"
-            autofocus
-          >
-          </v-textarea> -->
         </v-card-text>
-        <v-card-actions>
+
+        <v-btn block @click="downloading = true" text>
+          Download
+        </v-btn>
+
+        <!-- <v-card-actions>
           <v-row>
             <v-col cols="12" md="4">
               <v-btn
@@ -487,7 +494,34 @@
               </v-btn>
             </v-col>
           </v-row>
-        </v-card-actions>
+        </v-card-actions> -->
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="downloading" max-width="400px">
+      <v-card>
+        <v-card-title>
+          Download Options
+        </v-card-title>
+        <v-card-text>
+          <v-row align="center" justify="center">
+            <v-col cols="12" md="4">
+              <v-checkbox label="OAS"></v-checkbox>
+              <v-checkbox label="OIS"></v-checkbox>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-checkbox label="Readme.md"></v-checkbox>
+              <v-checkbox label="Deployment Pkg"></v-checkbox>
+            </v-col>
+          </v-row>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text block>
+              <v-icon color="primary">
+                mdi-download
+              </v-icon>
+            </v-btn>
+          </v-card-actions>
+        </v-card-text>
       </v-card>
     </v-dialog>
   </v-container>
@@ -520,7 +554,15 @@ export default {
       importType: "OAS",
       exporting: false,
       importing: false,
+      downloading: false,
       editing: false,
+      downloadOptions: {
+        oas: false,
+        ois: false,
+        config: false,
+        readme: false,
+        deployment: false,
+      },
       exportJson: {},
       editingConfig: false,
       endpointMenu: false,
