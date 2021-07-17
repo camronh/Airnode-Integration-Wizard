@@ -92,7 +92,7 @@
               </v-col>
             </v-row>
             <v-row align="center" justify="center">
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="3">
                 <v-text-field
                   :disabled="!hasAuth"
                   v-model="auth.name"
@@ -102,7 +102,7 @@
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="5">
+              <v-col cols="12" md="6">
                 <v-text-field
                   :disabled="!hasAuth"
                   v-model="auth.value"
@@ -158,6 +158,7 @@
       v-model="endpointMenu"
       max-width="60%"
       :overlay-opacity="75"
+      persistent
       overlay-color="black"
     >
       <v-card>
@@ -166,16 +167,10 @@
           <v-spacer></v-spacer>
           <v-spacer></v-spacer>
 
-          <v-btn
-            @click="saveEndpoint"
-            :disabled="!validEndpoint"
-            text
-            color="primary"
-          >
-            Save
-          </v-btn>
-          <v-btn @click="endpointMenu = false" text color="red">
-            Close
+          <v-btn @click="endpointMenu = false" icon>
+            <v-icon>
+              mdi-close
+            </v-icon>
           </v-btn>
         </v-card-title>
         <v-card-text>
@@ -232,7 +227,9 @@
                             icon
                             @click="addParam"
                             color="primary"
-                            :disabled="!param.name"
+                            :disabled="
+                              !param.name || (param.fixed && !param.value)
+                            "
                             v-bind="attrs"
                             v-on="on"
                           >
@@ -244,25 +241,25 @@
                         <span>Add Param</span>
                       </v-tooltip>
                     </v-col>
+                    <v-col cols="12" md="3">
+                      <v-checkbox label="Fixed" v-model="param.fixed">
+                      </v-checkbox>
+                    </v-col>
+                    <v-col cols="12" md="9">
+                      <v-text-field
+                        label="Value"
+                        :disabled="!param.fixed"
+                        v-model="param.value"
+                        @keypress.enter="addParam"
+                      >
+                      </v-text-field>
+                    </v-col>
                   </v-row>
-                </v-card-text>
-                <v-card-text>
-                  <template v-if="ep.params.length">
-                    <v-chip
-                      v-for="(param, i) of ep.params"
-                      :key="param.name"
-                      close
-                      label
-                      class="ma-1"
-                      outlined
-                      @click:close="deleteParam(i)"
-                    >
-                      {{ param.name }} - {{ param.in }}
-                    </v-chip>
-                  </template>
-                  <p v-else>
-                    No params...
-                  </p>
+                  <!-- <v-row>
+                    <v-col cols="12" md="12">
+                      <v-checkbox label="Fixed"> </v-checkbox>
+                    </v-col>
+                  </v-row> -->
                 </v-card-text>
               </v-card>
             </v-col>
@@ -292,7 +289,7 @@
                         <template v-slot:activator="{ on, attrs }">
                           <v-checkbox
                             v-model="rp.times"
-                            label="Add __times"
+                            label="_times"
                             :disabled="rp.type != 'int256'"
                             v-bind="attrs"
                             v-on="on"
@@ -302,8 +299,6 @@
                         <span>Add Param</span>
                       </v-tooltip>
                     </v-col>
-                  </v-row>
-                  <v-row>
                     <v-col cols="12" md="12">
                       <v-text-field
                         label="__path"
@@ -315,11 +310,43 @@
                       </v-text-field>
                     </v-col>
                   </v-row>
+                  <v-row> </v-row>
                 </v-card-text>
               </v-card>
             </v-col>
           </v-row>
         </v-card-text>
+        <v-card-text>
+          <template v-if="ep.params.length">
+            <v-chip
+              v-for="(p, i) of ep.params"
+              :key="p.name"
+              close
+              label
+              :color="p.fixed ? 'accent' : ''"
+              class="ma-1"
+              outlined
+              @click="editParam(p, i)"
+              @click:close="deleteParam(i)"
+            >
+              {{ p.name }} - {{ p.in }}
+            </v-chip>
+          </template>
+          <p v-else>
+            No params...
+          </p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            @click="saveEndpoint"
+            :disabled="!validEndpoint"
+            text
+            color="primary"
+          >
+            Save
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
     <v-dialog v-model="importing" max-width="50%">
@@ -327,7 +354,13 @@
         <v-card-title>
           Import {{ importType }}
           <v-spacer></v-spacer>
-          <v-btn-toggle v-model="importType" tile color="primary" group>
+          <v-btn-toggle
+            v-model="importType"
+            tile
+            color="primary"
+            group
+            @change="parseImport"
+          >
             <v-btn value="OAS">
               OAS / Swagger
             </v-btn>
@@ -341,6 +374,7 @@
             v-model="importString"
             rows="20"
             autofocus
+            @input="parseImport"
             no-resize
             :error="importError"
           >
@@ -363,7 +397,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="exporting" max-width="50%">
+    <v-dialog v-model="exporting" max-width="50%" :overlay-opacity="75">
       <v-card>
         <v-card-title>
           Export
@@ -517,6 +551,8 @@ export default {
       param: {
         name: "",
         in: "query",
+        fixed: false,
+        value: "",
       },
       required: [v => !!v || "Required"],
       serverRules: [
@@ -526,16 +562,10 @@ export default {
     };
   },
   watch: {
-    importString() {
-      console.log("Changed");
-      this.importError = false;
-      this.parseImport();
-    },
     exportJson() {
       console.log("Changed");
       this.exportStr = JSON.stringify(this.exportJson, null, 2);
       this.importString = this.exportStr;
-      this.importError = false;
       this.parseImport();
     },
   },
@@ -557,9 +587,9 @@ export default {
       this.endpointMenu = false;
     },
     addParam() {
-      if (!this.param.name) return;
+      if (!this.param.name || (this.param.fixed && !this.param.value)) return;
       this.ep.params.push(this.param);
-      this.param = { name: "", in: "query" };
+      this.param = { name: "", in: "query", fixed: false, value: "" };
       // sort this.ep.params by name
       this.ep.params.sort((a, b) => {
         if (a.name < b.name) return -1;
@@ -567,6 +597,12 @@ export default {
         return 0;
       });
     },
+    editParam(param, index) {
+      if (this.param.name || this.param.value) return;
+      this.param = param;
+      this.ep.params.splice(index, 1);
+    },
+
     downloadReadme() {
       const text = utils.makeReadme(JSON.parse(this.exportStr));
       let filename = `${this.title}-Readme.md`;
@@ -663,6 +699,7 @@ export default {
     },
 
     parseImport() {
+      this.importError = false;
       let apiValue;
       if (this.auth.value) apiValue = this.auth.value;
       try {
