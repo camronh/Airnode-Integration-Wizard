@@ -74,7 +74,7 @@ function parseOAS(oas) {
     version: oas.info.version,
     server: oas.servers[0].url,
   };
-  if (oas.components.securitySchemes) {
+  if (oas.components && oas.components.securitySchemes) {
     const securitySchemes = Object.keys(oas.components.securitySchemes);
     if (securitySchemes.length > 0) {
       state.hasAuth = true;
@@ -84,7 +84,7 @@ function parseOAS(oas) {
         name: oas.components.securitySchemes[securitySchemes[0]].name,
       };
     }
-  }
+  } else state.hasAuth = false;
 
   const paths = Object.keys(oas.paths);
   console.log({ paths });

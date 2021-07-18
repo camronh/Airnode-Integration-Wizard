@@ -430,7 +430,7 @@
           </v-jsoneditor>
         </v-card-text>
 
-        <v-btn block @click="downloading = true" text>
+        <v-btn block @click="downloading = true" text color="primary">
           Download
         </v-btn>
 
