@@ -3,7 +3,7 @@
     <v-app-bar app color="dark" dark>
       <div class="d-flex align-center">
         <h1>
-          A I T
+          A I W
         </h1>
       </div>
       <v-spacer></v-spacer>
@@ -223,6 +223,7 @@
                         label="Param Name"
                         placeholder="ex. currency"
                         @keypress.enter="addParam"
+                        ref="paramName"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" md="3">
@@ -650,6 +651,7 @@ export default {
         if (a.name > b.name) return 1;
         return 0;
       });
+      this.$refs.paramName.focus();
     },
     editParam(param, index) {
       if (this.param.name || this.param.value) return;
