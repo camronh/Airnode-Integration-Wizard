@@ -97,7 +97,7 @@ function parseOAS(oas) {
         method,
         params: [],
         reservedParam: {
-          type: "",
+          type: "int256",
           path: "",
           times: false,
         },
