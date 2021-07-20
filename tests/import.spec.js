@@ -1,7 +1,5 @@
 const { test, expect } = require("@playwright/test");
 
-
-
 test("Import OAS / Swagger", async ({ page }) => {
   await page.goto("http://localhost:8080/");
   await page.click("text=Import");
@@ -12,6 +10,8 @@ test("Import OAS / Swagger", async ({ page }) => {
   );
   const value = await page.$eval("#input-14", el => el.value);
   expect(value).toContain("Finchains");
+  await page.click("text=pairs");
+  expect(await page.isVisible("text=int256")).toBeTruthy();
 });
 
 test("Import Config", async ({ page }) => {
