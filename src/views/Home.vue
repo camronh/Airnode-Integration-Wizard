@@ -131,9 +131,27 @@
               <v-col cols="12" md="11">
                 <v-card-title>
                   Endpoints
+                  <v-spacer></v-spacer>
+                  <v-menu bottom left>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn icon v-bind="attrs" v-on="on">
+                        <v-icon>mdi-dots-vertical</v-icon>
+                      </v-btn>
+                    </template>
+
+                    <v-list>
+                      <v-list-item-group>
+                        <v-list-item>
+                          <v-list-item-title @click="selectingEndpoint = true"
+                            >Clone Endpoint</v-list-item-title
+                          >
+                        </v-list-item>
+                      </v-list-item-group>
+                    </v-list>
+                  </v-menu>
                 </v-card-title>
                 <v-card-text>
-                  <template>
+                  <template v-if="!selectingEndpoint">
                     <v-chip
                       v-for="(endpoint, i) of endpoints"
                       :key="i"
@@ -157,6 +175,16 @@
                       <v-icon left>mdi-plus</v-icon>
                       Add Endpoint
                     </v-chip>
+                  </template>
+                  <template v-else>
+                    <v-btn
+                      v-for="(endpoint, i) of endpoints"
+                      :key="i"
+                      class="ma-1"
+                      @click="cloneEndpoint(endpoint)"
+                    >
+                      {{ endpoint.path }} - {{ endpoint.method }}
+                    </v-btn>
                   </template>
                   <br />
                 </v-card-text>
@@ -573,6 +601,7 @@ export default {
       importType: "OAS",
       exporting: false,
       importing: false,
+      selectingEndpoint: false,
       downloading: false,
       editing: false,
       downloadOptions: ["OAS", "OIS", "Readme", "Deployment"],
@@ -749,6 +778,13 @@ export default {
       this.rp = this.ep.reservedParam;
       this.editing = false;
       this.endpointMenu = true;
+    },
+    cloneEndpoint(endpoint) {
+      this.ep = { ...endpoint };
+      this.rp = this.ep.reservedParam;
+      this.editing = false;
+      this.endpointMenu = true;
+      this.selectingEndpoint = false;
     },
     exportConfig() {
       this.oas = utils.makeOAS(this);
