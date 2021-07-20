@@ -134,7 +134,13 @@
                   <v-spacer></v-spacer>
                   <v-menu bottom left>
                     <template v-slot:activator="{ on, attrs }">
-                      <v-btn icon v-bind="attrs" v-on="on">
+                      <v-btn
+                        icon
+                        :disabled="!endpoints.length"
+                        v-bind="attrs"
+                        v-on="on"
+                        id="endpointMenuButton"
+                      >
                         <v-icon>mdi-dots-vertical</v-icon>
                       </v-btn>
                     </template>
@@ -142,7 +148,9 @@
                     <v-list>
                       <v-list-item-group>
                         <v-list-item>
-                          <v-list-item-title @click="selectingEndpoint = true"
+                          <v-list-item-title
+                            @click="selectingEndpoint = true"
+                            id="cloneEndpoint"
                             >Clone Endpoint</v-list-item-title
                           >
                         </v-list-item>
