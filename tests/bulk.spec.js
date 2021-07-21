@@ -27,9 +27,11 @@ test.describe("Bulk", () => {
   test("Bulk Delete Param works", async ({ page }) => {
     await page.click("text=pairs - query");
     await page.click("text=Del Param");
-    await page.click("text=Confirm");
-    expect(
+    await page.click("text='Delete'");
+    asexpect(
       await page.waitForSelector("text=pair - query", { timeout: 1000 })
     ).toBeFalsy();
   });
+
+  
 });

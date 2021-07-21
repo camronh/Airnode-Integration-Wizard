@@ -607,7 +607,7 @@
               </v-btn>
             </v-col>
             <v-col cols="12" md="4">
-              <v-btn block text>
+              <v-btn block text @click="confirmDelete = true">
                 Del Param
               </v-btn>
             </v-col>
@@ -688,6 +688,25 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="confirmDelete" max-width="30%">
+      <v-card>
+        <v-card-title>
+          Delete Param from {{ selectedEndpoints.length }} Endpoints
+        </v-card-title>
+
+        <v-card-actions>
+          <v-row justify="center" align="center">
+            <v-btn text color="red" @click="bulkDeleteParam">
+              Delete
+            </v-btn>
+
+            <v-btn text color="primary" @click="confirmDelete = false">
+              Cancel
+            </v-btn>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="downloading" max-width="400px">
       <v-card>
         <v-card-title>
@@ -765,6 +784,7 @@ export default {
       exporting: false,
       importing: false,
       selectingEndpoint: false,
+      confirmDelete: false,
       selectedParam: null,
       downloading: false,
       editing: false,
@@ -943,6 +963,28 @@ export default {
         this.endpoints[i].params.push(this.param);
       }
       this.bulkAddParamMenu = false;
+    },
+    bulkDeleteParam() {
+      let endpoints = [];
+      const paramToDel = this.selectedEndpointParams[this.selectedParam];
+      console.log({ paramToDel });
+      for (let index = 0; index < this.endpoints.length; index++) {
+        if (!this.selectedEndpoints.includes(index)) {
+          endpoints.push(this.endpoints[index]);
+          continue;
+        }
+        const endpoint = this.endpoints[index];
+        // delete paramToDel from endpoint.params
+        const indexOfParam = endpoint.params.findIndex(
+          v => v.name === paramToDel.name
+        );
+        if (indexOfParam > -1) {
+          endpoint.params.splice(indexOfParam, 1);
+        }
+        endpoints.push(endpoint);
+      }
+      this.endpoints = endpoints;
+      this.confirmDelete = false;
     },
 
     deleteEndpoint(i) {
