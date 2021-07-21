@@ -235,6 +235,7 @@
               <v-text-field
                 v-model="ep.path"
                 label="Path"
+                id="path"
                 placeholder="/endpoint/{pathParam}"
                 required
               ></v-text-field>
@@ -361,6 +362,7 @@
                         label="__path"
                         :autofocus="!rp.path"
                         v-model="rp.path"
+                        id="_path"
                         :error="!rp.path"
                         placeholder="data.prices.0.ask"
                       >
@@ -445,6 +447,7 @@
             :disabled="importError"
             text
             color="primary"
+            type="submit"
             block
           >
             Import
