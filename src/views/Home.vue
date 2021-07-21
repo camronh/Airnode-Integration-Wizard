@@ -674,7 +674,13 @@ export default {
   methods: {
     saveEndpoint() {
       this.ep.reservedParam = this.rp;
-      if (!this.editing) this.endpoints.push(this.ep);
+      // if endpoint.path exists in endpoints get index
+      const duplicateIndex = this.endpoints.findIndex(
+        v => v.path === this.ep.path
+      );
+      console.log({ duplicateIndex });
+      if (duplicateIndex > -1) this.endpoints[duplicateIndex] = this.ep;
+      else if (!this.editing) this.endpoints.push(this.ep);
       else this.endpoints[this.editIndex] = this.ep;
       this.ep = {
         path: "",

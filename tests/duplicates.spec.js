@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-test("Export works", async ({ page }) => {
+test("Overwrite on duplicate", async ({ page }) => {
   await page.goto("http://localhost:8080/");
   await page.click("text=Import");
   await page.click("text=Config");
@@ -11,12 +11,13 @@ test("Export works", async ({ page }) => {
   );
   await page.click("[type='submit']");
   await page.click("text=Add Endpoint");
-  await page.type("#path", "/quote");
+  await page.type("#path", "/quotes");
   await page.type("#_path", "testPath");
 
   await page.click("text=Save");
-  const quoteEndpoints = await page.$$("text=/quote");
+//   await page.waitForTimeout(999999);
+  const quoteEndpoints = await page.$$("text=/quotes");
   expect(quoteEndpoints.length).toBe(1);
-  await page.click("text=/quote");
+  await page.click("text=/quotes");
   expect(await page.$eval("#_path", el => el.value)).toBe("testPath");
 });
