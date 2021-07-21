@@ -132,7 +132,7 @@
                 <v-card-title>
                   Endpoints
                   <v-spacer></v-spacer>
-                  <v-menu bottom left>
+                  <v-menu bottom left v-if="!selectingEndpoint">
                     <template v-slot:activator="{ on, attrs }">
                       <v-btn
                         icon
@@ -141,7 +141,9 @@
                         v-on="on"
                         id="endpointMenuButton"
                       >
-                        <v-icon>mdi-dots-vertical</v-icon>
+                        <v-icon>
+                          mdi-dots-vertical
+                        </v-icon>
                       </v-btn>
                     </template>
 
@@ -157,6 +159,11 @@
                       </v-list-item-group>
                     </v-list>
                   </v-menu>
+                  <v-btn icon v-else @click="selectingEndpoint = false">
+                    <v-icon>
+                      mdi-close
+                    </v-icon>
+                  </v-btn>
                 </v-card-title>
                 <v-card-text>
                   <template v-if="!selectingEndpoint">
