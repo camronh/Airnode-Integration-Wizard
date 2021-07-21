@@ -235,6 +235,7 @@
               <v-text-field
                 v-model="ep.path"
                 label="Path"
+                id="path"
                 placeholder="/endpoint/{pathParam}"
                 required
               ></v-text-field>
@@ -361,6 +362,7 @@
                         label="__path"
                         :autofocus="!rp.path"
                         v-model="rp.path"
+                        id="_path"
                         :error="!rp.path"
                         placeholder="data.prices.0.ask"
                       >
@@ -445,6 +447,7 @@
             :disabled="importError"
             text
             color="primary"
+            type="submit"
             block
           >
             Import
@@ -671,7 +674,13 @@ export default {
   methods: {
     saveEndpoint() {
       this.ep.reservedParam = this.rp;
-      if (!this.editing) this.endpoints.push(this.ep);
+      // if endpoint.path exists in endpoints get index
+      const duplicateIndex = this.endpoints.findIndex(
+        v => v.path === this.ep.path
+      );
+      console.log({ duplicateIndex });
+      if (duplicateIndex > -1) this.endpoints[duplicateIndex] = this.ep;
+      else if (!this.editing) this.endpoints.push(this.ep);
       else this.endpoints[this.editIndex] = this.ep;
       this.ep = {
         path: "",
