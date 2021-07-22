@@ -96,11 +96,6 @@ function parseOAS(oas) {
         path,
         method,
         params: [],
-        reservedParam: {
-          type: "int256",
-          path: "",
-          times: false,
-        },
       };
       if (oas.paths[path][method].parameters) {
         for (let param of oas.paths[path][method].parameters) {
@@ -218,11 +213,12 @@ function makeConfig(state) {
       reservedParameters: [
         {
           name: "_type",
-          fixed: endpoint.reservedParam.type,
         },
         {
           name: "_path",
-          fixed: endpoint.reservedParam.path,
+        },
+        {
+          name: "_times",
         },
       ],
       fixedOperationParameters: [],
@@ -246,12 +242,6 @@ function makeConfig(state) {
           },
         });
       }
-    }
-    if (endpoint.reservedParam.times) {
-      ep.reservedParameters.push({
-        name: "_times",
-        fixed: "100000000000000000",
-      });
     }
     return ep;
   });
@@ -298,17 +288,6 @@ function parseConfig(config) {
       path: endpoint.name,
       method: endpoint.operation.method,
       params: [],
-      //   params: endpoint.parameters.map(param => {
-      //     return {
-      //       name: param.operationParameter.name,
-      //       in: param.operationParameter.in,
-      //     };
-      //   }),
-      reservedParam: {
-        type: endpoint.reservedParameters[0].fixed,
-        path: endpoint.reservedParameters[1].fixed,
-        times: endpoint.reservedParameters[2] ? true : false,
-      },
     };
     for (let param of endpoint.parameters) {
       ep.params.push({
@@ -334,7 +313,6 @@ function parseConfig(config) {
   console.log({ state });
   return state;
 }
-
 
 // Download Zip
 async function makeZip(state) {
@@ -402,7 +380,6 @@ function makeReadme(config) {
     return {
       endpointName: endpoint.endpointName,
       endpointId: endpoint.endpointId,
-      reservedParameters: correctParams.reservedParameters,
       parameters: correctParams.parameters.map(p => p.name),
     };
   });
@@ -415,25 +392,11 @@ __URL:__ ${config.ois[0].apiSpecifications.servers[0].url}
 
 __ProviderID:__ *****\n\n`;
 
-  function makeReturnsStr(params) {
-    let param = Object.assign(
-      {},
-      ...params.map(p => {
-        return { [p.name]: p.fixed };
-      })
-    );
-    let returnsStr = `${param._path}`;
-    if (param._times) returnsStr += ` x ${param._times}`;
-    return returnsStr;
-  }
-
   for (let endpoint of endpoints) {
     configStr += `\n## ${endpoint.endpointName}
 __EndpointId:__ ${endpoint.endpointId}
 
-__Params:__ {${endpoint.parameters.join("} | {")}}
-
-__Returns:__ ${makeReturnsStr(endpoint.reservedParameters)}\n`;
+__Params:__ {${endpoint.parameters.join("} | {")}}\n`;
   }
   return configStr;
 }
