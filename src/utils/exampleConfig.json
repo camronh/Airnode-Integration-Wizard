@@ -109,16 +109,13 @@
           },
           "reservedParameters": [
             {
-              "name": "_type",
-              "fixed": "int256"
+              "name": "_type"
             },
             {
-              "name": "_path",
-              "fixed": "0.p"
+              "name": "_path"
             },
             {
-              "name": "_times",
-              "fixed": "100000000000000000"
+              "name": "_times"
             }
           ],
           "fixedOperationParameters": [],
@@ -140,12 +137,10 @@
           },
           "reservedParameters": [
             {
-              "name": "_type",
-              "fixed": "int256"
+              "name": "_type"
             },
             {
-              "name": "_path",
-              "fixed": "value"
+              "name": "_path"
             }
           ],
           "fixedOperationParameters": [],
@@ -181,12 +176,10 @@
           },
           "reservedParameters": [
             {
-              "name": "_type",
-              "fixed": "bool"
+              "name": "_type"
             },
             {
-              "name": "_path",
-              "fixed": "market_is_open"
+              "name": "_path"
             }
           ],
           "fixedOperationParameters": [],

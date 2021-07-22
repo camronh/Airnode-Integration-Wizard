@@ -9,7 +9,6 @@ test("Clone endpoint works", async ({ page }) => {
   expect(await page.isDisabled("#endpointMenuButton")).toBe(true);
   await page.click("text=Add Endpoint");
   await page.type("#path", "/TestPath");
-  await page.type("#_path", "test.path");
   await page.click("text=Save");
   expect(await page.isDisabled("#endpointMenuButton")).toBe(false);
 
