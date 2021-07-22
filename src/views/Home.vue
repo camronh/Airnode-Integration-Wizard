@@ -31,7 +31,7 @@
               @click="exportConfig"
               text
               color="primary"
-              :disabled="!valid || !endpoints.length || missingReservedParam"
+              :disabled="!valid || !endpoints.length"
             >
               Export
               <v-icon right>
@@ -172,7 +172,6 @@
                       close
                       class="ma-1"
                       outlined
-                      :color="endpoint.reservedParam.path ? '' : 'red'"
                       label
                       @click="editEndpoint(i)"
                       @click:close="deleteEndpoint(i)"
@@ -252,7 +251,7 @@
         <br />
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="12">
               <v-card height="100%" flat>
                 <v-card-title>
                   Params
@@ -264,6 +263,7 @@
                       <v-text-field
                         v-model="param.name"
                         label="Param Name"
+                        id="paramName"
                         placeholder="ex. currency"
                         @keypress.enter="addParam"
                         ref="paramName"
@@ -320,16 +320,24 @@
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="12" md="6">
+            <!-- <v-col cols="12" md="6">
               <v-card flat height="100%">
                 <v-card-title>
                   Reserved Params
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
                 </v-card-title>
+                <v-card-text>
+                  <v-row align="center">
+                    <v-checkbox
+                      v-model="enabled"
+                      hide-details
+                      class="shrink mr-2 mt-0"
+                    ></v-checkbox>
+                    <v-text-field
+                      :disabled="!enabled"
+                      label="I only work if you check the box"
+                    ></v-text-field>
+                  </v-row>
+                </v-card-text>
                 <v-card-text>
                   <v-row>
                     <v-col cols="12" md="5">
@@ -368,10 +376,9 @@
                       </v-text-field>
                     </v-col>
                   </v-row>
-                  <v-row> </v-row>
                 </v-card-text>
               </v-card>
-            </v-col>
+            </v-col> -->
           </v-row>
         </v-card-text>
         <v-card-text>
@@ -576,11 +583,11 @@ export default {
         path: "",
         method: "get",
         params: [],
-        reservedParam: {
-          type: "int256",
-          path: "",
-          times: false,
-        },
+        // reservedParam: {
+        //   type: "int256",
+        //   path: "",
+        //   times: false,
+        // },
       },
       rp: {
         type: "int256",
@@ -610,7 +617,7 @@ export default {
   },
   methods: {
     saveEndpoint() {
-      this.ep.reservedParam = this.rp;
+      // this.ep.reservedParam = this.rp;
       // if endpoint.path exists in endpoints get index
       const duplicateIndex = this.endpoints.findIndex(
         v => v.path === this.ep.path
@@ -623,11 +630,11 @@ export default {
         path: "",
         method: "get",
         params: [],
-        reservedParam: {
-          type: "int256",
-          path: "",
-          times: false,
-        },
+        // reservedParam: {
+        //   type: "int256",
+        //   path: "",
+        //   times: false,
+        // },
       };
       this.endpointMenu = false;
     },
@@ -659,15 +666,15 @@ export default {
     editEndpoint(i) {
       this.ep = this.endpoints[i];
       this.editIndex = i;
-      if (!this.ep.reservedParam) {
-        console.log("No reserved param");
-        console.log(this.ep);
-        this.rp = {
-          type: "int256",
-          path: "",
-          times: false,
-        };
-      } else this.rp = this.ep.reservedParam;
+      // if (!this.ep.reservedParam) {
+      //   console.log("No reserved param");
+      //   console.log(this.ep);
+      //   this.rp = {
+      //     type: "int256",
+      //     path: "",
+      //     times: false,
+      //   };
+      // } else this.rp = this.ep.reservedParam;
       this.editing = true;
       this.endpointMenu = true;
     },
@@ -676,11 +683,11 @@ export default {
         path: "",
         method: "get",
         params: [],
-        reservedParam: {
-          type: "int256",
-          path: "",
-          times: false,
-        },
+        // reservedParam: {
+        //   type: "int256",
+        //   path: "",
+        //   times: false,
+        // },
       };
     },
 
@@ -692,19 +699,19 @@ export default {
         path: "",
         method: "get",
         params: [],
-        reservedParam: {
-          type: "int256",
-          path: "",
-          times: false,
-        },
+        // reservedParam: {
+        //   type: "int256",
+        //   path: "",
+        //   times: false,
+        // },
       };
-      this.rp = this.ep.reservedParam;
+      // this.rp = this.ep.reservedParam;
       this.editing = false;
       this.endpointMenu = true;
     },
     cloneEndpoint(endpoint) {
       this.ep = { ...endpoint };
-      this.rp = this.ep.reservedParam;
+      // this.rp = this.ep.reservedParam;
       this.editing = false;
       this.endpointMenu = true;
       this.selectingEndpoint = false;
@@ -745,23 +752,12 @@ export default {
 
   computed: {
     validEndpoint() {
-      if (this.ep.path && this.rp.path) return true;
+      if (this.ep.path) return true;
       else return false;
     },
     endpointPath() {
       console.log(this.ep);
       return this.ep.path;
-    },
-
-    missingReservedParam() {
-      let missing = false;
-      for (let i = 0; i < this.endpoints.length; i++) {
-        if (!this.endpoints[i].reservedParam.path) {
-          missing = true;
-          break;
-        }
-      }
-      return missing;
     },
   },
 };
