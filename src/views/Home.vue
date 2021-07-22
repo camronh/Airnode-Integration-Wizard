@@ -120,8 +120,7 @@
                   :disabled="!hasAuth"
                   v-model="auth.value"
                   label="Value"
-                  placeholder="xxxxxxxxxapi_keyxxxxxxx"
-                  :rules="hasAuth ? required : false"
+                  placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
                   required
                 ></v-text-field>
               </v-col>
@@ -480,68 +479,6 @@
         <v-btn block @click="downloading = true" text color="primary">
           Download
         </v-btn>
-
-        <!-- <v-card-actions>
-          <v-row>
-            <v-col cols="12" md="4">
-              <v-btn
-                @click="downloadOAS"
-                text
-                color="primary"
-                block
-                :disabled="
-                  importError ||
-                    !valid ||
-                    !endpoints.length ||
-                    missingReservedParam
-                "
-              >
-                OAS / Swagger
-                <v-icon right>
-                  mdi-download
-                </v-icon>
-              </v-btn>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-btn
-                @click="downloadDeployment"
-                text
-                color="primary"
-                block
-                :disabled="
-                  importError ||
-                    !valid ||
-                    !endpoints.length ||
-                    missingReservedParam
-                "
-              >
-                Deployment Package
-                <v-icon right>
-                  mdi-download
-                </v-icon>
-              </v-btn>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-btn
-                @click="downloadReadme"
-                text
-                color="primary"
-                block
-                :disabled="
-                  importError ||
-                    !valid ||
-                    !endpoints.length ||
-                    missingReservedParam
-                "
-              >
-                Readme.md
-                <v-icon right>
-                  mdi-download
-                </v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-card-actions> -->
       </v-card>
     </v-dialog>
     <v-dialog v-model="downloading" max-width="400px">
@@ -712,45 +649,7 @@ export default {
       this.ep.params.splice(index, 1);
     },
 
-    downloadReadme() {
-      const text = utils.makeReadme(JSON.parse(this.exportStr));
-      let filename = `${this.title}-Readme.md`;
-      let element = document.createElement("a");
-      element.setAttribute(
-        "href",
-        "data:application/json;charset=utf-8," + encodeURIComponent(text)
-      );
-      element.setAttribute("download", filename);
-
-      element.style.display = "none";
-      document.body.appendChild(element);
-
-      element.click();
-      document.body.removeChild(element);
-    },
-
-    downloadOAS() {
-      // credit: https://www.bitdegree.org/learn/javascript-download
-      let text = utils.makeOAS(this);
-      let filename = `${this.title}.oas.json`;
-      let element = document.createElement("a");
-      element.setAttribute(
-        "href",
-        "data:application/json;charset=utf-8," + encodeURIComponent(text)
-      );
-      element.setAttribute("download", filename);
-
-      element.style.display = "none";
-      document.body.appendChild(element);
-
-      element.click();
-      document.body.removeChild(element);
-    },
-    downloadDeployment() {
-      utils.zipDeploymentPackage(this);
-    },
     download() {
-      console.log("Donwload");
       utils.makeZip(this);
     },
 
