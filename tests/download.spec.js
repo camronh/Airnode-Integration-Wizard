@@ -19,8 +19,7 @@ test("Export works", async ({ page }) => {
   const RPCValue = await page.$eval("#input-23", el => el.value);
   expect(RPCValue).toContain("https://");
 
-
   await page.click("text=Export");
-  await page.click("text=Download");
+  await page.click("text=Download", { force: true, timeout: 5000 });
   expect(await page.waitForSelector("text=Download Options")).toBeTruthy();
 });
