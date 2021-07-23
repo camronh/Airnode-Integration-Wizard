@@ -612,7 +612,7 @@
               </v-btn>
             </v-col>
             <v-col cols="12" md="4">
-              <v-btn block text>
+              <v-btn block text @click="openBulkEditMenu">
                 Edit Param
               </v-btn>
             </v-col>
@@ -684,6 +684,51 @@
         <v-card-actions>
           <v-btn block text color="primary" @click="bulkAddParam">
             Bulk Add Param
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="bulkEditParamMenu" max-width="50%">
+      <v-card>
+        <v-card-title>
+          Edit Param in {{ selectedEndpoints.length }} Endpoints
+        </v-card-title>
+
+        <v-card-text>
+          <v-row align="center">
+            <v-col cols="12" md="7">
+              <v-text-field
+                v-model="param.name"
+                label="Param Name"
+                id="paramName"
+                placeholder="ex. currency"
+                ref="paramName"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-select
+                v-model="param.in"
+                label="In"
+                :items="['query', 'header', 'path', 'cookie']"
+                required
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-checkbox label="Fixed" v-model="param.fixed"> </v-checkbox>
+            </v-col>
+            <v-col cols="12" md="8">
+              <v-text-field
+                label="Value"
+                :disabled="!param.fixed"
+                v-model="param.value"
+              >
+              </v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn block text color="primary" @click="bulkEditParam">
+            Bulk Edit Param
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -791,6 +836,7 @@ export default {
       downloadOptions: ["OAS", "OIS", "Readme", "Deployment"],
       exportJson: {},
       editingConfig: false,
+      bulkEditParamMenu: false,
       endpointMenu: false,
       bulkMenu: false,
       bulkAddParamMenu: false,
@@ -818,6 +864,7 @@ export default {
         path: "",
         times: false,
       },
+      oldParam: {},
       param: {
         name: "",
         in: "query",
@@ -958,6 +1005,11 @@ export default {
       this.selectedEndpoints = indexs;
       this.bulkMenu = true;
     },
+    openBulkEditMenu() {
+      this.param = this.selectedEndpointParams[this.selectedParam];
+      this.oldParam = { ...this.param };
+      this.bulkEditParamMenu = true;
+    },
     bulkAddParam() {
       for (let i of this.selectedEndpoints) {
         this.endpoints[i].params.push(this.param);
@@ -976,7 +1028,7 @@ export default {
         const endpoint = this.endpoints[index];
         // delete paramToDel from endpoint.params
         const indexOfParam = endpoint.params.findIndex(
-          v => v.name === paramToDel.name
+          v => v.name === paramToDel.name && v.in === paramToDel.in
         );
         if (indexOfParam > -1) {
           endpoint.params.splice(indexOfParam, 1);
@@ -985,6 +1037,28 @@ export default {
       }
       this.endpoints = endpoints;
       this.confirmDelete = false;
+    },
+
+    bulkEditParam() {
+      let endpoints = [];
+      const paramToEdit = this.oldParam;
+      console.log({ paramToEdit });
+      for (let index = 0; index < this.endpoints.length; index++) {
+        if (!this.selectedEndpoints.includes(index)) {
+          endpoints.push(this.endpoints[index]);
+          continue;
+        }
+        const endpoint = this.endpoints[index];
+        const indexOfParam = endpoint.params.findIndex(
+          v => v.name === paramToEdit.name && v.in === paramToEdit.in
+        );
+        if (indexOfParam > -1) {
+          endpoint.params[indexOfParam] = this.param;
+        }
+        endpoints.push(endpoint);
+      }
+      this.endpoints = endpoints;
+      this.bulkEditParamMenu = false;
     },
 
     deleteEndpoint(i) {

@@ -29,9 +29,17 @@ test.describe("Bulk", () => {
     await page.click("text=Del Param");
     await page.click("text='Delete'");
     asexpect(
-      await page.waitForSelector("text=pair - query", { timeout: 1000 })
+      await page.waitForSelector("text=pairs - query", { timeout: 1000 })
     ).toBeFalsy();
   });
 
-  
+  test("Bulk Edit Param works", async ({ page }) => {
+    await page.click("text=pairs - query");
+    await page.click("text=Edit Param");
+    await page.type("#paramName", "Testing");
+    await page.click("text=Bulk Edit Param");
+    asexpect(
+      await page.waitForSelector("text=Testingpairs - query", { timeout: 1000 })
+    ).toBeFalsy();
+  });
 });
