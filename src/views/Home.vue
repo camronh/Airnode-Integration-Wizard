@@ -31,7 +31,7 @@
               @click="exportConfig"
               text
               color="primary"
-              :disabled="!valid || !endpoints.length || missingReservedParam"
+              :disabled="!valid || !endpoints.length"
             >
               Export
               <v-icon right>
@@ -120,8 +120,7 @@
                   :disabled="!hasAuth"
                   v-model="auth.value"
                   label="Value"
-                  placeholder="xxxxxxxxxapi_keyxxxxxxx"
-                  :rules="hasAuth ? required : false"
+                  placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
                   required
                 ></v-text-field>
               </v-col>
@@ -180,7 +179,6 @@
                       close
                       class="ma-1"
                       outlined
-                      :color="endpoint.reservedParam.path ? '' : 'red'"
                       label
                       @click="editEndpoint(i)"
                       @click:close="deleteEndpoint(i)"
@@ -260,7 +258,7 @@
         <br />
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="12">
               <v-card height="100%" flat>
                 <v-card-title>
                   Params
@@ -272,6 +270,7 @@
                       <v-text-field
                         v-model="param.name"
                         label="Param Name"
+                        id="paramName"
                         placeholder="ex. currency"
                         @keypress.enter="addParam"
                         ref="paramName"
@@ -328,16 +327,24 @@
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="12" md="6">
+            <!-- <v-col cols="12" md="6">
               <v-card flat height="100%">
                 <v-card-title>
                   Reserved Params
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
                 </v-card-title>
+                <v-card-text>
+                  <v-row align="center">
+                    <v-checkbox
+                      v-model="enabled"
+                      hide-details
+                      class="shrink mr-2 mt-0"
+                    ></v-checkbox>
+                    <v-text-field
+                      :disabled="!enabled"
+                      label="I only work if you check the box"
+                    ></v-text-field>
+                  </v-row>
+                </v-card-text>
                 <v-card-text>
                   <v-row>
                     <v-col cols="12" md="5">
@@ -376,10 +383,9 @@
                       </v-text-field>
                     </v-col>
                   </v-row>
-                  <v-row> </v-row>
                 </v-card-text>
               </v-card>
-            </v-col>
+            </v-col> -->
           </v-row>
         </v-card-text>
         <v-card-text>
@@ -487,68 +493,6 @@
         <v-btn block @click="downloading = true" text color="primary">
           Download
         </v-btn>
-
-        <!-- <v-card-actions>
-          <v-row>
-            <v-col cols="12" md="4">
-              <v-btn
-                @click="downloadOAS"
-                text
-                color="primary"
-                block
-                :disabled="
-                  importError ||
-                    !valid ||
-                    !endpoints.length ||
-                    missingReservedParam
-                "
-              >
-                OAS / Swagger
-                <v-icon right>
-                  mdi-download
-                </v-icon>
-              </v-btn>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-btn
-                @click="downloadDeployment"
-                text
-                color="primary"
-                block
-                :disabled="
-                  importError ||
-                    !valid ||
-                    !endpoints.length ||
-                    missingReservedParam
-                "
-              >
-                Deployment Package
-                <v-icon right>
-                  mdi-download
-                </v-icon>
-              </v-btn>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-btn
-                @click="downloadReadme"
-                text
-                color="primary"
-                block
-                :disabled="
-                  importError ||
-                    !valid ||
-                    !endpoints.length ||
-                    missingReservedParam
-                "
-              >
-                Readme.md
-                <v-icon right>
-                  mdi-download
-                </v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-card-actions> -->
       </v-card>
     </v-dialog>
     <v-dialog v-model="bulkMenu" max-width="50%" :overlay-opacity="75">
@@ -853,11 +797,11 @@ export default {
         path: "",
         method: "get",
         params: [],
-        reservedParam: {
-          type: "int256",
-          path: "",
-          times: false,
-        },
+        // reservedParam: {
+        //   type: "int256",
+        //   path: "",
+        //   times: false,
+        // },
       },
       rp: {
         type: "int256",
@@ -888,7 +832,7 @@ export default {
   },
   methods: {
     saveEndpoint() {
-      this.ep.reservedParam = this.rp;
+      // this.ep.reservedParam = this.rp;
       // if endpoint.path exists in endpoints get index
       const duplicateIndex = this.endpoints.findIndex(
         v => v.path === this.ep.path
@@ -901,11 +845,11 @@ export default {
         path: "",
         method: "get",
         params: [],
-        reservedParam: {
-          type: "int256",
-          path: "",
-          times: false,
-        },
+        // reservedParam: {
+        //   type: "int256",
+        //   path: "",
+        //   times: false,
+        // },
       };
       this.endpointMenu = false;
     },
@@ -927,45 +871,7 @@ export default {
       this.ep.params.splice(index, 1);
     },
 
-    downloadReadme() {
-      const text = utils.makeReadme(JSON.parse(this.exportStr));
-      let filename = `${this.title}-Readme.md`;
-      let element = document.createElement("a");
-      element.setAttribute(
-        "href",
-        "data:application/json;charset=utf-8," + encodeURIComponent(text)
-      );
-      element.setAttribute("download", filename);
-
-      element.style.display = "none";
-      document.body.appendChild(element);
-
-      element.click();
-      document.body.removeChild(element);
-    },
-
-    downloadOAS() {
-      // credit: https://www.bitdegree.org/learn/javascript-download
-      let text = utils.makeOAS(this);
-      let filename = `${this.title}.oas.json`;
-      let element = document.createElement("a");
-      element.setAttribute(
-        "href",
-        "data:application/json;charset=utf-8," + encodeURIComponent(text)
-      );
-      element.setAttribute("download", filename);
-
-      element.style.display = "none";
-      document.body.appendChild(element);
-
-      element.click();
-      document.body.removeChild(element);
-    },
-    downloadDeployment() {
-      utils.zipDeploymentPackage(this);
-    },
     download() {
-      console.log("Donwload");
       utils.makeZip(this);
     },
 
@@ -975,15 +881,15 @@ export default {
     editEndpoint(i) {
       this.ep = this.endpoints[i];
       this.editIndex = i;
-      if (!this.ep.reservedParam) {
-        console.log("No reserved param");
-        console.log(this.ep);
-        this.rp = {
-          type: "int256",
-          path: "",
-          times: false,
-        };
-      } else this.rp = this.ep.reservedParam;
+      // if (!this.ep.reservedParam) {
+      //   console.log("No reserved param");
+      //   console.log(this.ep);
+      //   this.rp = {
+      //     type: "int256",
+      //     path: "",
+      //     times: false,
+      //   };
+      // } else this.rp = this.ep.reservedParam;
       this.editing = true;
       this.endpointMenu = true;
     },
@@ -992,11 +898,11 @@ export default {
         path: "",
         method: "get",
         params: [],
-        reservedParam: {
-          type: "int256",
-          path: "",
-          times: false,
-        },
+        // reservedParam: {
+        //   type: "int256",
+        //   path: "",
+        //   times: false,
+        // },
       };
     },
     openBulkMenu() {
@@ -1069,19 +975,19 @@ export default {
         path: "",
         method: "get",
         params: [],
-        reservedParam: {
-          type: "int256",
-          path: "",
-          times: false,
-        },
+        // reservedParam: {
+        //   type: "int256",
+        //   path: "",
+        //   times: false,
+        // },
       };
-      this.rp = this.ep.reservedParam;
+      // this.rp = this.ep.reservedParam;
       this.editing = false;
       this.endpointMenu = true;
     },
     cloneEndpoint(endpoint) {
       this.ep = { ...endpoint };
-      this.rp = this.ep.reservedParam;
+      // this.rp = this.ep.reservedParam;
       this.editing = false;
       this.endpointMenu = true;
       this.selectingEndpoint = false;
@@ -1122,7 +1028,7 @@ export default {
 
   computed: {
     validEndpoint() {
-      if (this.ep.path && this.rp.path) return true;
+      if (this.ep.path) return true;
       else return false;
     },
     endpointPath() {
@@ -1143,16 +1049,6 @@ export default {
       return selectedEndpointParams;
     },
 
-    missingReservedParam() {
-      let missing = false;
-      for (let i = 0; i < this.endpoints.length; i++) {
-        if (!this.endpoints[i].reservedParam.path) {
-          missing = true;
-          break;
-        }
-      }
-      return missing;
-    },
   },
 };
 </script>

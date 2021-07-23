@@ -11,7 +11,7 @@ test("Import OAS / Swagger", async ({ page }) => {
   const value = await page.$eval("#input-14", el => el.value);
   expect(value).toContain("Finchains");
   await page.click("text=pairs");
-  expect(await page.isVisible("text=int256")).toBeTruthy();
+  expect(await page.isVisible("text=Edit Endpoint")).toBeTruthy();
 });
 
 test("Import Config", async ({ page }) => {
@@ -29,7 +29,6 @@ test("Import Config", async ({ page }) => {
   const RPCValue = await page.$eval("#input-23", el => el.value);
   expect(RPCValue).toContain("https://");
 
-  await page.type("#input-43", "shbfkajnshbjfnabhs");
-
   await page.click("text=Export");
+  expect(await page.isVisible("text=Edit your config.json")).toBeTruthy();
 });

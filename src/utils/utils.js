@@ -96,11 +96,6 @@ function parseOAS(oas) {
         path,
         method,
         params: [],
-        reservedParam: {
-          type: "int256",
-          path: "",
-          times: false,
-        },
       };
       if (oas.paths[path][method].parameters) {
         for (let param of oas.paths[path][method].parameters) {
@@ -218,11 +213,12 @@ function makeConfig(state) {
       reservedParameters: [
         {
           name: "_type",
-          fixed: endpoint.reservedParam.type,
         },
         {
           name: "_path",
-          fixed: endpoint.reservedParam.path,
+        },
+        {
+          name: "_times",
         },
       ],
       fixedOperationParameters: [],
@@ -246,12 +242,6 @@ function makeConfig(state) {
           },
         });
       }
-    }
-    if (endpoint.reservedParam.times) {
-      ep.reservedParameters.push({
-        name: "_times",
-        fixed: "100000000000000000",
-      });
     }
     return ep;
   });
@@ -298,17 +288,6 @@ function parseConfig(config) {
       path: endpoint.name,
       method: endpoint.operation.method,
       params: [],
-      //   params: endpoint.parameters.map(param => {
-      //     return {
-      //       name: param.operationParameter.name,
-      //       in: param.operationParameter.in,
-      //     };
-      //   }),
-      reservedParam: {
-        type: endpoint.reservedParameters[0].fixed,
-        path: endpoint.reservedParameters[1].fixed,
-        times: endpoint.reservedParameters[2] ? true : false,
-      },
     };
     for (let param of endpoint.parameters) {
       ep.params.push({
@@ -333,38 +312,6 @@ function parseConfig(config) {
   state.RPC = config.nodeSettings.chains[0].providers[0].url;
   console.log({ state });
   return state;
-}
-
-// Download Zip
-async function zipDeploymentPackage(state) {
-  const JSZip = require("jszip");
-  const FileSaver = require("file-saver");
-  let zip = new JSZip();
-  zip.file("config.json", state.exportStr);
-  const config = JSON.parse(state.exportStr);
-
-  // Add Securty.json
-  let security = {
-    apiCredentials: {
-      [state.title]: [],
-    },
-    id: config.id,
-  };
-  console.log({ security });
-  const securitySchemes =
-    config.ois[0].apiSpecifications.components.securitySchemes;
-  for (let scheme in securitySchemes) {
-    security.apiCredentials[state.title].push({
-      securitySchemeName: scheme,
-      value: state.auth.value,
-    });
-  }
-
-  zip.file("security.json", JSON.stringify(security, null, 2));
-  zip.file(".env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_KEY=`);
-  zip.generateAsync({ type: "blob" }).then(function(content) {
-    FileSaver.saveAs(content, `${state.title}-Deployment.zip`);
-  });
 }
 
 // Download Zip
@@ -394,7 +341,7 @@ async function makeZip(state) {
       for (let scheme in securitySchemes) {
         security.apiCredentials[state.title].push({
           securitySchemeName: scheme,
-          value: state.auth.value,
+          value: state.auth.value ? state.auth.value : "{ INSERT_API_KEY }",
         });
       }
       configZip.file("security.json", JSON.stringify(security, null, 2));
@@ -433,7 +380,6 @@ function makeReadme(config) {
     return {
       endpointName: endpoint.endpointName,
       endpointId: endpoint.endpointId,
-      reservedParameters: correctParams.reservedParameters,
       parameters: correctParams.parameters.map(p => p.name),
     };
   });
@@ -446,25 +392,11 @@ __URL:__ ${config.ois[0].apiSpecifications.servers[0].url}
 
 __ProviderID:__ *****\n\n`;
 
-  function makeReturnsStr(params) {
-    let param = Object.assign(
-      {},
-      ...params.map(p => {
-        return { [p.name]: p.fixed };
-      })
-    );
-    let returnsStr = `${param._path}`;
-    if (param._times) returnsStr += ` x ${param._times}`;
-    return returnsStr;
-  }
-
   for (let endpoint of endpoints) {
     configStr += `\n## ${endpoint.endpointName}
 __EndpointId:__ ${endpoint.endpointId}
 
-__Params:__ {${endpoint.parameters.join("} | {")}}
-
-__Returns:__ ${makeReturnsStr(endpoint.reservedParameters)}\n`;
+__Params:__ {${endpoint.parameters.join("} | {")}}\n`;
   }
   return configStr;
 }
@@ -474,7 +406,6 @@ module.exports = {
   parseOAS,
   makeConfig,
   parseConfig,
-  zipDeploymentPackage,
   makeZip,
   makeReadme,
 };

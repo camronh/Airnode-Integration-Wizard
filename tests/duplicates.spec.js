@@ -12,12 +12,13 @@ test("Overwrite on duplicate", async ({ page }) => {
   await page.click("[type='submit']");
   await page.click("text=Add Endpoint");
   await page.type("#path", "/quotes");
-  await page.type("#_path", "testPath");
+  await page.type("#paramName", "testParam");
+  await page.keyboard.press("Enter");
 
   await page.click("text=Save");
-//   await page.waitForTimeout(999999);
+  //   await page.waitForTimeout(999999);
   const quoteEndpoints = await page.$$("text=/quotes");
   expect(quoteEndpoints.length).toBe(1);
   await page.click("text=/quotes");
-  expect(await page.$eval("#_path", el => el.value)).toBe("testPath");
+  expect(await page.waitForSelector("text=testParam")).toBeTruthy();
 });
