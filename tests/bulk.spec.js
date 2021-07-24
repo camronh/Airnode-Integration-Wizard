@@ -38,8 +38,8 @@ test.describe("Bulk", () => {
     await page.click("text=Edit Param");
     await page.type("#paramName", "Testing");
     await page.click("text=Bulk Edit Param");
-    asexpect(
+    expect(
       await page.waitForSelector("text=Testingpairs - query", { timeout: 1000 })
-    ).toBeFalsy();
+    ).toBeTruthy();
   });
 });

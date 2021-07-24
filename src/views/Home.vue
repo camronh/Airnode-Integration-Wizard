@@ -495,10 +495,21 @@
         </v-btn>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="bulkMenu" max-width="50%" :overlay-opacity="75">
+    <v-dialog
+      v-model="bulkMenu"
+      max-width="50%"
+      :overlay-opacity="75"
+      :scrollable="false"
+    >
       <v-card>
         <v-card-title>
           Bulk Changes
+          <v-spacer></v-spacer>
+          <v-btn icon @click="bulkMenu = false">
+            <v-icon>
+              mdi-close
+            </v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-subtitle>
           Make changes to multiple endpoints at once
@@ -511,6 +522,7 @@
             <v-col cols="12" md="12">
               <v-chip-group
                 multiple
+                column
                 active-class="primary--text"
                 v-model="selectedEndpoints"
               >
@@ -829,6 +841,9 @@ export default {
       this.importString = this.exportStr;
       this.parseImport();
     },
+    selectedParam() {
+      console.log(this.selectedEndpointParams[this.selectedParam]);
+    },
   },
   methods: {
     saveEndpoint() {
@@ -1043,12 +1058,25 @@ export default {
           this.endpoints[i].params
         );
       });
-      selectedEndpointParams = selectedEndpointParams.filter((v, i, a) => {
-        return a.indexOf(v) === i;
-      });
-      return selectedEndpointParams;
-    },
 
+      let uniqueParams = [];
+      selectedEndpointParams.forEach(param => {
+        if (uniqueParams.find(v => v.name === param.name)) return;
+        uniqueParams.push(param);
+      });
+      return uniqueParams;
+
+      // // Removing duplicates
+      // selectedEndpointParams.filter(
+      //   (v, i, a) =>
+      //     a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i
+      // );
+
+      // selectedEndpointParams = selectedEndpointParams.filter((v, i, a) => {
+      //   return a.indexOf(v) === i;
+      // });
+      // return selectedEndpointParams;
+    },
   },
 };
 </script>
@@ -1056,5 +1084,8 @@ export default {
 <style scoped>
 .titleField {
   font-size: 1.6em;
+}
+html {
+  overflow-y: auto;
 }
 </style>
