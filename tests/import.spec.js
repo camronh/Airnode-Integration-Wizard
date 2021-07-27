@@ -2,13 +2,18 @@ const { test, expect } = require("@playwright/test");
 
 test("Import OAS / Swagger", async ({ page }) => {
   await page.goto("http://localhost:8080/");
+  await page.click("#menuButton");
+
   await page.click("text=Import");
   const exampleOAS = require("../src/utils/exampleOAS.json");
-  await page.fill("#input-63", JSON.stringify(exampleOAS));
+  await page.fill(
+    "[placeholder='Paste Import Here...']",
+    JSON.stringify(exampleOAS)
+  );
   await page.click(
     "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
   );
-  const value = await page.$eval("#input-14", el => el.value);
+  const value = await page.$eval("[placeholder='Title']", el => el.value);
   expect(value).toContain("Finchains");
   await page.click("text=pairs");
   expect(await page.isVisible("text=Edit Endpoint")).toBeTruthy();
@@ -16,19 +21,24 @@ test("Import OAS / Swagger", async ({ page }) => {
 
 test("Import Config", async ({ page }) => {
   await page.goto("http://localhost:8080/");
+  await page.click("#menuButton");
+
   await page.click("text=Import");
   await page.click("text=Config");
   const exampleConfig = require("../src/utils/exampleConfig.json");
-  await page.fill("#input-63", JSON.stringify(exampleConfig));
+  await page.fill(
+    "[placeholder='Paste Import Here...']",
+    JSON.stringify(exampleConfig)
+  );
   await page.click(
     "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
   );
-  const titleValue = await page.$eval("#input-14", el => el.value);
+  const titleValue = await page.$eval("[placeholder='Title']", el => el.value);
   expect(titleValue).toContain("Forge");
 
-  const RPCValue = await page.$eval("#input-23", el => el.value);
+  const RPCValue = await page.$eval("#rpcURL", el => el.value);
   expect(RPCValue).toContain("https://");
-
+  await page.click("#menuButton");
   await page.click("text=Export");
   expect(await page.isVisible("text=Edit your config.json")).toBeTruthy();
 });

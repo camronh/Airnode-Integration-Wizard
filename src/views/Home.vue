@@ -21,21 +21,63 @@
           <v-card-title>
             API Settings
             <v-spacer></v-spacer>
-            <v-btn text @click="importing = true" color="primary">
-              Import
-              <v-icon right>
+            <!-- <v-btn text @click="importing = true" color="primary" icon>
+              <v-icon>
                 mdi-import
               </v-icon>
             </v-btn>
             <v-btn
               @click="exportConfig"
               text
+              icon
               color="primary"
-              :disabled="!valid || !endpoints.length"
             >
-              Export
-              <v-icon right>
+              <v-icon>
                 mdi-export
+              </v-icon>
+            </v-btn> -->
+            <v-menu bottom left v-if="!selectingEndpoint">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon v-bind="attrs" v-on="on" id="menuButton">
+                  <v-icon>
+                    mdi-dots-vertical
+                  </v-icon>
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item-group>
+                  <v-list-item id="import" @click="importing = true">
+                    <v-list-item-title
+                      >Import
+                      <v-icon right>
+                        mdi-import
+                      </v-icon>
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item
+                    :disabled="!valid || !endpoints.length"
+                    @click="exportConfig"
+                    id="export"
+                  >
+                    <v-list-item-title>
+                      Export
+                      <v-icon right :disabled="!valid || !endpoints.length">
+                        mdi-export
+                      </v-icon>
+                    </v-list-item-title>
+                  </v-list-item>
+                  <v-list-item :disabled="!endpoints.length" id="cloneEndpoint">
+                    <v-list-item-title @click="selectingEndpoint = true"
+                      >Clone Endpoint</v-list-item-title
+                    >
+                  </v-list-item>
+                </v-list-item-group>
+              </v-list>
+            </v-menu>
+            <v-btn icon v-else @click="selectingEndpoint = false">
+              <v-icon>
+                mdi-close
               </v-icon>
             </v-btn>
           </v-card-title>
@@ -77,6 +119,7 @@
                   placeholder="https://rinkeby.infura.io/v3/{ FILL }"
                   label="RPC URL"
                   :rules="serverRules"
+                  id="rpcURL"
                   required
                 ></v-text-field>
               </v-col>
@@ -138,38 +181,6 @@
                 <v-card-title>
                   Endpoints
                   <v-spacer></v-spacer>
-                  <v-menu bottom left v-if="!selectingEndpoint">
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn
-                        icon
-                        :disabled="!endpoints.length"
-                        v-bind="attrs"
-                        v-on="on"
-                        id="endpointMenuButton"
-                      >
-                        <v-icon>
-                          mdi-dots-vertical
-                        </v-icon>
-                      </v-btn>
-                    </template>
-
-                    <v-list>
-                      <v-list-item-group>
-                        <v-list-item>
-                          <v-list-item-title
-                            @click="selectingEndpoint = true"
-                            id="cloneEndpoint"
-                            >Clone Endpoint</v-list-item-title
-                          >
-                        </v-list-item>
-                      </v-list-item-group>
-                    </v-list>
-                  </v-menu>
-                  <v-btn icon v-else @click="selectingEndpoint = false">
-                    <v-icon>
-                      mdi-close
-                    </v-icon>
-                  </v-btn>
                 </v-card-title>
                 <v-card-text>
                   <template v-if="!selectingEndpoint">
