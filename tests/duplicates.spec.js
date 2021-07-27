@@ -2,6 +2,8 @@ const { test, expect } = require("@playwright/test");
 
 test("Overwrite on duplicate", async ({ page }) => {
   await page.goto("http://localhost:8080/");
+  await page.click("#menuButton");
+
   await page.click("text=Import");
   await page.click("text=Config");
   const exampleOAS = require("../src/utils/exampleConfig.json");
