@@ -71,7 +71,7 @@
               </v-col>
             </v-row>
             <v-row align="center" justify="center">
-              <v-col cols="12" md="9">
+              <v-col cols="12" md="7">
                 <v-text-field
                   v-model="RPC"
                   placeholder="https://rinkeby.infura.io/v3/{ FILL }"
@@ -79,6 +79,13 @@
                   :rules="serverRules"
                   required
                 ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="2">
+                <v-select
+                  v-model="chain"
+                  label="Chain"
+                  :items="['Rinkeby', 'Ropsten']"
+                ></v-select>
               </v-col>
             </v-row>
             <v-row align="center" justify="center">
@@ -558,6 +565,7 @@ export default {
         enableTransform: false,
       },
       RPC: "",
+      chain: "Rinkeby",
       importError: false,
       exportType: "oas",
       importType: "OAS",
