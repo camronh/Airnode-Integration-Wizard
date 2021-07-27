@@ -130,7 +130,7 @@ function makeConfig(state) {
           providers: [
             {
               name: "rinkeby-alchemy",
-              url: state.RPC,
+              url: state.RPCs[0],
             },
           ],
           contracts: {
@@ -147,6 +147,23 @@ function makeConfig(state) {
     },
     ois: [],
   };
+  if (state.RPCs[1])
+    config.nodeSettings.chains.push({
+      id: "4",
+      type: "evm",
+      providers: [
+        {
+          name: "rinkeby-alchemy",
+          url: state.RPCs[1],
+        },
+      ],
+      contracts: {
+        Airnode: "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC",
+        Convenience: "0xC9fb36DfAE95AD52E32ad48CCe9A1A169EfFaC6E",
+      },
+      providerAdminForRecordCreation:
+        "0xC22376E2Dd4537D78F088B349Cbf2b9Ce79Fe016",
+    });
 
   config.triggers.request = endpoints.map(endpoint => {
     const endpointId = ethers.utils.keccak256(
@@ -222,9 +239,8 @@ function makeConfig(state) {
         },
         {
           name: "_relay_metadata",
-          default: "v1"
+          default: "v1",
         },
-        
       ],
       fixedOperationParameters: [],
       parameters: [],
@@ -267,6 +283,7 @@ function parseConfig(config) {
     title: ois.title,
     version: ois.version,
     server: ois.apiSpecifications.servers[0].url,
+    RPCs: [],
   };
   const securitySchemes = Object.keys(
     ois.apiSpecifications.components.securitySchemes
@@ -314,7 +331,11 @@ function parseConfig(config) {
   }
   console.log({ state });
 
-  state.RPC = config.nodeSettings.chains[0].providers[0].url;
+  state.RPCs[0] = config.nodeSettings.chains[0].providers[0].url;
+  if (config.nodeSettings.chains[1]) {
+    state.RPCs[1] = config.nodeSettings.chains[1].providers[0].url;
+    state.extraRPC = true;
+  }
   console.log({ state });
   return state;
 }
