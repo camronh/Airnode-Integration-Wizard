@@ -66,6 +66,17 @@ function makeOAS(state) {
       oas.components.securitySchemes[`${title}Auth`].scheme = auth.scheme;
     }
   }
+  if (state.addedExtraAuth) {
+    oas.components.securitySchemes[`${title}AuthB`] = {
+      type: state.extraAuth.type,
+      name: state.extraAuth.name,
+      in: state.extraAuth.in,
+    };
+    if (auth.scheme) {
+      oas.components.securitySchemes[`${title}AuthB`].scheme =
+        state.extraAuth.scheme;
+    }
+  }
   console.log({ oas });
   return JSON.stringify(oas, null, 2);
 }
@@ -82,6 +93,14 @@ function parseOAS(oas) {
     if (securitySchemes.length > 0) {
       state.hasAuth = true;
       state.auth = {
+        type: oas.components.securitySchemes[securitySchemes[0]].type,
+        in: oas.components.securitySchemes[securitySchemes[0]].in,
+        name: oas.components.securitySchemes[securitySchemes[0]].name,
+        scheme: oas.components.securitySchemes[securitySchemes[0]].scheme || "",
+      };
+    }
+    if (securitySchemes[1]) {
+      state.extraAuth = {
         type: oas.components.securitySchemes[securitySchemes[0]].type,
         in: oas.components.securitySchemes[securitySchemes[0]].in,
         name: oas.components.securitySchemes[securitySchemes[0]].name,
@@ -216,6 +235,21 @@ function makeConfig(state) {
       ].scheme = auth.scheme;
     }
   }
+  if (state.extraAuth) {
+    config.ois[0].apiSpecifications.security[`${title}AuthB`] = [];
+    config.ois[0].apiSpecifications.components.securitySchemes[
+      `${title}AuthB`
+    ] = {
+      type: state.extraAuth.type,
+      name: state.extraAuth.name,
+      in: state.extraAuth.in,
+    };
+    if (state.extraAuth.scheme) {
+      config.ois[0].apiSpecifications.components.securitySchemes[
+        `${title}AuthB`
+      ].scheme = state.extraAuth.scheme;
+    }
+  }
 
   for (let endpoint of endpoints) {
     config.ois[0].apiSpecifications.paths[endpoint.path] = {
@@ -309,6 +343,18 @@ function parseConfig(config) {
       name: secScheme.name,
     };
     if (secScheme.scheme) state.auth.scheme = secScheme.scheme;
+    if (securitySchemes.length > 1) {
+      state.addedExtraAuth = true;
+      const secScheme =
+        ois.apiSpecifications.components.securitySchemes[securitySchemes[1]];
+
+      state.extraAuth = {
+        type: secScheme.type,
+        in: secScheme.in,
+        name: secScheme.name,
+      };
+      if (secScheme.scheme) state.extraAuth.scheme = secScheme.scheme;
+    }
   } else state.hasAuth = false;
   console.log({ state });
 
@@ -369,15 +415,25 @@ async function makeZip(state) {
         },
         id: config.id,
       };
-      console.log({ security });
-      const securitySchemes =
-        config.ois[0].apiSpecifications.components.securitySchemes;
-      for (let scheme in securitySchemes) {
-        security.apiCredentials[state.title].push({
-          securitySchemeName: scheme,
+      const securitySchemes = Object.keys(
+        config.ois[0].apiSpecifications.components.securitySchemes
+      );
+      if (securitySchemes.length > 0) {
+        security.apiCredentials[state.title][0] = {
+          securitySchemeName: securitySchemes[0],
           value: state.auth.value ? state.auth.value : "{ INSERT_API_KEY }",
-        });
+        };
       }
+      if (securitySchemes.length > 1) {
+        console.log(state.extraAuth);
+        security.apiCredentials[state.title][1] = {
+          securitySchemeName: securitySchemes[1],
+          value: state.extraAuth.value
+            ? state.extraAuth.value
+            : "{ INSERT_API_KEY }",
+        };
+      }
+
       configZip.file("security.json", JSON.stringify(security, null, 2));
 
       configZip.file(".env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_KEY=`);

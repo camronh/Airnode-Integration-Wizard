@@ -84,6 +84,9 @@
                   >
                     <v-list-item-title>Bulk Change</v-list-item-title>
                   </v-list-item>
+                  <v-list-item id="addAuth" @click="addedExtraAuth = true">
+                    <v-list-item-title>Add Auth</v-list-item-title>
+                  </v-list-item>
                 </v-list-item-group>
               </v-list>
             </v-menu>
@@ -226,6 +229,97 @@
                 ></v-text-field>
               </v-col>
             </v-row>
+            <template v-if="addedExtraAuth">
+              <v-row align="center" justify="center">
+                <v-col cols="12" md="3">
+                  <v-select
+                    v-model="extraAuth.type"
+                    :disabled="!hasAuth"
+                    label="Type"
+                    :items="['apiKey', 'http']"
+                    @change="extraAuth.scheme = null"
+                    required
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" md="3">
+                  <v-select
+                    :disabled="!hasAuth"
+                    v-model="extraAuth.in"
+                    label="In"
+                    :items="['query', 'header']"
+                    required
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" md="3">
+                  <v-btn
+                    block
+                    text
+                    @click="addedExtraAuth = false"
+                    id="trashAuthBtn"
+                  >
+                    <v-icon>
+                      mdi-delete
+                    </v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+              <v-row
+                align="center"
+                justify="center"
+                v-if="extraAuth.type == 'apiKey'"
+              >
+                <v-col cols="12" md="3">
+                  <v-text-field
+                    :disabled="!hasAuth"
+                    v-model="extraAuth.name"
+                    label="Name"
+                    placeholder="X-API-KEY"
+                    :rules="hasAuth ? required : false"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    :disabled="!hasAuth"
+                    v-model="extraAuth.value"
+                    label="Value"
+                    placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row align="center" justify="center" v-else>
+                <v-col cols="12" md="3">
+                  <v-text-field
+                    :disabled="!hasAuth"
+                    v-model="extraAuth.name"
+                    label="Name"
+                    placeholder="X-API-KEY"
+                    :rules="hasAuth ? required : false"
+                    required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="2">
+                  <v-select
+                    :disabled="!hasAuth"
+                    v-model="extraAuth.scheme"
+                    label="Scheme"
+                    :items="['basic', 'bearer']"
+                    required
+                    item-value="basic"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" md="4">
+                  <v-text-field
+                    :disabled="!hasAuth"
+                    v-model="extraAuth.value"
+                    label="Value"
+                    placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
+                    required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </template>
             <v-row align="center" justify="center">
               <v-col cols="12" md="1"></v-col>
               <v-col cols="12" md="11">
@@ -777,6 +871,7 @@ export default {
       },
       RPCs: [""],
       extraRPC: false,
+      addedExtraAuth: false,
       importError: false,
       exportType: "oas",
       importType: "OAS",
@@ -796,6 +891,13 @@ export default {
       bulkAddParamMenu: false,
       hasAuth: true,
       auth: {
+        type: "apiKey",
+        in: "query",
+        name: "",
+        value: "",
+        scheme: null,
+      },
+      extraAuth: {
         type: "apiKey",
         in: "query",
         name: "",
@@ -886,6 +988,7 @@ export default {
     },
 
     download() {
+      console.log("Auth again", this.extraAuth);
       utils.makeZip(this);
     },
 
@@ -1009,6 +1112,7 @@ export default {
     exportConfig() {
       this.oas = utils.makeOAS(this);
       this.exportStr = utils.makeConfig(this);
+      console.log(this.exportStr);
       this.exportJson = JSON.parse(this.exportStr);
       this.importType = ".Config";
       this.exporting = true;
@@ -1016,8 +1120,10 @@ export default {
 
     parseImport() {
       this.importError = false;
-      let apiValue;
+      let apiValue, extraValue;
       if (this.auth.value) apiValue = this.auth.value;
+      if (this.extraAuth.value) extraValue = this.extraAuth.value;
+
       try {
         const json = JSON.parse(this.importString);
         console.log({ json });
@@ -1033,6 +1139,7 @@ export default {
           this[key] = state[key];
         });
         this.auth.value = apiValue;
+        this.extraAuth.value = extraValue;
       } catch (error) {
         console.log(error);
         this.importError = true;
