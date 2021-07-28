@@ -6,10 +6,7 @@ test("Import OAS / Swagger", async ({ page }) => {
 
   await page.click("text=Import");
   const exampleOAS = require("../src/utils/exampleOAS.json");
-  await page.fill(
-    "[placeholder='Paste Import Here...']",
-    JSON.stringify(exampleOAS)
-  );
+  await page.fill("[placeholder='Paste Import Here...']", JSON.stringify(exampleOAS));
   await page.click(
     "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
   );
@@ -26,10 +23,7 @@ test("Import Config", async ({ page }) => {
   await page.click("text=Import");
   await page.click("text=Config");
   const exampleConfig = require("../src/utils/exampleConfig.json");
-  await page.fill(
-    "[placeholder='Paste Import Here...']",
-    JSON.stringify(exampleConfig)
-  );
+  await page.fill("[placeholder='Paste Import Here...']", JSON.stringify(exampleConfig));
   await page.click(
     "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
   );

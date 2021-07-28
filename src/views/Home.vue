@@ -77,6 +77,11 @@
                   <v-list-item id="addRPC" @click="extraRPC = true">
                     <v-list-item-title>Add RPC</v-list-item-title>
                   </v-list-item>
+                  <v-list-item>
+                    <v-list-item-title id="bulkChange" @click="openBulkMenu"
+                      >Bulk Change</v-list-item-title
+                    >
+                  </v-list-item>
                 </v-list-item-group>
               </v-list>
             </v-menu>
@@ -224,7 +229,6 @@
               <v-col cols="12" md="11">
                 <v-card-title>
                   Endpoints
-                  <v-spacer></v-spacer>
                 </v-card-title>
                 <v-card-text>
                   <template v-if="!selectingEndpoint">
@@ -486,6 +490,219 @@
         </v-btn>
       </v-card>
     </v-dialog>
+    <v-dialog
+      v-model="bulkMenu"
+      max-width="50%"
+      :overlay-opacity="75"
+      :scrollable="false"
+    >
+      <v-card>
+        <v-card-title>
+          Bulk Changes
+          <v-spacer></v-spacer>
+          <v-btn icon @click="bulkMenu = false">
+            <v-icon>
+              mdi-close
+            </v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-subtitle>
+          Make changes to multiple endpoints at once
+        </v-card-subtitle>
+        <v-card-text>
+          <v-card-title>
+            Endpoints
+          </v-card-title>
+          <v-row>
+            <v-col cols="12" md="12">
+              <v-chip-group
+                multiple
+                column
+                active-class="primary--text"
+                v-model="selectedEndpoints"
+              >
+                <v-chip v-for="(endpoint, i) in endpoints" :key="i">
+                  {{ endpoint.path }} - {{ endpoint.method }}
+                </v-chip>
+              </v-chip-group>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-text>
+          <v-card-title>
+            Params
+          </v-card-title>
+          <v-row>
+            <v-col cols="12" md="12">
+              <v-chip-group
+                active-class="primary--text"
+                v-model="selectedParam"
+                column
+              >
+                <v-chip
+                  v-for="(param, i) in selectedEndpointParams"
+                  outlined
+                  :key="i"
+                >
+                  {{ param.name }} - {{ param.in }}
+                </v-chip>
+              </v-chip-group>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-row align="center" justify="center">
+            <v-col cols="12" md="4">
+              <v-btn block text @click="bulkAddParamMenu = true">
+                Add Param
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-btn block text @click="confirmDelete = true">
+                Del Param
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-btn block text @click="openBulkEditMenu">
+                Edit Param
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="exporting" max-width="50%" :overlay-opacity="75">
+      <v-card>
+        <v-card-title>
+          Export
+        </v-card-title>
+        <v-card-subtitle>
+          Edit your config.json
+        </v-card-subtitle>
+        <v-card-text>
+          <v-jsoneditor
+            v-model="exportJson"
+            :plus="true"
+            @error="importError = true"
+            height="600px"
+            :options="options"
+          >
+          </v-jsoneditor>
+        </v-card-text>
+
+        <v-btn block @click="downloading = true" text color="primary">
+          Download
+        </v-btn>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="bulkAddParamMenu" max-width="50%">
+      <v-card>
+        <v-card-title>
+          Add Param to {{ selectedEndpoints.length }} Endpoints
+        </v-card-title>
+
+        <v-card-text>
+          <v-row align="center">
+            <v-col cols="12" md="7">
+              <v-text-field
+                v-model="param.name"
+                label="Param Name"
+                placeholder="ex. currency"
+                ref="paramName"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-select
+                v-model="param.in"
+                label="In"
+                :items="['query', 'header', 'path', 'cookie']"
+                required
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-checkbox label="Fixed" v-model="param.fixed"> </v-checkbox>
+            </v-col>
+            <v-col cols="12" md="8">
+              <v-text-field
+                label="Value"
+                :disabled="!param.fixed"
+                v-model="param.value"
+              >
+              </v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn block text color="primary" @click="bulkAddParam">
+            Bulk Add Param
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="bulkEditParamMenu" max-width="50%">
+      <v-card>
+        <v-card-title>
+          Edit Param in {{ selectedEndpoints.length }} Endpoints
+        </v-card-title>
+
+        <v-card-text>
+          <v-row align="center">
+            <v-col cols="12" md="7">
+              <v-text-field
+                v-model="param.name"
+                label="Param Name"
+                id="paramName"
+                placeholder="ex. currency"
+                ref="paramName"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="4">
+              <v-select
+                v-model="param.in"
+                label="In"
+                :items="['query', 'header', 'path', 'cookie']"
+                required
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-checkbox label="Fixed" v-model="param.fixed"> </v-checkbox>
+            </v-col>
+            <v-col cols="12" md="8">
+              <v-text-field
+                label="Value"
+                :disabled="!param.fixed"
+                v-model="param.value"
+              >
+              </v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn block text color="primary" @click="bulkEditParam">
+            Bulk Edit Param
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="confirmDelete" max-width="30%">
+      <v-card>
+        <v-card-title>
+          Delete Param from {{ selectedEndpoints.length }} Endpoints
+        </v-card-title>
+
+        <v-card-actions>
+          <v-row justify="center" align="center">
+            <v-btn text color="red" @click="bulkDeleteParam">
+              Delete
+            </v-btn>
+
+            <v-btn text color="primary" @click="confirmDelete = false">
+              Cancel
+            </v-btn>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="downloading" max-width="400px">
       <v-card>
         <v-card-title>
@@ -550,6 +767,7 @@ export default {
       server: "",
       importString: "",
       exportStr: "{}",
+      selectedEndpoints: [],
       valid: false,
       options: {
         mode: "code",
@@ -563,12 +781,17 @@ export default {
       exporting: false,
       importing: false,
       selectingEndpoint: false,
+      confirmDelete: false,
+      selectedParam: null,
       downloading: false,
       editing: false,
       downloadOptions: ["OAS", "OIS", "Readme", "Deployment"],
       exportJson: {},
       editingConfig: false,
+      bulkEditParamMenu: false,
       endpointMenu: false,
+      bulkMenu: false,
+      bulkAddParamMenu: false,
       hasAuth: true,
       auth: {
         type: "apiKey",
@@ -594,6 +817,7 @@ export default {
         path: "",
         times: false,
       },
+      oldParam: {},
       param: {
         name: "",
         in: "query",
@@ -613,6 +837,9 @@ export default {
       this.exportStr = JSON.stringify(this.exportJson, null, 2);
       this.importString = this.exportStr;
       this.parseImport();
+    },
+    selectedParam() {
+      console.log(this.selectedEndpointParams[this.selectedParam]);
     },
   },
   methods: {
@@ -690,6 +917,67 @@ export default {
         // },
       };
     },
+    openBulkMenu() {
+      const indexs = this.endpoints.map((v, i) => i);
+      this.param = { name: "", in: "query", fixed: false, value: "" };
+      this.selectedEndpoints = indexs;
+      this.bulkMenu = true;
+    },
+    openBulkEditMenu() {
+      this.param = this.selectedEndpointParams[this.selectedParam];
+      this.oldParam = { ...this.param };
+      this.bulkEditParamMenu = true;
+    },
+    bulkAddParam() {
+      for (let i of this.selectedEndpoints) {
+        this.endpoints[i].params.push(this.param);
+      }
+      this.bulkAddParamMenu = false;
+    },
+    bulkDeleteParam() {
+      let endpoints = [];
+      const paramToDel = this.selectedEndpointParams[this.selectedParam];
+      console.log({ paramToDel });
+      for (let index = 0; index < this.endpoints.length; index++) {
+        if (!this.selectedEndpoints.includes(index)) {
+          endpoints.push(this.endpoints[index]);
+          continue;
+        }
+        const endpoint = this.endpoints[index];
+        // delete paramToDel from endpoint.params
+        const indexOfParam = endpoint.params.findIndex(
+          v => v.name === paramToDel.name && v.in === paramToDel.in
+        );
+        if (indexOfParam > -1) {
+          endpoint.params.splice(indexOfParam, 1);
+        }
+        endpoints.push(endpoint);
+      }
+      this.endpoints = endpoints;
+      this.confirmDelete = false;
+    },
+
+    bulkEditParam() {
+      let endpoints = [];
+      const paramToEdit = this.oldParam;
+      console.log({ paramToEdit });
+      for (let index = 0; index < this.endpoints.length; index++) {
+        if (!this.selectedEndpoints.includes(index)) {
+          endpoints.push(this.endpoints[index]);
+          continue;
+        }
+        const endpoint = this.endpoints[index];
+        const indexOfParam = endpoint.params.findIndex(
+          v => v.name === paramToEdit.name && v.in === paramToEdit.in
+        );
+        if (indexOfParam > -1) {
+          endpoint.params[indexOfParam] = this.param;
+        }
+        endpoints.push(endpoint);
+      }
+      this.endpoints = endpoints;
+      this.bulkEditParamMenu = false;
+    },
 
     deleteEndpoint(i) {
       this.endpoints.splice(i, 1);
@@ -759,6 +1047,34 @@ export default {
       console.log(this.ep);
       return this.ep.path;
     },
+
+    selectedEndpointParams() {
+      let selectedEndpointParams = [];
+      this.selectedEndpoints.forEach(i => {
+        selectedEndpointParams = selectedEndpointParams.concat(
+          this.endpoints[i].params
+        );
+      });
+
+      let uniqueParams = [];
+      selectedEndpointParams.forEach(param => {
+        if (uniqueParams.find(v => v.name === param.name && v.in === param.in))
+          return;
+        uniqueParams.push(param);
+      });
+      return uniqueParams;
+
+      // // Removing duplicates
+      // selectedEndpointParams.filter(
+      //   (v, i, a) =>
+      //     a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i
+      // );
+
+      // selectedEndpointParams = selectedEndpointParams.filter((v, i, a) => {
+      //   return a.indexOf(v) === i;
+      // });
+      // return selectedEndpointParams;
+    },
   },
 };
 </script>
@@ -766,5 +1082,8 @@ export default {
 <style scoped>
 .titleField {
   font-size: 1.6em;
+}
+html {
+  overflow-y: auto;
 }
 </style>
