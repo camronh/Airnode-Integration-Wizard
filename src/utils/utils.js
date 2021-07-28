@@ -55,13 +55,16 @@ function makeOAS(state) {
   if (hasAuth) {
     oas.components = {
       securitySchemes: {
-        key: {
+        [`${title}Auth`]: {
           type: auth.type,
           name: auth.name,
           in: auth.in,
         },
       },
     };
+    if (auth.scheme) {
+      oas.components.securitySchemes[`${title}Auth`].scheme = auth.scheme;
+    }
   }
   console.log({ oas });
   return JSON.stringify(oas, null, 2);
@@ -82,6 +85,7 @@ function parseOAS(oas) {
         type: oas.components.securitySchemes[securitySchemes[0]].type,
         in: oas.components.securitySchemes[securitySchemes[0]].in,
         name: oas.components.securitySchemes[securitySchemes[0]].name,
+        scheme: oas.components.securitySchemes[securitySchemes[0]].scheme || "",
       };
     }
   } else state.hasAuth = false;
@@ -169,7 +173,7 @@ function makeConfig(state) {
     const endpointId = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         ["string"],
-        [`${title}/${endpoint.path}`]
+        [`${title}/${endpoint.method}-${endpoint.path}`]
       )
     );
     return {
@@ -206,6 +210,11 @@ function makeConfig(state) {
       name: auth.name,
       in: auth.in,
     };
+    if (auth.scheme) {
+      config.ois[0].apiSpecifications.components.securitySchemes[
+        `${title}Auth`
+      ].scheme = auth.scheme;
+    }
   }
 
   for (let endpoint of endpoints) {
@@ -291,16 +300,15 @@ function parseConfig(config) {
   console.log({ securitySchemes });
   if (securitySchemes.length > 0) {
     state.hasAuth = true;
+    const secScheme =
+      ois.apiSpecifications.components.securitySchemes[securitySchemes[0]];
+
     state.auth = {
-      type:
-        ois.apiSpecifications.components.securitySchemes[securitySchemes[0]]
-          .type,
-      in:
-        ois.apiSpecifications.components.securitySchemes[securitySchemes[0]].in,
-      name:
-        ois.apiSpecifications.components.securitySchemes[securitySchemes[0]]
-          .name,
+      type: secScheme.type,
+      in: secScheme.in,
+      name: secScheme.name,
     };
+    if (secScheme.scheme) state.auth.scheme = secScheme.scheme;
   } else state.hasAuth = false;
   console.log({ state });
 

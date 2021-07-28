@@ -152,7 +152,8 @@
                   v-model="auth.type"
                   :disabled="!hasAuth"
                   label="Type"
-                  :items="['apiKey']"
+                  :items="['apiKey', 'http']"
+                  @change="auth.scheme = null"
                   required
                 ></v-select>
               </v-col>
@@ -166,7 +167,7 @@
                 ></v-select>
               </v-col>
             </v-row>
-            <v-row align="center" justify="center">
+            <v-row align="center" justify="center" v-if="auth.type == 'apiKey'">
               <v-col cols="12" md="3">
                 <v-text-field
                   :disabled="!hasAuth"
@@ -178,6 +179,37 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
+                <v-text-field
+                  :disabled="!hasAuth"
+                  v-model="auth.value"
+                  label="Value"
+                  placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row align="center" justify="center" v-else>
+              <v-col cols="12" md="3">
+                <v-text-field
+                  :disabled="!hasAuth"
+                  v-model="auth.name"
+                  label="Name"
+                  placeholder="X-API-KEY"
+                  :rules="hasAuth ? required : false"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="2">
+                <v-select
+                  :disabled="!hasAuth"
+                  v-model="auth.scheme"
+                  label="Scheme"
+                  :items="['basic', 'bearer']"
+                  required
+                  item-value="basic"
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="4">
                 <v-text-field
                   :disabled="!hasAuth"
                   v-model="auth.value"
@@ -801,6 +833,7 @@ export default {
         in: "query",
         name: "",
         value: "",
+        scheme: null,
       },
       oas: "",
       endpoints: [],
@@ -849,7 +882,7 @@ export default {
       // this.ep.reservedParam = this.rp;
       // if endpoint.path exists in endpoints get index
       const duplicateIndex = this.endpoints.findIndex(
-        v => v.path === this.ep.path
+        v => v.path === this.ep.path && v.method === this.ep.method
       );
       console.log({ duplicateIndex });
       if (duplicateIndex > -1) this.endpoints[duplicateIndex] = this.ep;
