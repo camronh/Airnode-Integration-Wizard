@@ -169,7 +169,7 @@ function makeConfig(state) {
     const endpointId = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         ["string"],
-        [`${title}/${endpoint.path}`]
+        [`${title}/${endpoint.method}-${endpoint.path}`]
       )
     );
     return {

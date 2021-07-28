@@ -587,7 +587,7 @@ export default {
       // this.ep.reservedParam = this.rp;
       // if endpoint.path exists in endpoints get index
       const duplicateIndex = this.endpoints.findIndex(
-        v => v.path === this.ep.path
+        v => v.path === this.ep.path && v.method === this.ep.method
       );
       console.log({ duplicateIndex });
       if (duplicateIndex > -1) this.endpoints[duplicateIndex] = this.ep;
