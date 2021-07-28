@@ -77,10 +77,12 @@
                   <v-list-item id="addRPC" @click="extraRPC = true">
                     <v-list-item-title>Add RPC</v-list-item-title>
                   </v-list-item>
-                  <v-list-item>
-                    <v-list-item-title id="bulkChange" @click="openBulkMenu"
-                      >Bulk Change</v-list-item-title
-                    >
+                  <v-list-item
+                    id="bulkChange"
+                    @click="openBulkMenu"
+                    :disabled="!endpoints.length"
+                  >
+                    <v-list-item-title>Bulk Change</v-list-item-title>
                   </v-list-item>
                 </v-list-item-group>
               </v-list>
