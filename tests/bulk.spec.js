@@ -4,6 +4,8 @@ test.describe("Bulk", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("http://localhost:8080/");
     expect(page.url()).toBe("http://localhost:8080/");
+    await page.click("#menuButton");
+
     await page.click("text=Import");
     await page.click("text=Config");
     const exampleOAS = require("../src/utils/exampleConfig.json");
@@ -12,7 +14,7 @@ test.describe("Bulk", () => {
       JSON.stringify(exampleOAS)
     );
     await page.click("[type='submit']");
-    await page.click("#endpointMenuButton");
+    await page.click("#menuButton");
     await page.click("text=Bulk Change");
     expect(await page.waitForSelector("text=Bulk Change")).toBeTruthy();
   });
@@ -28,9 +30,7 @@ test.describe("Bulk", () => {
     await page.click("text=pairs - query");
     await page.click("text=Del Param");
     await page.click("text='Delete'");
-    expect(
-      await page.waitForSelector("text=pairs - query", { timeout: 1000 })
-    ).toBeFalsy();
+    expect(await page.isVisible("text=pairs - query")).toBeFalsy();
   });
 
   test("Bulk Edit Param works", async ({ page }) => {

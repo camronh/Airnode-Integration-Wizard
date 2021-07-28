@@ -77,6 +77,11 @@
                   <v-list-item id="addRPC" @click="extraRPC = true">
                     <v-list-item-title>Add RPC</v-list-item-title>
                   </v-list-item>
+                  <v-list-item>
+                    <v-list-item-title id="bulkChange" @click="openBulkMenu"
+                      >Bulk Change</v-list-item-title
+                    >
+                  </v-list-item>
                 </v-list-item-group>
               </v-list>
             </v-menu>
@@ -224,46 +229,6 @@
               <v-col cols="12" md="11">
                 <v-card-title>
                   Endpoints
-                  <v-spacer></v-spacer>
-                  <v-menu bottom left v-if="!selectingEndpoint">
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn
-                        icon
-                        :disabled="!endpoints.length"
-                        v-bind="attrs"
-                        v-on="on"
-                        id="endpointMenuButton"
-                      >
-                        <v-icon>
-                          mdi-dots-vertical
-                        </v-icon>
-                      </v-btn>
-                    </template>
-
-                    <v-list>
-                      <v-list-item-group>
-                        <v-list-item>
-                          <v-list-item-title
-                            @click="selectingEndpoint = true"
-                            id="cloneEndpoint"
-                            >Clone Endpoint</v-list-item-title
-                          >
-                        </v-list-item>
-                        <v-list-item>
-                          <v-list-item-title
-                            id="bulkChange"
-                            @click="openBulkMenu"
-                            >Bulk Change</v-list-item-title
-                          >
-                        </v-list-item>
-                      </v-list-item-group>
-                    </v-list>
-                  </v-menu>
-                  <v-btn icon v-else @click="selectingEndpoint = false">
-                    <v-icon>
-                      mdi-close
-                    </v-icon>
-                  </v-btn>
                 </v-card-title>
                 <v-card-text>
                   <template v-if="!selectingEndpoint">
@@ -1093,7 +1058,8 @@ export default {
 
       let uniqueParams = [];
       selectedEndpointParams.forEach(param => {
-        if (uniqueParams.find(v => v.name === param.name)) return;
+        if (uniqueParams.find(v => v.name === param.name && v.in === param.in))
+          return;
         uniqueParams.push(param);
       });
       return uniqueParams;
