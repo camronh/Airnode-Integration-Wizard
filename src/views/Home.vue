@@ -275,6 +275,12 @@
                     label="Name"
                     placeholder="X-API-KEY"
                     :rules="hasAuth ? required : false"
+                    autofocus
+                    @blur="
+                      !extraAuth.name && !extraAuth.value
+                        ? (addedExtraAuth = false)
+                        : ''
+                    "
                     required
                   ></v-text-field>
                 </v-col>
