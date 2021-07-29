@@ -856,6 +856,7 @@
 <script>
 import utils from "../utils/utils";
 import VJsoneditor from "v-jsoneditor/src/index";
+import yaml from "yaml";
 
 export default {
   name: "Home",
@@ -1126,9 +1127,17 @@ export default {
 
     parseImport() {
       this.importError = false;
+      if (!this.importString) return;
       let apiValue, extraValue;
       if (this.auth.value) apiValue = this.auth.value;
       if (this.extraAuth.value) extraValue = this.extraAuth.value;
+      // try to convert yaml to json
+      try {
+        const json = yaml.parse(this.importString);
+        this.importString = JSON.stringify(json, null, 2);
+      } catch (e) {
+        console.log("Error parsing yaml", e);
+      }
 
       try {
         const json = JSON.parse(this.importString);
