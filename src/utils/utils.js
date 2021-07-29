@@ -152,7 +152,7 @@ function makeConfig(state) {
           type: "evm",
           providers: [
             {
-              name: "rinkeby-alchemy",
+              name: "rinkeby1",
               url: state.RPCs[0],
             },
           ],
@@ -176,7 +176,7 @@ function makeConfig(state) {
       type: "evm",
       providers: [
         {
-          name: "rinkeby-alchemy",
+          name: "rinkeby2",
           url: state.RPCs[1],
         },
       ],
