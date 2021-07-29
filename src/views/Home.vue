@@ -1141,6 +1141,7 @@ export default {
 
       try {
         const json = JSON.parse(this.importString);
+        if (json.host) json.servers = [{ url: json.host }];
         console.log({ json });
         console.log("Parsing");
         let state;
