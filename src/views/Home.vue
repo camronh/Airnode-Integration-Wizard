@@ -87,6 +87,9 @@
                   <v-list-item id="addAuth" @click="addedExtraAuth = true">
                     <v-list-item-title>Add Auth</v-list-item-title>
                   </v-list-item>
+                  <v-list-item id="clear" @click="confirmClear = true">
+                    <v-list-item-title>Clear</v-list-item-title>
+                  </v-list-item>
                 </v-list-item-group>
               </v-list>
             </v-menu>
@@ -852,6 +855,28 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="confirmClear" max-width="400px">
+      <v-card>
+        <v-card-title>
+          Are you sure you want to clear data?
+        </v-card-title>
+        <v-card-text>
+          <v-row align="center" justify="center">
+            <v-checkbox label="Store Sessions"></v-checkbox>
+          </v-row>
+        </v-card-text>
+        <v-card-text>
+          <v-row justify="center" align="center">
+            <v-btn text @click="confirmClear = false">
+              Close
+            </v-btn>
+            <v-btn text color="red" @click="clearAll">
+              Clear All
+            </v-btn>
+          </v-row>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -885,6 +910,7 @@ export default {
       exportType: "oas",
       importType: "OAS",
       exporting: false,
+      confirmClear: false,
       importing: false,
       selectingEndpoint: false,
       confirmDelete: false,
