@@ -101,8 +101,10 @@
             <v-text-field
               placeholder="Title"
               v-model="title"
+              type="text"
+              pattern="[a-zA-Z]+"
               class="titleField ma-1"
-              :rules="required"
+              :rules="[required, onlyLetters]"
               height="40px"
             ></v-text-field>
             <v-spacer></v-spacer>
@@ -1171,6 +1173,12 @@ export default {
     endpointPath() {
       console.log(this.ep);
       return this.ep.path;
+    },
+    // check if string contains only letters
+    onlyLetters() {
+      const regex = /^[a-zA-Z]+$/;
+      if (regex.test(this.title)) return true;
+      else return false;
     },
 
     selectedEndpointParams() {
