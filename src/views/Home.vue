@@ -87,6 +87,9 @@
                   <v-list-item id="addAuth" @click="addedExtraAuth = true">
                     <v-list-item-title>Add Auth</v-list-item-title>
                   </v-list-item>
+                  <v-list-item id="clear" @click="confirmClear = true">
+                    <v-list-item-title>Clear Session</v-list-item-title>
+                  </v-list-item>
                 </v-list-item-group>
               </v-list>
             </v-menu>
@@ -102,6 +105,7 @@
               placeholder="Title"
               v-model="title"
               type="text"
+              @input="storeSession"
               pattern="[a-zA-Z]+"
               class="titleField ma-1"
               :rules="[required, onlyLetters]"
@@ -116,6 +120,7 @@
                   v-model="server"
                   placeholder="https://api.website.com/v2"
                   label="Server"
+                  @input="storeSession"
                   :rules="serverRules"
                   required
                 ></v-text-field>
@@ -125,6 +130,7 @@
                   v-model="version"
                   label="Version"
                   required
+                  @input="storeSession"
                   :rules="required"
                 ></v-text-field>
               </v-col>
@@ -137,6 +143,7 @@
                   label="RPC URL"
                   :rules="serverRules"
                   id="rpcURL"
+                  @input="storeSession"
                   required
                 ></v-text-field>
               </v-col>
@@ -148,6 +155,7 @@
                   placeholder="https://rinkeby.infura.io/v3/{ FILL }"
                   label="RPC URL"
                   autofocus
+                  @input="storeSession"
                   :rules="serverRules"
                   @blur="RPCs[1] ? '' : (extraRPC = false)"
                   id="rpcURL2"
@@ -157,13 +165,19 @@
             </v-row>
             <v-row align="center" justify="center">
               <v-col cols="12" md="3">
-                <v-checkbox label="Auth" v-model="hasAuth"> </v-checkbox>
+                <v-checkbox
+                  label="Auth"
+                  v-model="hasAuth"
+                  @change="storeSession"
+                >
+                </v-checkbox>
               </v-col>
               <v-col cols="12" md="3">
                 <v-select
                   v-model="auth.type"
                   :disabled="!hasAuth"
                   label="Type"
+                  @input="storeSession"
                   :items="['apiKey', 'http']"
                   @change="auth.scheme = null"
                   required
@@ -174,6 +188,7 @@
                   :disabled="!hasAuth"
                   v-model="auth.in"
                   label="In"
+                  @input="storeSession"
                   :items="['query', 'header']"
                   required
                 ></v-select>
@@ -185,6 +200,7 @@
                   :disabled="!hasAuth"
                   v-model="auth.name"
                   label="Name"
+                  @input="storeSession"
                   placeholder="X-API-KEY"
                   :rules="hasAuth ? required : false"
                   required
@@ -195,6 +211,7 @@
                   :disabled="!hasAuth"
                   v-model="auth.value"
                   label="Value"
+                  @input="storeSession"
                   placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
                   required
                 ></v-text-field>
@@ -206,6 +223,7 @@
                   :disabled="!hasAuth"
                   v-model="auth.name"
                   label="Name"
+                  @input="storeSession"
                   placeholder="X-API-KEY"
                   :rules="hasAuth ? required : false"
                   required
@@ -216,6 +234,7 @@
                   :disabled="!hasAuth"
                   v-model="auth.scheme"
                   label="Scheme"
+                  @input="storeSession"
                   :items="['basic', 'bearer']"
                   required
                   item-value="basic"
@@ -226,6 +245,7 @@
                   :disabled="!hasAuth"
                   v-model="auth.value"
                   label="Value"
+                  @input="storeSession"
                   placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
                   required
                 ></v-text-field>
@@ -238,6 +258,7 @@
                     v-model="extraAuth.type"
                     :disabled="!hasAuth"
                     label="Type"
+                    @input="storeSession"
                     :items="['apiKey', 'http']"
                     @change="extraAuth.scheme = null"
                     required
@@ -248,6 +269,7 @@
                     :disabled="!hasAuth"
                     v-model="extraAuth.in"
                     label="In"
+                    @input="storeSession"
                     :items="['query', 'header']"
                     required
                   ></v-select>
@@ -275,6 +297,7 @@
                     :disabled="!hasAuth"
                     v-model="extraAuth.name"
                     label="Name"
+                    @input="storeSession"
                     placeholder="X-API-KEY"
                     :rules="hasAuth ? required : false"
                     autofocus
@@ -291,6 +314,7 @@
                     :disabled="!hasAuth"
                     v-model="extraAuth.value"
                     label="Value"
+                    @input="storeSession"
                     placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
                     required
                   ></v-text-field>
@@ -302,6 +326,7 @@
                     :disabled="!hasAuth"
                     v-model="extraAuth.name"
                     label="Name"
+                    @input="storeSession"
                     placeholder="X-API-KEY"
                     :rules="hasAuth ? required : false"
                     required
@@ -314,6 +339,7 @@
                     label="Scheme"
                     :items="['basic', 'bearer']"
                     required
+                    @input="storeSession"
                     item-value="basic"
                   ></v-select>
                 </v-col>
@@ -322,6 +348,7 @@
                     :disabled="!hasAuth"
                     v-model="extraAuth.value"
                     label="Value"
+                    @input="storeSession"
                     placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
                     required
                   ></v-text-field>
@@ -852,6 +879,31 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="confirmClear" max-width="400px">
+      <v-card>
+        <v-card-title>
+          Are you sure you want to clear data?
+        </v-card-title>
+        <v-card-text>
+          <v-row align="center" justify="center">
+            <v-checkbox
+              label="Store Sessions"
+              v-model="storeSessions"
+            ></v-checkbox>
+          </v-row>
+        </v-card-text>
+        <v-card-text>
+          <v-row justify="center" align="center">
+            <v-btn text @click="confirmClear = false">
+              Close
+            </v-btn>
+            <v-btn text color="red" @click="clear">
+              Clear All
+            </v-btn>
+          </v-row>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -885,6 +937,8 @@ export default {
       exportType: "oas",
       importType: "OAS",
       exporting: false,
+      storeSessions: localStorage.storeSessions === "false" ? false : true,
+      confirmClear: false,
       importing: false,
       selectingEndpoint: false,
       confirmDelete: false,
@@ -951,9 +1005,38 @@ export default {
       this.importString = this.exportStr;
       this.parseImport();
     },
+
     selectedParam() {
       console.log(this.selectedEndpointParams[this.selectedParam]);
     },
+    storeSessions() {
+      localStorage.storeSessions = this.storeSessions;
+    },
+  },
+  mounted() {
+    // localStorage.clear();
+    try {
+      if (localStorage.session) {
+        let session = JSON.parse(localStorage.session);
+        if (
+          !localStorage.storeSessions ||
+          localStorage.storeSessions === "false"
+        )
+          return;
+        this.server = session.server;
+        this.title = session.title;
+        this.version = session.version;
+        this.hasAuth = session.hasAuth;
+        this.addedExtraAuth = session.addedExtraAuth;
+        this.RPCs = session.RPCs;
+        this.auth = session.auth;
+        this.extraRPC = session.extraRPC;
+        this.extraAuth = session.extraAuth;
+        this.endpoints = session.endpoints;
+      }
+    } catch (error) {
+      console.log(error);
+    }
   },
   methods: {
     saveEndpoint() {
@@ -977,6 +1060,7 @@ export default {
         // },
       };
       this.endpointMenu = false;
+      this.storeSession();
     },
     addParam() {
       if (!this.param.name || (this.param.fixed && !this.param.value)) return;
@@ -1158,10 +1242,52 @@ export default {
         });
         this.auth.value = apiValue;
         this.extraAuth.value = extraValue;
+        this.storeSession();
       } catch (error) {
         console.log(error);
         this.importError = true;
       }
+    },
+    storeSession() {
+      if (!this.storeSessions) return;
+      console.log("Storing session");
+
+      const session = {
+        title: this.title,
+        server: this.server,
+        version: this.version,
+        auth: this.auth,
+        extraAuth: this.extraAuth,
+        RPCs: this.RPCs,
+        extraRPC: this.extraRPC,
+        hasAuth: this.hasAuth,
+        addedExtraAuth: this.addedExtraAuth,
+        endpoints: this.endpoints,
+      };
+      localStorage.storeSessions = this.storeSessions;
+
+      localStorage.session = JSON.stringify(session);
+    },
+    clear() {
+      this.title = "";
+      this.server = "";
+      this.version = "";
+      this.auth = {
+        name: "",
+        value: "",
+        type: "",
+      };
+      this.extraAuth = {
+        name: "",
+        value: "",
+        type: "",
+      };
+      this.RPCs = [];
+      this.addedExtraAuth = false;
+      this.endpoints = [];
+      localStorage.clear();
+      this.storeSession();
+      this.confirmClear = false;
     },
   },
 
@@ -1179,6 +1305,9 @@ export default {
       const regex = /^[a-zA-Z]+$/;
       if (regex.test(this.title)) return true;
       else return false;
+    },
+    sessionValues() {
+      return `${this.title}|${this.propertyB}`;
     },
 
     selectedEndpointParams() {
