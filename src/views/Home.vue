@@ -88,7 +88,7 @@
                     <v-list-item-title>Add Auth</v-list-item-title>
                   </v-list-item>
                   <v-list-item id="clear" @click="confirmClear = true">
-                    <v-list-item-title>Clear</v-list-item-title>
+                    <v-list-item-title>Clear Session</v-list-item-title>
                   </v-list-item>
                 </v-list-item-group>
               </v-list>
@@ -937,7 +937,7 @@ export default {
       exportType: "oas",
       importType: "OAS",
       exporting: false,
-      storeSessions: localStorage.storeSessions === "true",
+      storeSessions: localStorage.storeSessions === "false" ? false : true,
       confirmClear: false,
       importing: false,
       selectingEndpoint: false,
@@ -1029,8 +1029,8 @@ export default {
         this.hasAuth = session.hasAuth;
         this.addedExtraAuth = session.addedExtraAuth;
         this.RPCs = session.RPCs;
-        this.extraRPC = session.extraRPC;
         this.auth = session.auth;
+        this.extraRPC = session.extraRPC;
         this.extraAuth = session.extraAuth;
         this.endpoints = session.endpoints;
       }
@@ -1242,6 +1242,7 @@ export default {
         });
         this.auth.value = apiValue;
         this.extraAuth.value = extraValue;
+        this.storeSession();
       } catch (error) {
         console.log(error);
         this.importError = true;
@@ -1258,6 +1259,7 @@ export default {
         auth: this.auth,
         extraAuth: this.extraAuth,
         RPCs: this.RPCs,
+        extraRPC: this.extraRPC,
         hasAuth: this.hasAuth,
         addedExtraAuth: this.addedExtraAuth,
         endpoints: this.endpoints,

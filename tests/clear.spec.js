@@ -3,9 +3,9 @@ const { test, expect } = require("@playwright/test");
 test("Clear Works", async ({ page }) => {
   await page.goto("http://localhost:8080/");
   await page.click("#menuButton");
-  await page.click("#clear", { force: true });
-  expect(await page.isVisible("text=Are you sure")).toBe(false);
-
+  await page.click("#clear");
+  expect(await page.waitForSelector("text=Are you sure")).toBeTruthy();
+  await page.click("text=close");
   await page.click("#menuButton");
 
   await page.click("text=Import");
@@ -20,8 +20,10 @@ test("Clear Works", async ({ page }) => {
   );
   await page.click("#menuButton");
   await page.click("#clear");
-  await page.click("text=clear");
-  expect(await page.isVisible('"Edit your config"')).toBeFalsy();
+  await page.click("text=Clear All");
+  expect(
+    await page.isVisible('"Are you sure you want to clear data"')
+  ).toBeFalsy();
   const titleValue = await page.$eval("[placeholder='Title']", el => el.value);
   expect(titleValue).toBeFalsy();
 });
