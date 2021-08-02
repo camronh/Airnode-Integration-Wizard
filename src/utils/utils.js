@@ -235,7 +235,7 @@ function makeConfig(state) {
       ].scheme = auth.scheme;
     }
   }
-  if (state.extraAuth) {
+  if (state.addedExtraAuth) {
     config.ois[0].apiSpecifications.security[`${title}AuthB`] = [];
     config.ois[0].apiSpecifications.components.securitySchemes[
       `${title}AuthB`
