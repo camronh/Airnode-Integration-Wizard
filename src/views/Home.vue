@@ -16,7 +16,7 @@
     <br />
 
     <v-row align="center" justify="center">
-      <v-card max-width="80%" width="90%">
+      <v-card max-width="95%" width="90%">
         <v-form v-model="valid">
           <v-card-title>
             API Settings
@@ -1164,6 +1164,7 @@ export default {
       const paramToEdit = this.oldParam;
       console.log({ paramToEdit });
       for (let index = 0; index < this.endpoints.length; index++) {
+        if (!this.endpoints[index]) continue;
         if (!this.selectedEndpoints.includes(index)) {
           endpoints.push(this.endpoints[index]);
           continue;
@@ -1182,7 +1183,9 @@ export default {
     },
 
     deleteEndpoint(i) {
+      console.log(this.endpoints);
       this.endpoints.splice(i, 1);
+      console.log(this.endpoints);
     },
     newEndpoint() {
       this.ep = {
@@ -1326,9 +1329,14 @@ export default {
     selectedEndpointParams() {
       let selectedEndpointParams = [];
       this.selectedEndpoints.forEach(i => {
-        selectedEndpointParams = selectedEndpointParams.concat(
-          this.endpoints[i].params
-        );
+        try {
+          selectedEndpointParams = selectedEndpointParams.concat(
+            this.endpoints[i].params
+          );
+        } catch (error) {
+          console.log(error);
+          console.log({ i, ep: this.endpoints[i] });
+        }
       });
 
       let uniqueParams = [];

@@ -1,6 +1,8 @@
 const { test, expect } = require("@playwright/test");
 
-test("Bug Fix: Unable to delete endpoint after bulk edit", async ({ page }) => {
+test.skip("Bug Fix: Unable to delete endpoint after bulk edit", async ({
+  page,
+}) => {
   await page.goto("http://localhost:8080/");
   await page.click("#menuButton");
 
