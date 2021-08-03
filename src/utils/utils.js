@@ -124,7 +124,7 @@ function parseOAS(oas) {
         for (let param of oas.paths[path][method].parameters) {
           ep.params.push({
             name: param.name,
-            in: param.in,
+            in: param.in == "body" ? "query" : param.in,
           });
         }
       }
@@ -408,7 +408,7 @@ async function makeZip(state) {
 
       configZip.file("config.json", state.exportStr);
 
-      // Add Securty.json
+      // Add Security.json
       let security = {
         apiCredentials: {
           [state.title]: [],
