@@ -369,6 +369,7 @@
                       close
                       class="ma-1"
                       outlined
+                      :color="validEndpoint(endpoint) ? '' : 'red'"
                       label
                       @click="editEndpoint(i)"
                       @click:close="deleteEndpoint(i)"
@@ -470,7 +471,7 @@
                       <v-select
                         v-model="param.in"
                         label="In"
-                        :items="['query', 'header', 'path', 'cookie']"
+                        :items="paramTypes"
                         required
                       ></v-select>
                     </v-col>
@@ -538,7 +539,7 @@
           <v-spacer></v-spacer>
           <v-btn
             @click="saveEndpoint"
-            :disabled="!validEndpoint"
+            :disabled="!savableEndpoint"
             text
             color="primary"
           >
@@ -624,6 +625,7 @@
     <v-dialog
       v-model="bulkMenu"
       max-width="50%"
+      fullscreen
       :overlay-opacity="75"
       :scrollable="false"
     >
@@ -791,6 +793,7 @@
               <v-select
                 v-model="param.in"
                 label="In"
+                id="bulkEditIn"
                 :items="['query', 'header', 'path', 'cookie']"
                 required
               ></v-select>
@@ -945,6 +948,7 @@ export default {
       selectedParam: null,
       downloading: false,
       editing: false,
+      paramTypes: ["query", "header", "path", "cookie"],
       downloadOptions: ["OAS", "OIS", "Readme", "Deployment"],
       exportJson: {},
       editingConfig: false,
@@ -1289,13 +1293,22 @@ export default {
       this.storeSession();
       this.confirmClear = false;
     },
+    validEndpoint(ep) {
+      if (ep.method != "get" && ep.method != "post") return false;
+      const { params } = ep;
+      for (let p of params) {
+        if (!this.paramTypes.includes(p.in)) return false;
+      }
+      return true;
+    },
   },
 
   computed: {
-    validEndpoint() {
+    savableEndpoint() {
       if (this.ep.path) return true;
       else return false;
     },
+
     endpointPath() {
       console.log(this.ep);
       return this.ep.path;
