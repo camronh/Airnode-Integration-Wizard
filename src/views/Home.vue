@@ -568,7 +568,13 @@
             </v-btn>
           </v-btn-toggle>
         </v-card-title>
-        <v-card-text>
+        <v-card-text
+          @drop.prevent="onDrop($event)"
+          @dragover.prevent="dragover = true"
+          @dragenter.prevent="dragover = true"
+          @dragleave.prevent="dragover = false"
+          :class="{ accent: dragover }"
+        >
           <v-textarea
             v-model="importString"
             rows="20"
@@ -926,6 +932,7 @@ export default {
       version: "",
       server: "",
       importString: "",
+      dragover: false,
       exportStr: "{}",
       selectedEndpoints: [],
       valid: false,
@@ -1303,6 +1310,15 @@ export default {
         if (!this.paramTypes.includes(p.in)) return false;
       }
       return true;
+    },
+    onDrop(e) {
+      this.dragover = false;
+      console.log("Dropped!");
+      if (e.dataTransfer.files.length > 1) {
+        console.log("Only 1 at a time");
+      } else {
+        e.dataTransfer.files.forEach(element => console.log({ element }));
+      }
     },
   },
 
