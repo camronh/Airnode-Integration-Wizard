@@ -22,6 +22,7 @@ test("Export works", async ({ page }) => {
   await page.click("#menuButton");
 
   await page.click("text=Export");
-  await page.click("text=Download", { force: true, timeout: 5000 });
+  await page.waitForTimeout(500);
+  await page.click("text=Download", { force: true });
   expect(await page.waitForSelector("text=Download Options")).toBeTruthy();
 });
