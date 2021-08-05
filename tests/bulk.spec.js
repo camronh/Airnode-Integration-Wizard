@@ -10,7 +10,7 @@ test.describe("Bulk", () => {
     await page.click("text=Config");
     const exampleOAS = require("../src/utils/exampleConfig.json");
     await page.fill(
-      "[placeholder='Paste Import Here...']",
+      "[placeholder='Paste or Drop Import Here...']",
       JSON.stringify(exampleOAS)
     );
     await page.click("[type='submit']");

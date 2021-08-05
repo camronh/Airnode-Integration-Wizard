@@ -12,7 +12,7 @@ test("Clear Works", async ({ page }) => {
   await page.click("text=Config");
   const exampleConfig = require("../src/utils/exampleConfig.json");
   await page.fill(
-    "[placeholder='Paste Import Here...']",
+    "[placeholder='Paste or Drop Import Here...']",
     JSON.stringify(exampleConfig)
   );
   await page.click(

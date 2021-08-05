@@ -9,7 +9,7 @@ test.skip("Bug Fix: Unable to delete endpoint after bulk edit", async ({
   await page.click("text=Import");
   const exampleOAS = require("../src/utils/obpOAS.json");
   await page.fill(
-    "[placeholder='Paste Import Here...']",
+    "[placeholder='Paste or Drop Import Here...']",
     JSON.stringify(exampleOAS)
   );
   await page.click(

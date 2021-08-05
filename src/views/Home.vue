@@ -579,7 +579,7 @@
             v-model="importString"
             rows="20"
             autofocus
-            placeholder="Paste Import Here..."
+            placeholder="Paste or Drop Import Here..."
             @input="parseImport"
             no-resize
             :error="importError"
@@ -1311,14 +1311,29 @@ export default {
       }
       return true;
     },
-    onDrop(e) {
+    async onDrop(e) {
       this.dragover = false;
-      console.log("Dropped!");
-      if (e.dataTransfer.files.length > 1) {
-        console.log("Only 1 at a time");
-      } else {
-        e.dataTransfer.files.forEach(element => console.log({ element }));
+      try {
+        this.importString = await new Promise(resolve => {
+          if (e.dataTransfer.files.length > 1) {
+            console.log("Only 1 at a time");
+          } else {
+            const file = e.dataTransfer.files[0];
+            let reader = new FileReader();
+            reader.onload = function(event) {
+              const uploadString = event.target.result;
+              resolve(uploadString);
+            };
+            reader.readAsText(file);
+          }
+        });
+        this.parseImport();
+      } catch (error) {
+        console.log("Import Failed");
       }
+      // console.log("Dropped!");
+      // console.log(e);
+      // console.log(e.dataTransfer.getData("text"));
     },
   },
 
