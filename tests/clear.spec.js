@@ -9,10 +9,9 @@ test("Clear Works", async ({ page }) => {
   await page.click("#menuButton");
 
   await page.click("text=Import");
-  await page.click("text=Config");
   const exampleConfig = require("../src/utils/exampleConfig.json");
   await page.fill(
-    "[placeholder='Paste or Drop Import Here...']",
+    "textarea",
     JSON.stringify(exampleConfig)
   );
   await page.click(

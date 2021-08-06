@@ -8,10 +8,7 @@ test.skip("Bug Fix: Unable to delete endpoint after bulk edit", async ({
 
   await page.click("text=Import");
   const exampleOAS = require("../src/utils/obpOAS.json");
-  await page.fill(
-    "[placeholder='Paste or Drop Import Here...']",
-    JSON.stringify(exampleOAS)
-  );
+  await page.fill("textarea", JSON.stringify(exampleOAS));
   await page.click(
     "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
   );
