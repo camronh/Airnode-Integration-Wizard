@@ -244,7 +244,7 @@
                   <v-select
                     :disabled="!hasAuth"
                     v-model="extraAuth.in"
-                    label="In" 
+                    label="In"
                     @input="storeSession"
                     :items="['query', 'header']"
                     required
@@ -263,13 +263,10 @@
                   </v-btn>
                 </v-col>
               </v-row>
-              <v-row
-                align="center"
-                justify="center"
-                v-if="extraAuth.type == 'apiKey'"
-              >
+              <v-row align="center" justify="center">
                 <v-col cols="12" md="3">
                   <v-text-field
+                    v-if="extraAuth.type == 'apiKey'"
                     :disabled="!hasAuth"
                     v-model="extraAuth.name"
                     label="Name"
@@ -277,13 +274,18 @@
                     placeholder="X-API-KEY"
                     :rules="hasAuth ? required : false"
                     autofocus
-                    @blur="
-                      !extraAuth.name && !extraAuth.value
-                        ? (addedExtraAuth = false)
-                        : ''
-                    "
                     required
                   ></v-text-field>
+                  <v-select
+                    v-else
+                    :disabled="!hasAuth"
+                    v-model="extraAuth.scheme"
+                    label="Scheme"
+                    :items="['basic', 'bearer']"
+                    required
+                    :error="extraAuth.type == 'http' && !extraAuth.scheme"
+                    @input="storeSession"
+                  ></v-select>
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-text-field
@@ -296,7 +298,7 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row align="center" justify="center" v-else>
+              <!-- <v-row align="center" justify="center">
                 <v-col cols="12" md="3">
                   <v-text-field
                     :disabled="!hasAuth"
@@ -328,7 +330,7 @@
                     required
                   ></v-text-field>
                 </v-col>
-              </v-row>
+              </v-row> -->
             </template>
             <v-row align="center" justify="center">
               <v-col cols="12" md="1"></v-col>
