@@ -179,7 +179,6 @@
                   label="Type"
                   @input="storeSession"
                   :items="['apiKey', 'http']"
-                  @change="auth.scheme = null"
                   required
                 ></v-select>
               </v-col>
@@ -194,9 +193,10 @@
                 ></v-select>
               </v-col>
             </v-row>
-            <v-row align="center" justify="center" v-if="auth.type == 'apiKey'">
+            <v-row align="center" justify="center">
               <v-col cols="12" md="3">
                 <v-text-field
+                  v-if="auth.type == 'apiKey'"
                   :disabled="!hasAuth"
                   v-model="auth.name"
                   label="Name"
@@ -205,42 +205,19 @@
                   :rules="hasAuth ? required : false"
                   required
                 ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  :disabled="!hasAuth"
-                  v-model="auth.value"
-                  label="Value"
-                  @input="storeSession"
-                  placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
-                  required
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row align="center" justify="center" v-else>
-              <v-col cols="12" md="3">
-                <v-text-field
-                  :disabled="!hasAuth"
-                  v-model="auth.name"
-                  label="Name"
-                  @input="storeSession"
-                  placeholder="X-API-KEY"
-                  :rules="hasAuth ? required : false"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="2">
                 <v-select
+                  v-else
                   :disabled="!hasAuth"
                   v-model="auth.scheme"
                   label="Scheme"
+                  :error="auth.type == 'http' && !auth.scheme"
                   @input="storeSession"
                   :items="['basic', 'bearer']"
                   required
                   item-value="basic"
                 ></v-select>
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="6">
                 <v-text-field
                   :disabled="!hasAuth"
                   v-model="auth.value"
@@ -260,7 +237,6 @@
                     label="Type"
                     @input="storeSession"
                     :items="['apiKey', 'http']"
-                    @change="extraAuth.scheme = null"
                     required
                   ></v-select>
                 </v-col>
@@ -268,7 +244,7 @@
                   <v-select
                     :disabled="!hasAuth"
                     v-model="extraAuth.in"
-                    label="In"
+                    label="In" 
                     @input="storeSession"
                     :items="['query', 'header']"
                     required
@@ -340,7 +316,6 @@
                     :items="['basic', 'bearer']"
                     required
                     @input="storeSession"
-                    item-value="basic"
                   ></v-select>
                 </v-col>
                 <v-col cols="12" md="4">

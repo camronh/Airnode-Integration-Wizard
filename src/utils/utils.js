@@ -232,6 +232,9 @@ function makeConfig(state) {
       config.ois[0].apiSpecifications.components.securitySchemes[
         `${title}Auth`
       ].scheme = auth.scheme;
+      delete config.ois[0].apiSpecifications.components.securitySchemes[
+        `${title}Auth`
+      ].name;
     }
   }
   if (state.addedExtraAuth) {

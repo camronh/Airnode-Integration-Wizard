@@ -17,6 +17,7 @@ test("HTTP Works", async ({ page }) => {
   await page.click("text=apiKey");
   await page.click("text=http");
   expect(await page.isVisible("text=Scheme")).toBeTruthy();
+  expect(await page.isVisible("text=Name")).toBeFalsy();
   await page.click("text=Scheme");
   await page.click("text=basic");
   await page.click("#menuButton");
