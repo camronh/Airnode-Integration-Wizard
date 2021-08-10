@@ -945,7 +945,6 @@ export default {
       addedExtraAuth: false,
       importError: false,
       exportType: "oas",
-      importType: "OAS",
       exporting: false,
       storeSessions: localStorage.storeSessions === "false" ? false : true,
       confirmClear: false,
@@ -1221,7 +1220,6 @@ export default {
       this.exportStr = utils.makeConfig(this);
       console.log(this.exportStr);
       this.exportJson = JSON.parse(this.exportStr);
-      this.importType = ".Config";
       this.exporting = true;
     },
 
@@ -1250,7 +1248,6 @@ export default {
         } else {
           state = utils.parseConfig(json);
         }
-        console.log({ state });
         Object.keys(state).forEach(key => {
           this[key] = state[key];
         });

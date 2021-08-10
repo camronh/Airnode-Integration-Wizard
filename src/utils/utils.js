@@ -131,7 +131,6 @@ function parseOAS(oas) {
       state.endpoints.push(ep);
     }
   }
-  console.log({ state });
   return state;
 }
 
@@ -356,7 +355,6 @@ function parseConfig(config) {
       if (secScheme.scheme) state.extraAuth.scheme = secScheme.scheme;
     }
   } else state.hasAuth = false;
-  console.log({ state });
 
   state.endpoints = [];
   for (let endpoint of ois.endpoints) {
@@ -383,14 +381,12 @@ function parseConfig(config) {
     }
     state.endpoints.push(ep);
   }
-  console.log({ state });
 
   state.RPCs[0] = config.nodeSettings.chains[0].providers[0].url;
   if (config.nodeSettings.chains[1]) {
     state.RPCs[1] = config.nodeSettings.chains[1].providers[0].url;
     state.extraRPC = true;
   }
-  console.log({ state });
   return state;
 }
 
