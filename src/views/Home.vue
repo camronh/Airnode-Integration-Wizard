@@ -179,7 +179,6 @@
                   label="Type"
                   @input="storeSession"
                   :items="['apiKey', 'http']"
-                  @change="auth.scheme = null"
                   required
                 ></v-select>
               </v-col>
@@ -194,9 +193,10 @@
                 ></v-select>
               </v-col>
             </v-row>
-            <v-row align="center" justify="center" v-if="auth.type == 'apiKey'">
+            <v-row align="center" justify="center">
               <v-col cols="12" md="3">
                 <v-text-field
+                  v-if="auth.type == 'apiKey'"
                   :disabled="!hasAuth"
                   v-model="auth.name"
                   label="Name"
@@ -205,42 +205,19 @@
                   :rules="hasAuth ? required : false"
                   required
                 ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field
-                  :disabled="!hasAuth"
-                  v-model="auth.value"
-                  label="Value"
-                  @input="storeSession"
-                  placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
-                  required
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row align="center" justify="center" v-else>
-              <v-col cols="12" md="3">
-                <v-text-field
-                  :disabled="!hasAuth"
-                  v-model="auth.name"
-                  label="Name"
-                  @input="storeSession"
-                  placeholder="X-API-KEY"
-                  :rules="hasAuth ? required : false"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="2">
                 <v-select
+                  v-else
                   :disabled="!hasAuth"
                   v-model="auth.scheme"
                   label="Scheme"
+                  :error="auth.type == 'http' && !auth.scheme"
                   @input="storeSession"
                   :items="['basic', 'bearer']"
                   required
                   item-value="basic"
                 ></v-select>
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="6">
                 <v-text-field
                   :disabled="!hasAuth"
                   v-model="auth.value"
@@ -260,7 +237,6 @@
                     label="Type"
                     @input="storeSession"
                     :items="['apiKey', 'http']"
-                    @change="extraAuth.scheme = null"
                     required
                   ></v-select>
                 </v-col>
@@ -287,13 +263,10 @@
                   </v-btn>
                 </v-col>
               </v-row>
-              <v-row
-                align="center"
-                justify="center"
-                v-if="extraAuth.type == 'apiKey'"
-              >
+              <v-row align="center" justify="center">
                 <v-col cols="12" md="3">
                   <v-text-field
+                    v-if="extraAuth.type == 'apiKey'"
                     :disabled="!hasAuth"
                     v-model="extraAuth.name"
                     label="Name"
@@ -301,13 +274,18 @@
                     placeholder="X-API-KEY"
                     :rules="hasAuth ? required : false"
                     autofocus
-                    @blur="
-                      !extraAuth.name && !extraAuth.value
-                        ? (addedExtraAuth = false)
-                        : ''
-                    "
                     required
                   ></v-text-field>
+                  <v-select
+                    v-else
+                    :disabled="!hasAuth"
+                    v-model="extraAuth.scheme"
+                    label="Scheme"
+                    :items="['basic', 'bearer']"
+                    required
+                    :error="extraAuth.type == 'http' && !extraAuth.scheme"
+                    @input="storeSession"
+                  ></v-select>
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-text-field
@@ -320,7 +298,7 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row align="center" justify="center" v-else>
+              <!-- <v-row align="center" justify="center">
                 <v-col cols="12" md="3">
                   <v-text-field
                     :disabled="!hasAuth"
@@ -340,7 +318,6 @@
                     :items="['basic', 'bearer']"
                     required
                     @input="storeSession"
-                    item-value="basic"
                   ></v-select>
                 </v-col>
                 <v-col cols="12" md="4">
@@ -353,7 +330,7 @@
                     required
                   ></v-text-field>
                 </v-col>
-              </v-row>
+              </v-row> -->
             </template>
             <v-row align="center" justify="center">
               <v-col cols="12" md="1"></v-col>
@@ -949,7 +926,6 @@ export default {
       addedExtraAuth: false,
       importError: false,
       exportType: "oas",
-      importType: "OAS",
       exporting: false,
       storeSessions: localStorage.storeSessions === "false" ? false : true,
       confirmClear: false,
@@ -1225,7 +1201,6 @@ export default {
       this.exportStr = utils.makeConfig(this);
       console.log(this.exportStr);
       this.exportJson = JSON.parse(this.exportStr);
-      this.importType = ".Config";
       this.exporting = true;
     },
 
@@ -1259,7 +1234,6 @@ export default {
         } else {
           state = utils.parseConfig(json);
         }
-        console.log({ state });
         Object.keys(state).forEach(key => {
           this[key] = state[key];
         });

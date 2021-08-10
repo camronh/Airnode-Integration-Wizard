@@ -131,12 +131,11 @@ function parseOAS(oas) {
       state.endpoints.push(ep);
     }
   }
-  console.log({ state });
   return state;
 }
 
 function makeConfig(state) {
-  const { title, endpoints, server, hasAuth, auth, version } = state;
+  const { title, endpoints, server, hasAuth, auth, version, extraAuth } = state;
 
   let config = {
     id: uuid(),
@@ -226,28 +225,35 @@ function makeConfig(state) {
       `${title}Auth`
     ] = {
       type: auth.type,
-      name: auth.name,
       in: auth.in,
     };
-    if (auth.scheme) {
+    if (auth.type == "http") {
       config.ois[0].apiSpecifications.components.securitySchemes[
         `${title}Auth`
       ].scheme = auth.scheme;
+    } else {
+      config.ois[0].apiSpecifications.components.securitySchemes[
+        `${title}Auth`
+      ].name = auth.name;
     }
   }
+  
   if (state.addedExtraAuth) {
     config.ois[0].apiSpecifications.security[`${title}AuthB`] = [];
     config.ois[0].apiSpecifications.components.securitySchemes[
       `${title}AuthB`
     ] = {
       type: state.extraAuth.type,
-      name: state.extraAuth.name,
       in: state.extraAuth.in,
     };
-    if (state.extraAuth.scheme) {
+    if (extraAuth.type == "http") {
       config.ois[0].apiSpecifications.components.securitySchemes[
         `${title}AuthB`
-      ].scheme = state.extraAuth.scheme;
+      ].scheme = extraAuth.scheme;
+    } else {
+      config.ois[0].apiSpecifications.components.securitySchemes[
+        `${title}AuthB`
+      ].name = extraAuth.name;
     }
   }
 
@@ -356,7 +362,6 @@ function parseConfig(config) {
       if (secScheme.scheme) state.extraAuth.scheme = secScheme.scheme;
     }
   } else state.hasAuth = false;
-  console.log({ state });
 
   state.endpoints = [];
   for (let endpoint of ois.endpoints) {
@@ -383,14 +388,12 @@ function parseConfig(config) {
     }
     state.endpoints.push(ep);
   }
-  console.log({ state });
 
   state.RPCs[0] = config.nodeSettings.chains[0].providers[0].url;
   if (config.nodeSettings.chains[1]) {
     state.RPCs[1] = config.nodeSettings.chains[1].providers[0].url;
     state.extraRPC = true;
   }
-  console.log({ state });
   return state;
 }
 
