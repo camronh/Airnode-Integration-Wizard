@@ -1190,7 +1190,10 @@ export default {
       this.endpointMenu = true;
     },
     cloneEndpoint(endpoint) {
-      this.ep = { ...endpoint };
+      let deepClone = JSON.parse(JSON.stringify(endpoint));
+
+      this.ep = deepClone;
+
       // this.rp = this.ep.reservedParam;
       this.editing = false;
       this.endpointMenu = true;
