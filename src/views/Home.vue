@@ -551,9 +551,9 @@
     <v-dialog v-model="importing" max-width="50%">
       <v-card>
         <v-card-title>
-          Import {{ importType }}
-          <v-spacer></v-spacer>
-          <v-btn-toggle
+          Import API Specs
+
+          <!-- <v-btn-toggle
             v-model="importType"
             tile
             color="primary"
@@ -566,8 +566,12 @@
             <v-btn value=".Config">
               Config
             </v-btn>
-          </v-btn-toggle>
+          </v-btn-toggle> -->
         </v-card-title>
+        <v-card-subtitle>
+          Paste or Drop an API Spec (OAS/Swagger/Config)
+        </v-card-subtitle>
+
         <v-card-text
           @drop.prevent="onDrop($event)"
           @dragover.prevent="dragover = true"
@@ -579,7 +583,7 @@
             v-model="importString"
             rows="20"
             autofocus
-            placeholder="Paste or Drop Import Here..."
+            placeholder='{ "swagger": "2.0", "info": { "version": "1.0.0" } }'
             @input="parseImport"
             no-resize
             :error="importError"
@@ -1232,7 +1236,11 @@ export default {
       // try to convert yaml to json
       try {
         const json = yaml.parse(this.importString);
-        this.importString = JSON.stringify(json, null, 2);
+        if (json.toString() != "[object Object]") throw new Error("Not Object");
+        console.log("parsed:", json.toString());
+        const jsonStr = JSON.stringify(json, null, 2);
+        console.log({ jsonStr });
+        this.importString = jsonStr;
       } catch (e) {
         console.log("Error parsing yaml", e);
       }
@@ -1243,7 +1251,8 @@ export default {
         console.log({ json });
         console.log("Parsing");
         let state;
-        if (this.importType == "OAS") {
+
+        if (!json.ois) {
           state = utils.parseOAS(json);
         } else {
           state = utils.parseConfig(json);

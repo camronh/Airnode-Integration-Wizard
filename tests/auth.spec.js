@@ -8,12 +8,8 @@ test("HTTP Works", async ({ page }) => {
   await page.click("#menuButton");
 
   await page.click("text=Import");
-  await page.click("text=Config");
   const exampleConfig = require("../src/utils/exampleConfig.json");
-  await page.fill(
-    "[placeholder='Paste or Drop Import Here...']",
-    JSON.stringify(exampleConfig)
-  );
+  await page.fill("textarea", JSON.stringify(exampleConfig));
   await page.click(
     "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
   );
@@ -44,12 +40,8 @@ test("Addition Auth Works", async ({ page }) => {
   await page.click("#menuButton");
 
   await page.click("text=Import");
-  await page.click("text=Config");
   const exampleConfig = require("../src/utils/exampleConfig.json");
-  await page.fill(
-    "[placeholder='Paste or Drop Import Here...']",
-    JSON.stringify(exampleConfig)
-  );
+  await page.fill("textarea", JSON.stringify(exampleConfig));
   await page.click(
     "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
   );
@@ -74,5 +66,4 @@ test("Addition Auth Works", async ({ page }) => {
     config.ois[0].apiSpecifications.components.securitySchemes
   );
   expect(securitySchemes.length).toBe(2);
-
 });

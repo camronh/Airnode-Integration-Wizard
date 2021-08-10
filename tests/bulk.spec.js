@@ -7,12 +7,8 @@ test.describe("Bulk", () => {
     await page.click("#menuButton");
 
     await page.click("text=Import");
-    await page.click("text=Config");
     const exampleOAS = require("../src/utils/exampleConfig.json");
-    await page.fill(
-      "[placeholder='Paste or Drop Import Here...']",
-      JSON.stringify(exampleOAS)
-    );
+    await page.fill("textarea", JSON.stringify(exampleOAS));
     await page.click("[type='submit']");
     await page.click("#menuButton");
     await page.click("text=Bulk Change");
