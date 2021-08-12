@@ -647,8 +647,8 @@
                           ></v-list-item-title>
                         </v-list-item-content>
                         <v-list-item-action v-if="hover || selectedConfig == i">
-                          <v-btn icon @click="deleteConfig(configName)">
-                            <v-icon color="red">
+                          <v-btn icon @click="deleteConfig(configName)" small>
+                            <v-icon color="red" small >
                               mdi-close
                             </v-icon>
                           </v-btn>
@@ -1476,12 +1476,17 @@ export default {
 
     async importSavedConfig() {
       this.loading = true;
-      console.log(this.selectedConfig);
-      const configName = this.savedConfigNames[this.selectedConfig];
-      const config = await utils.getConfig(configName);
-      this.importString = JSON.stringify(config, null, 2);
-      await this.parseImport();
-      this.importing = false;
+      try {
+        console.log(this.selectedConfig);
+        const configName = this.savedConfigNames[this.selectedConfig];
+        const config = await utils.getConfig(configName);
+        this.importString = JSON.stringify(config, null, 2);
+        await this.parseImport();
+        this.importing = false;
+        this.makeSnackbar(`Imported ${configName}! ✅`);
+      } catch (error) {
+        this.makeSnackbar("Import Failed! 😱");
+      }
       this.loading = false;
     },
   },
