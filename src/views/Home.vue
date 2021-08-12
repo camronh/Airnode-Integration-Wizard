@@ -559,6 +559,7 @@
               <v-text-field
                 v-if="tab == 1"
                 prepend-icon="mdi-magnify"
+                @keypress.enter="importOnlyConfig"
                 v-model="configSearch"
                 autofocus
               >
@@ -648,7 +649,7 @@
                         </v-list-item-content>
                         <v-list-item-action v-if="hover || selectedConfig == i">
                           <v-btn icon @click="deleteConfig(configName)" small>
-                            <v-icon color="red" small >
+                            <v-icon color="red" small>
                               mdi-close
                             </v-icon>
                           </v-btn>
@@ -1474,11 +1475,12 @@ export default {
       this.loading = false;
     },
 
-    async importSavedConfig() {
+    async importSavedConfig(title) {
       this.loading = true;
       try {
         console.log(this.selectedConfig);
-        const configName = this.savedConfigNames[this.selectedConfig];
+        let configName = this.savedConfigNames[this.selectedConfig];
+        if (title) configName = title;
         const config = await utils.getConfig(configName);
         this.importString = JSON.stringify(config, null, 2);
         await this.parseImport();
@@ -1488,6 +1490,10 @@ export default {
         this.makeSnackbar("Import Failed! 😱");
       }
       this.loading = false;
+    },
+    async importOnlyConfig() {
+      if (this.searchedConfigs.length != 1) return;
+      await this.importSavedConfig(this.searchedConfigs[0]);
     },
   },
 
