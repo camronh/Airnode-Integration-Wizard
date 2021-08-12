@@ -526,6 +526,19 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="loading" persistent width="300">
+      <v-card>
+        <v-card-title>
+          Loading...
+          <v-progress-linear
+            indeterminate
+            color="primary"
+            class="mb-0"
+          ></v-progress-linear>
+        </v-card-title>
+      </v-card>
+    </v-dialog>
+
     <v-dialog v-model="importing" max-width="50%">
       <v-card>
         <v-tabs v-model="tab">
@@ -616,6 +629,13 @@
                           v-text="configName"
                         ></v-list-item-title>
                       </v-list-item-content>
+                      <v-list-item-action>
+                        <v-btn icon @click="deleteConfig(configName)">
+                          <v-icon color="white">
+                            mdi-close
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
                     </v-list-item>
                   </v-list-item-group>
                 </v-list>
@@ -961,6 +981,9 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-snackbar v-model="snackbar">
+      {{ snackbarText }}
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -985,6 +1008,9 @@ export default {
       exportStr: "{}",
       selectedEndpoints: [],
       valid: false,
+      snackbar: false,
+      snackbarText: "",
+      snackbarColor: "",
       options: {
         mode: "code",
         enableTransform: false,
@@ -1005,6 +1031,7 @@ export default {
       confirmDelete: false,
       selectedParam: null,
       downloading: false,
+      loading: false,
       editing: false,
       paramTypes: ["query", "header", "path", "cookie"],
       downloadOptions: ["OAS", "OIS", "Readme", "Deployment"],
@@ -1216,6 +1243,10 @@ export default {
       this.endpoints = endpoints;
       this.confirmDelete = false;
     },
+    makeSnackbar(message) {
+      this.snackbarText = message;
+      this.snackbar = true;
+    },
 
     bulkEditParam() {
       let endpoints = [];
@@ -1397,19 +1428,39 @@ export default {
     },
 
     async saveConfig() {
-      this.savingConfig = true;
-      const results = await utils.saveConfig(this.exportStr);
-      console.log(results);
-      this.savingConfig = false;
+      this.loading = true;
+      try {
+        const results = await utils.saveConfig(this.exportStr);
+        console.log(results);
+        this.makeSnackbar("Saved! ✅");
+      } catch (error) {
+        this.makeSnackbar("Save Failed! 😱");
+      }
+      this.loading = false;
+    },
+
+    async deleteConfig(title) {
+      this.loading = true;
+      try {
+        const results = await utils.deleteConfig(title);
+        console.log(results);
+        await this.getConfigNames();
+        this.makeSnackbar("Deleted! ✅");
+      } catch (error) {
+        this.makeSnackbar("Delete Failed! 😱");
+      }
+
+      this.loading = false;
     },
 
     async importSavedConfig() {
-      this.importLoading = true;
+      this.loading = true;
       const configName = this.savedConfigNames[this.selectedConfig];
       const config = await utils.getConfig(configName);
       this.importString = JSON.stringify(config, null, 2);
       await this.parseImport();
       this.importing = false;
+      this.loading = false;
     },
   },
 
@@ -1417,6 +1468,9 @@ export default {
     savableEndpoint() {
       if (this.ep.path) return true;
       else return false;
+    },
+    utils() {
+      return this.utils;
     },
 
     endpointPath() {

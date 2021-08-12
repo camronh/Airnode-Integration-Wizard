@@ -518,6 +518,11 @@ async function getConfigNames() {
   return results.data;
 }
 
+async function deleteConfig(title) {
+  const results = await axios.delete(`${apiUrl}/config/${title}`);
+  return results.data;
+}
+
 module.exports = {
   makeOAS,
   parseOAS,
@@ -528,5 +533,6 @@ module.exports = {
   getConfigNames,
   getConfigs,
   getConfig,
+  deleteConfig,
   makeReadme,
 };
