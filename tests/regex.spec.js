@@ -7,9 +7,8 @@ test("Regex on Title", async ({ page }) => {
   await page.click("text=Import");
   const exampleConfig = require("../src/utils/exampleConfig.json");
   await page.fill("textarea", JSON.stringify(exampleConfig));
-  await page.click(
-    "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
-  );
+  await page.click("[type='submit']");
+
   await page.click("#menuButton");
   expect(await page.waitForSelector("#export")).toBeTruthy();
   await page.click("[placeholder='Title']", { clickCount: 2 });

@@ -10,9 +10,8 @@ test("Session stores", async ({ page }) => {
   await page.click("text=Import");
   const exampleConfig = require("../src/utils/exampleConfig.json");
   await page.fill("textarea", JSON.stringify(exampleConfig));
-  await page.click(
-    "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
-  );
+  await page.click("[type='submit']");
+
   await page.reload();
   const RPCURLs = await page.$$("text=RPC URL");
   expect(RPCURLs.length).toBe(2);

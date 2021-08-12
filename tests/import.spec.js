@@ -7,9 +7,8 @@ test("Import OAS / Swagger", async ({ page }) => {
   await page.click("text=Import");
   const exampleOAS = require("../src/utils/exampleOAS.json");
   await page.fill("textarea", JSON.stringify(exampleOAS));
-  await page.click(
-    "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
-  );
+  await page.click("[type='submit']");
+
   const value = await page.$eval("[placeholder='Title']", el => el.value);
   expect(value).toContain("Finchains");
   await page.click("text=pairs");
@@ -23,9 +22,8 @@ test("Import Config", async ({ page }) => {
   await page.click("text=Import");
   const exampleConfig = require("../src/utils/exampleConfig.json");
   await page.fill("textarea", JSON.stringify(exampleConfig));
-  await page.click(
-    "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
-  );
+  await page.click("[type='submit']");
+
   const titleValue = await page.$eval("[placeholder='Title']", el => el.value);
   expect(titleValue).toContain("Forge");
 

@@ -6,13 +6,9 @@ test("Export works", async ({ page }) => {
   await page.click("#menuButton");
   await page.click("text=Import");
   const exampleConfig = require("../src/utils/exampleConfig.json");
-  await page.fill(
-    "textarea",
-    JSON.stringify(exampleConfig)
-  );
-  await page.click(
-    "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
-  );
+  await page.fill("textarea", JSON.stringify(exampleConfig));
+  await page.click("[type='submit']");
+
   const titleValue = await page.$eval("[placeholder='Title']", el => el.value);
   expect(titleValue).toContain("Forge");
 

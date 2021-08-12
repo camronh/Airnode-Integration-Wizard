@@ -1,5 +1,8 @@
 const { v4: uuid } = require("uuid");
 const ethers = require("ethers");
+const axios = require("axios");
+
+const apiUrl = "http://localhost:3000";
 
 function makeOAS(state) {
   const { title, version, server, hasAuth, auth, endpoints } = state;
@@ -237,7 +240,7 @@ function makeConfig(state) {
       ].name = auth.name;
     }
   }
-  
+
   if (state.addedExtraAuth) {
     config.ois[0].apiSpecifications.security[`${title}AuthB`] = [];
     config.ois[0].apiSpecifications.components.securitySchemes[
@@ -494,11 +497,36 @@ __Params:__ {${endpoint.parameters.join("} | {")}}\n`;
   return configStr;
 }
 
+async function saveConfig(configStr) {
+  const config = JSON.parse(configStr);
+  const results = await axios.post(`${apiUrl}/configs`, config);
+  return results.data;
+}
+
+async function getConfigs() {
+  const results = await axios.get(`${apiUrl}/configs`);
+  return results.data;
+}
+
+async function getConfig(title) {
+  const results = await axios.get(`${apiUrl}/config/${title}`);
+  return results.data;
+}
+
+async function getConfigNames() {
+  const results = await axios.get(`${apiUrl}/configs?names=true`);
+  return results.data;
+}
+
 module.exports = {
   makeOAS,
   parseOAS,
   makeConfig,
   parseConfig,
   makeZip,
+  saveConfig,
+  getConfigNames,
+  getConfigs,
+  getConfig,
   makeReadme,
 };

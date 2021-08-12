@@ -518,6 +518,7 @@
             @click="saveEndpoint"
             :disabled="!savableEndpoint"
             text
+            type="submit"
             color="primary"
           >
             Save
@@ -527,10 +528,24 @@
     </v-dialog>
     <v-dialog v-model="importing" max-width="50%">
       <v-card>
-        <v-card-title>
-          Import API Specs
+        <v-tabs v-model="tab">
+          <v-tabs-slider color="accent"></v-tabs-slider>
 
-          <!-- <v-btn-toggle
+          <v-tab>
+            Import
+          </v-tab>
+          <v-tab @click="getConfigNames">
+            Saved
+          </v-tab>
+        </v-tabs>
+
+        <v-tabs-items v-model="tab">
+          <v-tab-item>
+            <template>
+              <v-card-title>
+                Import API Specs
+
+                <!-- <v-btn-toggle
             v-model="importType"
             tile
             color="primary"
@@ -544,51 +559,97 @@
               Config
             </v-btn>
           </v-btn-toggle> -->
-        </v-card-title>
-        <v-card-subtitle>
-          Paste or Drop an API Spec (OAS/Swagger/Config)
-        </v-card-subtitle>
+              </v-card-title>
+              <v-card-subtitle>
+                Paste or Drop an API Spec (OAS/Swagger/Config)
+              </v-card-subtitle>
 
-        <v-card-text
-          @drop.prevent="onDrop($event)"
-          @dragover.prevent="dragover = true"
-          @dragenter.prevent="dragover = true"
-          @dragleave.prevent="dragover = false"
-          :class="{ accent: dragover }"
-        >
-          <v-textarea
-            v-model="importString"
-            rows="20"
-            autofocus
-            placeholder='{ "swagger": "2.0", "info": { "version": "1.0.0" } }'
-            @input="parseImport"
-            no-resize
-            :error="importError"
-          >
-          </v-textarea>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            @click="importing = false"
-            :disabled="importError"
-            text
-            color="primary"
-            type="submit"
-            block
-          >
-            Import
-            <v-icon right>
-              mdi-import
-            </v-icon>
-          </v-btn>
-        </v-card-actions>
+              <v-card-text
+                @drop.prevent="onDrop($event)"
+                @dragover.prevent="dragover = true"
+                @dragenter.prevent="dragover = true"
+                @dragleave.prevent="dragover = false"
+                :class="{ accent: dragover }"
+              >
+                <v-textarea
+                  v-model="importString"
+                  rows="16"
+                  autofocus
+                  placeholder='{ "swagger": "2.0", "info": { "version": "1.0.0" } }'
+                  @input="parseImport"
+                  no-resize
+                  dense
+                  :error="importError"
+                >
+                </v-textarea>
+                <v-btn
+                  @click="importing = false"
+                  :disabled="importError"
+                  text
+                  color="primary"
+                  type="submit"
+                  block
+                >
+                  Import
+                  <v-icon right>
+                    mdi-import
+                  </v-icon>
+                </v-btn>
+              </v-card-text>
+            </template>
+          </v-tab-item>
+          <v-tab-item>
+            <v-card flat>
+              <v-card-text>
+                <v-list>
+                  <v-list-item-group
+                    v-model="selectedConfig"
+                    mandatory
+                    color="accent"
+                  >
+                    <v-list-item
+                      v-for="configName in savedConfigNames"
+                      :key="configName"
+                    >
+                      <v-list-item-content>
+                        <v-list-item-title
+                          v-text="configName"
+                        ></v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-list-item-group>
+                </v-list>
+              </v-card-text>
+            </v-card>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                @click="importSavedConfig()"
+                text
+                color="primary"
+                type="submit"
+                block
+              >
+                Import
+                <v-icon right>
+                  mdi-import
+                </v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-tab-item>
+        </v-tabs-items>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="exporting" max-width="50%" :overlay-opacity="75">
+    <!-- <v-dialog v-model="exporting" max-width="50%" :overlay-opacity="75">
       <v-card>
         <v-card-title>
-          Export
+          Export2
+          <v-spacer></v-spacer>
+          <v-btn icon>
+            <v-icon>
+              mdi-plus
+            </v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-subtitle>
           Edit your config.json
@@ -608,7 +669,7 @@
           Download
         </v-btn>
       </v-card>
-    </v-dialog>
+    </v-dialog> -->
     <v-dialog
       v-model="bulkMenu"
       max-width="50%"
@@ -695,6 +756,12 @@
       <v-card>
         <v-card-title>
           Export
+          <v-spacer></v-spacer>
+          <v-btn icon :loading="savingConfig" @click="saveConfig">
+            <v-icon>
+              mdi-floppy
+            </v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-subtitle>
           Edit your config.json
@@ -914,6 +981,7 @@ export default {
       server: "",
       importString: "",
       dragover: false,
+      tab: null,
       exportStr: "{}",
       selectedEndpoints: [],
       valid: false,
@@ -925,11 +993,14 @@ export default {
       extraRPC: false,
       addedExtraAuth: false,
       importError: false,
+      savedConfigNames: ["TEst1", "test2"],
       exportType: "oas",
       exporting: false,
+      selectedConfig: null,
       storeSessions: localStorage.storeSessions === "false" ? false : true,
       confirmClear: false,
       importing: false,
+      savingConfig: false,
       selectingEndpoint: false,
       confirmDelete: false,
       selectedParam: null,
@@ -1320,6 +1391,25 @@ export default {
       // console.log("Dropped!");
       // console.log(e);
       // console.log(e.dataTransfer.getData("text"));
+    },
+    async getConfigNames() {
+      this.savedConfigNames = await utils.getConfigNames();
+    },
+
+    async saveConfig() {
+      this.savingConfig = true;
+      const results = await utils.saveConfig(this.exportStr);
+      console.log(results);
+      this.savingConfig = false;
+    },
+
+    async importSavedConfig() {
+      this.importLoading = true;
+      const configName = this.savedConfigNames[this.selectedConfig];
+      const config = await utils.getConfig(configName);
+      this.importString = JSON.stringify(config, null, 2);
+      await this.parseImport();
+      this.importing = false;
     },
   },
 
