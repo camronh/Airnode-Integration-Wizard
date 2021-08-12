@@ -540,17 +540,32 @@
     </v-dialog>
 
     <v-dialog v-model="importing" max-width="50%">
-      <v-card>
-        <v-tabs v-model="tab">
-          <v-tabs-slider color="accent"></v-tabs-slider>
-
-          <v-tab>
-            Import
-          </v-tab>
-          <v-tab @click="getConfigNames">
-            Saved
-          </v-tab>
-        </v-tabs>
+      <v-card class="overflow-hidden">
+        <v-app-bar flat color="transparent">
+          <v-row>
+            <v-col cols="12" md="5">
+              <v-tabs v-model="tab" fixed-tabs>
+                <v-tabs-slider color="accent"></v-tabs-slider>
+                <v-tab>
+                  Import
+                </v-tab>
+                <v-tab @click="getConfigNames">
+                  Saved
+                </v-tab>
+              </v-tabs>
+            </v-col>
+            <v-col cols="12" md="1"> </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-if="tab == 1"
+                prepend-icon="mdi-magnify"
+                v-model="configSearch"
+                autofocus
+              >
+              </v-text-field>
+            </v-col>
+          </v-row>
+        </v-app-bar>
 
         <v-tabs-items v-model="tab">
           <v-tab-item>
@@ -612,36 +627,39 @@
             </template>
           </v-tab-item>
           <v-tab-item>
-            <v-card flat>
-              <v-card-text>
-                <v-list>
-                  <v-list-item-group
-                    v-model="selectedConfig"
-                    mandatory
-                    color="accent"
-                  >
-                    <v-list-item
-                      v-for="configName in savedConfigNames"
-                      :key="configName"
+            <v-card-text>
+              <v-list style="max-height: 700px" class="overflow-y-auto">
+                <v-list-item-group
+                  v-model="selectedConfig"
+                  mandatory
+                  color="accent"
+                >
+                  <template>
+                    <v-hover
+                      v-slot="{ hover }"
+                      v-for="(configName, i) in searchedConfigs"
+                      :key="i"
                     >
-                      <v-list-item-content>
-                        <v-list-item-title
-                          v-text="configName"
-                        ></v-list-item-title>
-                      </v-list-item-content>
-                      <v-list-item-action>
-                        <v-btn icon @click="deleteConfig(configName)">
-                          <v-icon color="white">
-                            mdi-close
-                          </v-icon>
-                        </v-btn>
-                      </v-list-item-action>
-                    </v-list-item>
-                  </v-list-item-group>
-                </v-list>
-              </v-card-text>
-            </v-card>
-            <v-card-actions>
+                      <v-list-item @dblclick="importSavedConfig()">
+                        <v-list-item-content>
+                          <v-list-item-title
+                            v-text="configName"
+                          ></v-list-item-title>
+                        </v-list-item-content>
+                        <v-list-item-action v-if="hover || selectedConfig == i">
+                          <v-btn icon @click="deleteConfig(configName)">
+                            <v-icon color="red">
+                              mdi-close
+                            </v-icon>
+                          </v-btn>
+                        </v-list-item-action>
+                      </v-list-item>
+                    </v-hover>
+                  </template>
+                </v-list-item-group>
+              </v-list>
+            </v-card-text>
+            <!-- <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn
                 @click="importSavedConfig()"
@@ -655,7 +673,7 @@
                   mdi-import
                 </v-icon>
               </v-btn>
-            </v-card-actions>
+            </v-card-actions> -->
           </v-tab-item>
         </v-tabs-items>
       </v-card>
@@ -1011,6 +1029,7 @@ export default {
       snackbar: false,
       snackbarText: "",
       snackbarColor: "",
+      configSearch: "",
       options: {
         mode: "code",
         enableTransform: false,
@@ -1019,7 +1038,7 @@ export default {
       extraRPC: false,
       addedExtraAuth: false,
       importError: false,
-      savedConfigNames: ["TEst1", "test2"],
+      savedConfigNames: [],
       exportType: "oas",
       exporting: false,
       selectedConfig: null,
@@ -1457,6 +1476,7 @@ export default {
 
     async importSavedConfig() {
       this.loading = true;
+      console.log(this.selectedConfig);
       const configName = this.savedConfigNames[this.selectedConfig];
       const config = await utils.getConfig(configName);
       this.importString = JSON.stringify(config, null, 2);
@@ -1487,6 +1507,12 @@ export default {
     },
     sessionValues() {
       return `${this.title}|${this.propertyB}`;
+    },
+    searchedConfigs() {
+      if (!this.configSearch) return this.savedConfigNames;
+      return this.savedConfigNames.filter(config => {
+        return config.toLowerCase().includes(this.configSearch.toLowerCase());
+      });
     },
 
     selectedEndpointParams() {
