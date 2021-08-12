@@ -9,9 +9,8 @@ test.skip("Bug Fix: Unable to delete endpoint after bulk edit", async ({
   await page.click("text=Import");
   const exampleOAS = require("../src/utils/obpOAS.json");
   await page.fill("textarea", JSON.stringify(exampleOAS));
-  await page.click(
-    "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
-  );
+  await page.click("[type='submit']");
+
   const value = await page.$eval("[placeholder='Title']", el => el.value);
   expect(value).toContain("Open Bank");
   await page.click("#menuButton");

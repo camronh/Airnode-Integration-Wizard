@@ -6,10 +6,7 @@ test("Overwrite on duplicate", async ({ page }) => {
 
   await page.click("text=Import");
   const exampleOAS = require("../src/utils/exampleConfig.json");
-  await page.fill(
-    "textarea",
-    JSON.stringify(exampleOAS)
-  );
+  await page.fill("textarea", JSON.stringify(exampleOAS));
   await page.click("[type='submit']");
   await page.click("text=Add Endpoint");
   await page.type("#path", "/quotes");

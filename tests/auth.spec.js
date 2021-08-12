@@ -10,9 +10,8 @@ test("HTTP Works", async ({ page }) => {
   await page.click("text=Import");
   const exampleConfig = require("../src/utils/exampleConfig.json");
   await page.fill("textarea", JSON.stringify(exampleConfig));
-  await page.click(
-    "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
-  );
+  await page.click("[type='submit']");
+
   expect(await page.isVisible("text=Scheme")).toBeFalsy();
   await page.click("text=apiKey");
   await page.click("text=http");
@@ -43,9 +42,8 @@ test("Addition Auth Works", async ({ page }) => {
   await page.click("text=Import");
   const exampleConfig = require("../src/utils/exampleConfig.json");
   await page.fill("textarea", JSON.stringify(exampleConfig));
-  await page.click(
-    "#app > div.v-dialog__content.v-dialog__content--active > div > div > div.v-card__actions > button"
-  );
+  await page.click("[type='submit']");
+
   await page.click("#menuButton");
   await page.click('"Add Auth"');
   expect(await page.isVisible("#trashAuthBtn")).toBeTruthy();
