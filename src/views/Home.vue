@@ -1424,7 +1424,9 @@ export default {
       // console.log(e.dataTransfer.getData("text"));
     },
     async getConfigNames() {
+      this.loading = true;
       this.savedConfigNames = await utils.getConfigNames();
+      this.loading = false;
     },
 
     async saveConfig() {
