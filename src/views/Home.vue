@@ -409,6 +409,7 @@
                 v-model="ep.path"
                 label="Path"
                 id="path"
+                @input="parsePath"
                 placeholder="/endpoint/{pathParam}"
                 required
               ></v-text-field>
@@ -629,7 +630,7 @@
           </v-tab-item>
           <v-tab-item>
             <v-card-text>
-              <v-list style="max-height: 700px" class="overflow-y-auto">
+              <v-list style="max-height: 600px" class="overflow-y-auto">
                 <v-list-item-group
                   v-model="selectedConfig"
                   mandatory
@@ -1370,6 +1371,29 @@ export default {
         this.importError = true;
       }
     },
+    parsePath() {
+      console.log(this.ep.path);
+      // get all strings inside of curly braces in this.ep.path
+      let paths = this.ep.path.match(/\{[^}]*\}/g);
+      if (!paths) return;
+      console.log(paths);
+      let pathParams = [];
+      // remove curly braces from each path
+      paths.forEach(path => {
+        let param = path.replace(path, path.replace(/\{|\}/g, ""));
+        pathParams.push(param);
+      });
+      for (let param of pathParams) {
+        if (this.ep.params.find(v => v.name === param && v.in == "path")) {
+          continue;
+        }
+        this.ep.params.push({
+          name: param,
+          in: "path",
+        });
+      }
+      return pathParams;
+    },
     storeSession() {
       if (!this.storeSessions) return;
       console.log("Storing session");
@@ -1412,10 +1436,16 @@ export default {
       this.confirmClear = false;
     },
     validEndpoint(ep) {
+      // console.log("Getting valid endpoint");
+      console.log({ ep });
       if (ep.method != "get" && ep.method != "post") return false;
       const { params } = ep;
       for (let p of params) {
+        console.log(p);
         if (!this.paramTypes.includes(p.in)) return false;
+        console.log(ep.path);
+        console.log({ includes: ep.path.includes(p.name) });
+        if (p.in == "path" && !ep.path.includes(`{${p.name}}`)) return false;
       }
       return true;
     },
@@ -1515,9 +1545,6 @@ export default {
       const regex = /^[a-zA-Z]+$/;
       if (regex.test(this.title)) return true;
       else return false;
-    },
-    sessionValues() {
-      return `${this.title}|${this.propertyB}`;
     },
     searchedConfigs() {
       if (!this.configSearch) return this.savedConfigNames;
