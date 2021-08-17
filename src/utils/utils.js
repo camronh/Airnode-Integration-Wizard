@@ -86,7 +86,7 @@ function makeOAS(state) {
 }
 
 // parse oas to state variables
-function parseOAS(oas) {
+async function parseOAS(oas) {
   let state = {
     title: oas.info.title,
     version: oas.info.version,
@@ -119,6 +119,7 @@ function parseOAS(oas) {
   for (let path of paths) {
     const methods = Object.keys(oas.paths[path]);
     for (let method of methods) {
+      if (!["get", "post"].includes(method)) continue;
       let ep = {
         path,
         method,
@@ -132,6 +133,27 @@ function parseOAS(oas) {
           });
         }
       }
+      if (oas.paths[path][method].requestBody) {
+        try {
+          const requestBody = oas.paths[path][method].requestBody;
+          const contentTypes = Object.keys(requestBody.content);
+          for (let contentType of contentTypes) {
+            const bodyParams = Object.keys(
+              requestBody.content[contentType].schema.properties
+            );
+
+            for (let bodyParam of bodyParams) {
+              ep.params.push({
+                name: bodyParam,
+                in: "query",
+              });
+            }
+          }
+        } catch (error) {
+          console.log("Error parsing request body", error);
+        }
+      }
+
       state.endpoints.push(ep);
     }
   }

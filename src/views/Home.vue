@@ -1330,13 +1330,14 @@ export default {
       this.exporting = true;
     },
 
-    parseImport() {
+    async parseImport() {
       this.importError = false;
       if (!this.importString) return;
       let apiValue, extraValue;
       if (this.auth.value) apiValue = this.auth.value;
       if (this.extraAuth.value) extraValue = this.extraAuth.value;
       // try to convert yaml to json
+
       try {
         const json = yaml.parse(this.importString);
         if (json.toString() != "[object Object]") throw new Error("Not Object");
@@ -1349,14 +1350,23 @@ export default {
       }
 
       try {
+        const SwaggerParser = require("@apidevtools/swagger-parser");
+        let parser = new SwaggerParser();
+        const oas = await parser.dereference(JSON.parse(this.importString));
+        this.importString = JSON.stringify(oas, null, 2);
+        console.log("Dereferenced!");
+      } catch (error) {
+        console.log(error);
+      }
+
+      try {
         const json = JSON.parse(this.importString);
         if (json.host) json.servers = [{ url: json.host }];
-        console.log({ json });
         console.log("Parsing");
         let state;
 
         if (!json.ois) {
-          state = utils.parseOAS(json);
+          state = await utils.parseOAS(json);
         } else {
           state = utils.parseConfig(json);
         }
@@ -1372,11 +1382,9 @@ export default {
       }
     },
     parsePath() {
-      console.log(this.ep.path);
       // get all strings inside of curly braces in this.ep.path
       let paths = this.ep.path.match(/\{[^}]*\}/g);
       if (!paths) return;
-      console.log(paths);
       let pathParams = [];
       // remove curly braces from each path
       paths.forEach(path => {
@@ -1437,14 +1445,10 @@ export default {
     },
     validEndpoint(ep) {
       // console.log("Getting valid endpoint");
-      console.log({ ep });
       if (ep.method != "get" && ep.method != "post") return false;
       const { params } = ep;
       for (let p of params) {
-        console.log(p);
         if (!this.paramTypes.includes(p.in)) return false;
-        console.log(ep.path);
-        console.log({ includes: ep.path.includes(p.name) });
         if (p.in == "path" && !ep.path.includes(`{${p.name}}`)) return false;
       }
       return true;
@@ -1537,7 +1541,6 @@ export default {
     },
 
     endpointPath() {
-      console.log(this.ep);
       return this.ep.path;
     },
     // check if string contains only letters
