@@ -115,6 +115,7 @@ function parseOAS(oas) {
   for (let path of paths) {
     const methods = Object.keys(oas.paths[path]);
     for (let method of methods) {
+      if (!["get", "post"].includes(method)) continue;
       let ep = {
         path,
         method,
@@ -126,6 +127,25 @@ function parseOAS(oas) {
             name: param.name,
             in: param.in == "body" ? "query" : param.in,
           });
+        }
+      }
+      if (oas.paths[path][method].requestBody) {
+        const requestBody = oas.paths[path][method].requestBody;
+        const contentTypes = Object.keys(requestBody.content);
+        console.log("Got Here!");
+        for (let contentType of contentTypes) {
+          console.log({ path, method, contentType });
+          const bodyParams = Object.keys(
+            requestBody.content[contentType].schema.properties
+          );
+          console.log("Got Here2!");
+
+          for (let bodyParam of bodyParams) {
+            ep.params.push({
+              name: bodyParam,
+              in: "query",
+            });
+          }
         }
       }
       state.endpoints.push(ep);
@@ -237,7 +257,7 @@ function makeConfig(state) {
       ].name = auth.name;
     }
   }
-  
+
   if (state.addedExtraAuth) {
     config.ois[0].apiSpecifications.security[`${title}AuthB`] = [];
     config.ois[0].apiSpecifications.components.securitySchemes[
