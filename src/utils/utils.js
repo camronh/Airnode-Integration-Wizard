@@ -82,7 +82,7 @@ function makeOAS(state) {
 }
 
 // parse oas to state variables
-function parseOAS(oas) {
+async function parseOAS(oas) {
   let state = {
     title: oas.info.title,
     version: oas.info.version,
@@ -237,7 +237,7 @@ function makeConfig(state) {
       ].name = auth.name;
     }
   }
-  
+
   if (state.addedExtraAuth) {
     config.ois[0].apiSpecifications.security[`${title}AuthB`] = [];
     config.ois[0].apiSpecifications.components.securitySchemes[
