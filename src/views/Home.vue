@@ -409,6 +409,7 @@
                 v-model="ep.path"
                 label="Path"
                 id="path"
+                autofocus
                 @input="parsePath"
                 placeholder="/endpoint/{pathParam}"
                 required
