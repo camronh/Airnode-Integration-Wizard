@@ -82,7 +82,7 @@ function makeOAS(state) {
 }
 
 // parse oas to state variables
-function parseOAS(oas) {
+async function parseOAS(oas) {
   let state = {
     title: oas.info.title,
     version: oas.info.version,
