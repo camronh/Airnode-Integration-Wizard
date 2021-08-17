@@ -130,24 +130,26 @@ async function parseOAS(oas) {
         }
       }
       if (oas.paths[path][method].requestBody) {
-        const requestBody = oas.paths[path][method].requestBody;
-        const contentTypes = Object.keys(requestBody.content);
-        console.log("Got Here!");
-        for (let contentType of contentTypes) {
-          console.log({ path, method, contentType });
-          const bodyParams = Object.keys(
-            requestBody.content[contentType].schema.properties
-          );
-          console.log("Got Here2!");
+        try {
+          const requestBody = oas.paths[path][method].requestBody;
+          const contentTypes = Object.keys(requestBody.content);
+          for (let contentType of contentTypes) {
+            const bodyParams = Object.keys(
+              requestBody.content[contentType].schema.properties
+            );
 
-          for (let bodyParam of bodyParams) {
-            ep.params.push({
-              name: bodyParam,
-              in: "query",
-            });
+            for (let bodyParam of bodyParams) {
+              ep.params.push({
+                name: bodyParam,
+                in: "query",
+              });
+            }
           }
+        } catch (error) {
+          console.log("Error parsing request body", error);
         }
       }
+
       state.endpoints.push(ep);
     }
   }
