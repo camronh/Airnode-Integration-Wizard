@@ -1,0 +1,1801 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "climateKuul live",
+    "contact": {},
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://api.climatekuul.com:8000/footprint",
+      "variables": {}
+    }
+  ],
+  "paths": {
+    "/requestApiKey": {
+      "post": {
+        "tags": ["Request Api Key"],
+        "summary": "requestApiKey",
+        "operationId": "requestApiKey",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "userFirstName",
+                  "userLastName",
+                  "email",
+                  "password",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "userFirstName": {
+                    "type": "string",
+                    "example": "usman",
+                    "description": "User first name"
+                  },
+                  "userLastName": {
+                    "type": "string",
+                    "example": "ch",
+                    "description": "User last name"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "abcd@gmail.com",
+                    "description": "User email"
+                  },
+                  "password": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 234,
+                    "description": "User password"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "qNahlSrEaduQ",
+                    "description": "Api Key for client"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "eCqMeAfaDBWG",
+                    "description": "Integration Partner Api Key"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/airtravelMultileg": {
+      "post": {
+        "tags": ["airtravelMultileg"],
+        "summary": "airtravelMultileg",
+        "operationId": "airtravelMultileg",
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/airtravelMultilegRequest"
+              },
+              "example": {
+                "travel_mode": "multileg",
+                "legs_count": "2",
+                "leg1": {
+                  "origin_airport_code": "KHI",
+                  "destination_airport_code": "DXB",
+                  "travel_class": "Economy"
+                },
+                "leg2": {
+                  "origin_airport_code": "DXB",
+                  "destination_airport_code": "LHR",
+                  "travel_class": "Business"
+                },
+                "leg3": {
+                  "origin_airport_code": "FRA",
+                  "destination_airport_code": "KHI",
+                  "travel_class": "Premium Economy"
+                },
+                "number_of_passengers": "2",
+                "apiKey_l1": "d95fead6-e8a6-4547-9fb9-7835101a3960",
+                "apiKey_l2": "c60f8db5-7204-4427-960d-27400c38b166"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/airtravelCoordinates": {
+      "post": {
+        "tags": ["AirtravelCoordinates"],
+        "summary": "airtravelCoordinates",
+        "operationId": "airtravelCoordinates",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/x-www-form-urlencoded"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "number_of_passengers",
+                  "travel_class",
+                  "travel_mode",
+                  "origin_airport_latitude",
+                  "origin_airport_longitude",
+                  "destination_airport_latitude",
+                  "destination_airport_longitude",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "number_of_passengers": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 2,
+                    "description": "Number of passengers (like: 1, 2 ,3 )"
+                  },
+                  "travel_class": {
+                    "type": "string",
+                    "example": "Economy",
+                    "description": "Travel class can be 'First Class', 'Economy', 'Business' or 'Premium Economy'"
+                  },
+                  "travel_mode": {
+                    "type": "string",
+                    "example": "round trip",
+                    "description": "Travel mode can be 'one way' or 'round trip'"
+                  },
+                  "origin_airport_latitude": {
+                    "type": "number",
+                    "format": "double",
+                    "example": 31.5208,
+                    "description": "Origin latitude (like: 23.372628 value = -90<=x<=90 )"
+                  },
+                  "origin_airport_longitude": {
+                    "type": "number",
+                    "format": "double",
+                    "example": 74.4028,
+                    "description": "Origin longitude (like: 113.159339, value = -180<=x<=180 )"
+                  },
+                  "destination_airport_latitude": {
+                    "type": "number",
+                    "format": "double",
+                    "example": 24.9056,
+                    "description": "Destination latitude (like:  50.870752, value = -90<=x<=90)"
+                  },
+                  "destination_airport_longitude": {
+                    "type": "number",
+                    "format": "double",
+                    "example": 67.1569,
+                    "description": "Destination longitude (like:  4.669490, value = -180<=x<=180)"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4547-9fb9-7835101a3960",
+                    "description": "Client Api Key"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7204-4427-960d-27400c38b166",
+                    "description": "Integration Partner Api Key"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/ecommerceDelivery": {
+      "post": {
+        "tags": ["EcommerceDelivery"],
+        "summary": "ecommerceDelivery",
+        "operationId": "ecommerceDelivery",
+        "parameters": [
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "description": "",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "example": "application/x-www-form-urlencoded"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "waybill_type",
+                  "origin_latitude",
+                  "origin_longitude",
+                  "destination_latitude",
+                  "destination_longitude",
+                  "volumetric_weight",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "waybill_type": {
+                    "type": "string",
+                    "description": "this can be 'air only', 'road only' or 'air and road'",
+                    "example": "road only"
+                  },
+                  "origin_airport_code": {
+                    "type": "string",
+                    "description": "valid airport code of origin",
+                    "example": "KHI"
+                  },
+                  "origin_latitude": {
+                    "type": "number",
+                    "description": "valid latitude of origin",
+                    "format": "double",
+                    "example": 23.372628
+                  },
+                  "origin_longitude": {
+                    "type": "number",
+                    "description": "valid longitude of origin",
+                    "format": "double",
+                    "example": 113.159339
+                  },
+                  "destination_latitude": {
+                    "type": "number",
+                    "description": "valid latitude of destination",
+                    "format": "double",
+                    "example": 50.870752
+                  },
+                  "destination_longitude": {
+                    "type": "number",
+                    "description": "valid longitude of destination",
+                    "format": "double",
+                    "example": 4.66949
+                  },
+                  "destination_airport_code": {
+                    "type": "string",
+                    "description": "valid airport code of destination",
+                    "example": "BRU"
+                  },
+                  "volumetric_weight": {
+                    "type": "number",
+                    "format": "double",
+                    "example": 2.7,
+                    "description": "Volumetric weight' (like:2.70)"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4547-9fb9-7835101a3960",
+                    "description": "Client Api Key"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7204-4427-960d-27400c38b166",
+                    "description": "Integration Partner Api Key"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/roadDistance": {
+      "post": {
+        "tags": ["RoadDistance"],
+        "summary": "RoadDistance",
+        "operationId": "roadDistance",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "travel_distance",
+                  "vehicle_type",
+                  "trip_start",
+                  "trip_end",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "travel_distance": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 2450
+                  },
+                  "vehicle_type": {
+                    "type": "string",
+                    "example": "personal car",
+                    "description": "Vehicle type can be 'personal car', 'light truck' or 'heavy-duty truck'"
+                  },
+                  "vehicle_year": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 2010,
+                    "description": "vehicle year (like: 2010, 2015, 2019), Required only when vehicle_type is 'personal car' "
+                  },
+                  "vehicle_make": {
+                    "type": "string",
+                    "example": "Honda",
+                    "description": "vehicle make (like: Honda, Toyota, Smart), Required only when vehicle_type is 'personal car' "
+                  },
+                  "trip_start": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 16,
+                    "description": "timestamp in epoch time (like: 1604188800)"
+                  },
+                  "trip_end": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 18,
+                    "description": "timestamp in epoch time (like: 1606780799)"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4547-9fb9-7835101a3960",
+                    "description": "Client Api Key"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7204-4427-960d-27400c38b166",
+                    "description": "Integration Partner Api Key"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/urbanDelivery": {
+      "post": {
+        "tags": ["UrbanDelivery"],
+        "summary": "urbanDelivery",
+        "operationId": "urbanDelivery",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "vehicle_type",
+                  "origin_latitude",
+                  "origin_longitude",
+                  "destination_latitude",
+                  "destination_longitude",
+                  "item_count",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "vehicle_type": {
+                    "type": "string",
+                    "example": "PRIVATE CAR",
+                    "description": "Vehicle type (like: private car, motorcycle,cargo van,zero-emission)"
+                  },
+                  "origin_latitude": {
+                    "type": "number",
+                    "format": "double",
+                    "example": -89.372628,
+                    "description": "Origin latitude (like: 23.372628, value = -90<=x<=90)"
+                  },
+                  "origin_longitude": {
+                    "type": "number",
+                    "format": "double",
+                    "example": -179.159339,
+                    "description": "Origin longitude (like: 113.159339, value = -180<=x<=180)"
+                  },
+                  "destination_latitude": {
+                    "type": "number",
+                    "format": "double",
+                    "example": -89.870752,
+                    "description": "Destination latitude (like: 50.870752, value = -90<=x<=90)"
+                  },
+                  "destination_longitude": {
+                    "type": "number",
+                    "format": "double",
+                    "example": 179.66949,
+                    "description": "Destination longitude (like: 4.669490, value = -180<=x<=180)"
+                  },
+                  "item_count": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 3,
+                    "description": "item_count' (like:2, value = 0<x<=100)"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4547-9fb9-7835101a3960",
+                    "description": "Client Api Key"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7204-4427-960d-27400c38b166",
+                    "description": "Integration Partner Api Key"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/urbanDelivery/confirmCarbonOffset": {
+      "patch": {
+        "tags": ["UrbanDelivery"],
+        "summary": "confirmCarbonOffset",
+        "operationId": "confirmCarbonOffset",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": ["transaction_id", "carbonOffset"],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a7875a01d88997746c91ae",
+                    "description": "transaction_id"
+                  },
+                  "carbonOffset": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Carbon Offset (Value = y/n)"
+                  },
+                  "contactFirstName": {
+                    "type": "string",
+                    "example": "abc",
+                    "description": "Contact first name"
+                  },
+                  "contactLastName": {
+                    "type": "string",
+                    "example": "xyz",
+                    "description": "Contact last name"
+                  },
+                  "contactEmail": {
+                    "type": "string",
+                    "example": "example@example.com",
+                    "description": "Contact email"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/ecommerceDelivery/confirmCarbonOffset": {
+      "patch": {
+        "tags": ["EcommerceDelivery"],
+        "summary": "confirmCarbonOffset",
+        "operationId": "confirmCarbonOffset1",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": ["transaction_id", "carbonOffset"],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a766d401d88997746c91a0",
+                    "description": "transaction_id"
+                  },
+                  "carbonOffset": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Carbon Offset (Value = y/n)"
+                  },
+                  "contactFirstName": {
+                    "type": "string",
+                    "example": "abc",
+                    "description": "Contact first name"
+                  },
+                  "contactLastName": {
+                    "type": "string",
+                    "example": "xyz",
+                    "description": "Contact last name"
+                  },
+                  "contactEmail": {
+                    "type": "string",
+                    "example": "example@example.com",
+                    "description": "Contact email"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/airtravelMultileg/confirmCarbonOffset": {
+      "patch": {
+        "tags": ["airtravelMultileg"],
+        "summary": "confirmCarbonOffset",
+        "operationId": "confirmCarbonOffset3",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": ["transaction_id", "carbonOffset"],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a75c0e94c8cb95a6d0e02e",
+                    "description": "transaction_id"
+                  },
+                  "carbonOffset": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Carbon Offset (Value = y/n)"
+                  },
+                  "contactFirstName": {
+                    "type": "string",
+                    "example": "abc",
+                    "description": "Contact first name"
+                  },
+                  "contactLastName": {
+                    "type": "string",
+                    "example": "xyz",
+                    "description": "Contact last name"
+                  },
+                  "contactEmail": {
+                    "type": "string",
+                    "example": "example@example.com",
+                    "description": "Contact email"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/airtravelCoordinates/confirmCarbonOffset": {
+      "patch": {
+        "tags": ["AirtravelCoordinates"],
+        "summary": "confirmCarbonOffset",
+        "operationId": "confirmCarbonOffset4",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": ["transaction_id", "carbonOffset"],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a78ed201d88997746c91b5",
+                    "description": "transaction_id"
+                  },
+                  "carbonOffset": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Carbon Offset (Value = y/n)"
+                  },
+                  "contactFirstName": {
+                    "type": "string",
+                    "example": "abc",
+                    "description": "Contact first name"
+                  },
+                  "contactLastName": {
+                    "type": "string",
+                    "example": "xyz",
+                    "description": "Contact last name"
+                  },
+                  "contactEmail": {
+                    "type": "string",
+                    "example": "example@example.com",
+                    "description": "Contact email"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/roadDistance/confirmCarbonOffset": {
+      "patch": {
+        "tags": ["RoadDistance"],
+        "summary": "confirmCarbonOffset",
+        "operationId": "confirmCarbonOffset5",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": ["transaction_id", "carbonOffset"],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a7823401d88997746c91a7",
+                    "description": "transaction_id"
+                  },
+                  "carbonOffset": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Carbon Offset (Value = y/n)"
+                  },
+                  "contactFirstName": {
+                    "type": "string",
+                    "example": "abc",
+                    "description": "Contact first name"
+                  },
+                  "contactLastName": {
+                    "type": "string",
+                    "example": "xyz",
+                    "description": "Contact last name"
+                  },
+                  "contactEmail": {
+                    "type": "string",
+                    "example": "example@example.com",
+                    "description": "Contact email"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/urbanDelivery/confirmTransaction": {
+      "patch": {
+        "tags": ["UrbanDelivery"],
+        "summary": "confirmTransaction",
+        "operationId": "confirmPaymentOfTransaction",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": ["transaction_id", "confirmTransaction"],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a7875a01d88997746c91ae",
+                    "description": "transaction_id"
+                  },
+                  "confirmTransaction": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Payment Of Transaction (Value = y/n)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/ecommerceDelivery/confirmTransaction": {
+      "patch": {
+        "tags": ["EcommerceDelivery"],
+        "summary": "confirmTransaction",
+        "operationId": "confirmPaymentOfTransaction1",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": ["transaction_id", "confirmTransaction"],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a766d401d88997746c91a0",
+                    "description": "transaction_id"
+                  },
+                  "confirmTransaction": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Payment Of Transaction (Value = y/n)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/airtravelMultileg/confirmTransaction": {
+      "patch": {
+        "tags": ["airtravelMultileg"],
+        "summary": "confirmTransaction",
+        "operationId": "confirmPaymentOfTransaction3",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": ["transaction_id", "confirmTransaction"],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a75c0e94c8cb95a6d0e02e",
+                    "description": "transaction_id"
+                  },
+                  "confirmTransaction": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Payment Of Transaction (Value = y/n)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/airtravelCoordinates/confirmTransaction": {
+      "patch": {
+        "tags": ["AirtravelCoordinates"],
+        "summary": "confirmTransaction",
+        "operationId": "confirmPaymentOfTransaction4",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": ["transaction_id", "confirmTransaction"],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a78ed201d88997746c91b5",
+                    "description": "transaction_id"
+                  },
+                  "confirmTransaction": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Payment Of Transaction (Value = y/n)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/roadDistance/confirmTransaction": {
+      "patch": {
+        "tags": ["RoadDistance"],
+        "summary": "confirmTransaction",
+        "operationId": "confirmPaymentOfTransaction5",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": ["transaction_id", "confirmTransaction"],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a7823401d88997746c91a7",
+                    "description": "transaction_id"
+                  },
+                  "confirmTransaction": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Payment Of Transaction (Value = y/n)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/urbanDelivery/confirmPayment": {
+      "patch": {
+        "tags": ["UrbanDelivery"],
+        "summary": "confirmPayment",
+        "operationId": "confirmPayment",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "transaction_id",
+                  "confirmPayment",
+                  "paymentID",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a7875a01d88997746c91ae",
+                    "description": "transaction_id"
+                  },
+                  "confirmPayment": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Payment (Value = y/n)"
+                  },
+                  "paymentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 34567878,
+                    "description": "Payment Id"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4247-9fb9-7835101a4560",
+                    "description": "apikey_l1 (Like: d95fead6-e8a6-4247-9fb9-7835101a4560)"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7904-4227-960d-27400c38b166",
+                    "description": "apikey_l2 (Like: c60f8db5-7904-4227-960d-27400c38b166)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/ecommerceDelivery/confirmPayment": {
+      "patch": {
+        "tags": ["EcommerceDelivery"],
+        "summary": "confirmPayment",
+        "operationId": "confirmPayment1",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "transaction_id",
+                  "confirmPayment",
+                  "paymentID",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a766d401d88997746c91a0",
+                    "description": "transaction_id"
+                  },
+                  "confirmPayment": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Payment (Value = y/n)"
+                  },
+                  "paymentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 34567878,
+                    "description": "Payment Id"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4247-9fb9-7835101a4560",
+                    "description": "apikey_l1 (Like: d95fead6-e8a6-4247-9fb9-7835101a4560)"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7904-4227-960d-27400c38b166",
+                    "description": "apikey_l2 (Like: c60f8db5-7904-4227-960d-27400c38b166)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/airtravelMultileg/confirmPayment": {
+      "patch": {
+        "tags": ["airtravelMultileg"],
+        "summary": "confirmPayment",
+        "operationId": "confirmPayment3",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "transaction_id",
+                  "confirmPayment",
+                  "paymentID",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a75c0e94c8cb95a6d0e02e",
+                    "description": "transaction_id"
+                  },
+                  "confirmPayment": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Payment (Value = y/n)"
+                  },
+                  "paymentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 34567878,
+                    "description": "Payment Id"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4247-9fb9-7835101a4560",
+                    "description": "apikey_l1 (Like: d95fead6-e8a6-4247-9fb9-7835101a4560)"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7904-4227-960d-27400c38b166",
+                    "description": "apikey_l2 (Like: c60f8db5-7904-4227-960d-27400c38b166)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/airtravelCoordinates/confirmPayment": {
+      "patch": {
+        "tags": ["AirtravelCoordinates"],
+        "summary": "confirmPayment",
+        "operationId": "confirmPayment4",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "transaction_id",
+                  "confirmPayment",
+                  "paymentID",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a78ed201d88997746c91b5",
+                    "description": "transaction_id"
+                  },
+                  "confirmPayment": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Payment (Value = y/n)"
+                  },
+                  "paymentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 34567878,
+                    "description": "Payment Id"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4247-9fb9-7835101a4560",
+                    "description": "apikey_l1 (Like: d95fead6-e8a6-4247-9fb9-7835101a4560)"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7904-4227-960d-27400c38b166",
+                    "description": "apikey_l2 (Like: c60f8db5-7904-4227-960d-27400c38b166)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/roadDistance/confirmPayment": {
+      "patch": {
+        "tags": ["RoadDistance"],
+        "summary": "confirmPayment",
+        "operationId": "confirmPayment5",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "transaction_id",
+                  "confirmPayment",
+                  "paymentID",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a7823401d88997746c91a7",
+                    "description": "transaction_id"
+                  },
+                  "confirmPayment": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Payment (Value = y/n)"
+                  },
+                  "paymentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "example": 34567878,
+                    "description": "Payment Id"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4247-9fb9-7835101a4560",
+                    "description": "apikey_l1 (Like: d95fead6-e8a6-4247-9fb9-7835101a4560)"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7904-4227-960d-27400c38b166",
+                    "description": "apikey_l2 (Like: c60f8db5-7904-4227-960d-27400c38b166)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/urbanDelivery/confirmPlanting": {
+      "patch": {
+        "tags": ["UrbanDelivery"],
+        "summary": "confirmPlanting",
+        "operationId": "confirmsPlanting",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "transaction_id",
+                  "confirmPlanting",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a7875a01d88997746c91ae",
+                    "description": "transaction_id"
+                  },
+                  "confirmPlanting": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Planting (Value = y/n)"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4247-9fb9-7835101a4560",
+                    "description": "apikey_l1 (Like: d95fead6-e8a6-4247-9fb9-7835101a4560)"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7904-4227-960d-27400c38b166",
+                    "description": "apikey_l2 (Like: c60f8db5-7904-4227-960d-27400c38b166)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/ecommerceDelivery/confirmPlanting": {
+      "patch": {
+        "tags": ["EcommerceDelivery"],
+        "summary": "confirmPlanting",
+        "operationId": "confirmsPlanting2",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "transaction_id",
+                  "confirmPlanting",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a766d401d88997746c91a0",
+                    "description": "transaction_id"
+                  },
+                  "confirmPlanting": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Planting (Value = y/n)"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4247-9fb9-7835101a4560",
+                    "description": "apikey_l1 (Like: d95fead6-e8a6-4247-9fb9-7835101a4560)"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7904-4227-960d-27400c38b166",
+                    "description": "apikey_l2 (Like: c60f8db5-7904-4227-960d-27400c38b166)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/airtravelMultileg/confirmPlanting": {
+      "patch": {
+        "tags": ["airtravelMultileg"],
+        "summary": "confirmPlanting",
+        "operationId": "confirmsPlanting3",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "transaction_id",
+                  "confirmPlanting",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a75c0e94c8cb95a6d0e02e",
+                    "description": "transaction_id"
+                  },
+                  "confirmPlanting": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Planting (Value = y/n)"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4247-9fb9-7835101a4560",
+                    "description": "apikey_l1 (Like: d95fead6-e8a6-4247-9fb9-7835101a4560)"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7904-4227-960d-27400c38b166",
+                    "description": "apikey_l2 (Like: c60f8db5-7904-4227-960d-27400c38b166)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/airtravelCoordinates/confirmPlanting": {
+      "patch": {
+        "tags": ["AirtravelCoordinates"],
+        "summary": "confirmPlanting",
+        "operationId": "confirmsPlanting4",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "transaction_id",
+                  "confirmPlanting",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a78ed201d88997746c91b5",
+                    "description": "transaction_id"
+                  },
+                  "confirmPlanting": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Planting (Value = y/n)"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4247-9fb9-7835101a4560",
+                    "description": "apikey_l1 (Like: d95fead6-e8a6-4247-9fb9-7835101a4560)"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7904-4227-960d-27400c38b166",
+                    "description": "apikey_l2 (Like: c60f8db5-7904-4227-960d-27400c38b166)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    },
+    "/roadDistance/confirmPlanting": {
+      "patch": {
+        "tags": ["RoadDistance"],
+        "summary": "confirmPlanting",
+        "operationId": "confirmsPlanting5",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "encoding": {},
+              "schema": {
+                "required": [
+                  "transaction_id",
+                  "confirmPlanting",
+                  "apiKey_l1",
+                  "apiKey_l2"
+                ],
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "60a7823401d88997746c91a7",
+                    "description": "transaction_id"
+                  },
+                  "confirmPlanting": {
+                    "type": "string",
+                    "example": "y",
+                    "description": "Confirm Planting (Value = y/n)"
+                  },
+                  "apiKey_l1": {
+                    "type": "string",
+                    "example": "d95fead6-e8a6-4247-9fb9-7835101a4560",
+                    "description": "apikey_l1 (Like: d95fead6-e8a6-4247-9fb9-7835101a4560)"
+                  },
+                  "apiKey_l2": {
+                    "type": "string",
+                    "example": "c60f8db5-7904-4227-960d-27400c38b166",
+                    "description": "apikey_l2 (Like: c60f8db5-7904-4227-960d-27400c38b166)"
+                  }
+                }
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "deprecated": false,
+        "servers": [
+          {
+            "url": "http://api.climatekuul.com:8000/footprint",
+            "variables": {}
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "airtravelMultilegRequest": {
+        "title": "airtravelMultilegRequest",
+        "required": [
+          "travel_mode",
+          "legs_count",
+          "leg1",
+          "leg2",
+          "leg3",
+          "number_of_passengers",
+          "apiKey_l1",
+          "apiKey_l2",
+          "contactFirstName",
+          "contactLastName",
+          "contactEmail"
+        ],
+        "type": "object",
+        "properties": {
+          "travel_mode": {
+            "type": "string"
+          },
+          "legs_count": {
+            "type": "string"
+          },
+          "leg1": {
+            "$ref": "#/components/schemas/Leg1"
+          },
+          "leg2": {
+            "$ref": "#/components/schemas/Leg1"
+          },
+          "leg3": {
+            "$ref": "#/components/schemas/Leg1"
+          },
+          "number_of_passengers": {
+            "type": "string"
+          },
+          "apiKey_l1": {
+            "type": "string"
+          },
+          "apiKey_l2": {
+            "type": "string"
+          },
+          "contactFirstName": {
+            "type": "string"
+          },
+          "contactLastName": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "travel_mode": "multileg",
+          "legs_count": "2",
+          "leg1": {
+            "origin_airport_code": "KHI",
+            "destination_airport_code": "DXB",
+            "travel_class": "Economy"
+          },
+          "leg2": {
+            "origin_airport_code": "DXB",
+            "destination_airport_code": "LHR",
+            "travel_class": "Business"
+          },
+          "leg3": {
+            "origin_airport_code": "FRA",
+            "destination_airport_code": "KHI",
+            "travel_class": "Premium Economy"
+          },
+          "number_of_passengers": "2",
+          "apiKey_l1": "qNahlSrEaduQ",
+          "apiKey_l2": "eCqMeAfaDBWG",
+          "contactFirstName": "abc",
+          "contactLastName": "xyz",
+          "contactEmail": "example@example.com"
+        }
+      },
+      "Leg1": {
+        "title": "Leg1",
+        "required": [
+          "origin_airport_code",
+          "destination_airport_code",
+          "travel_class"
+        ],
+        "type": "object",
+        "properties": {
+          "origin_airport_code": {
+            "type": "string"
+          },
+          "destination_airport_code": {
+            "type": "string"
+          },
+          "travel_class": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "origin_airport_code": "KHI",
+          "destination_airport_code": "DXB",
+          "travel_class": "Economy"
+        }
+      }
+    }
+  }
+}
