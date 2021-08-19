@@ -450,7 +450,7 @@ async function makeZip(state) {
       if (securitySchemes.length > 0) {
         security.apiCredentials[state.title][0] = {
           securitySchemeName: securitySchemes[0],
-          value: state.auth.value ? state.auth.value : "{ INSERT_API_KEY }",
+          value: state.auth.value ? state.auth.value : "INSERT_API_KEY",
         };
       }
       if (securitySchemes.length > 1) {
@@ -459,7 +459,7 @@ async function makeZip(state) {
           securitySchemeName: securitySchemes[1],
           value: state.extraAuth.value
             ? state.extraAuth.value
-            : "{ INSERT_API_KEY }",
+            : "INSERT_API_KEY",
         };
       }
 
