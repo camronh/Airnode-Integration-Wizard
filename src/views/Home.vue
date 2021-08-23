@@ -1514,7 +1514,7 @@ export default {
       this.loading = true;
       try {
         console.log(this.selectedConfig);
-        let configName = this.savedConfigNames[this.selectedConfig];
+        let configName = this.searchedConfigs[this.selectedConfig];
         if (title) configName = title;
         const config = await utils.getConfig(configName);
         this.importString = JSON.stringify(config, null, 2);
