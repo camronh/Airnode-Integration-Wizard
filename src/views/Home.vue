@@ -1175,6 +1175,14 @@ export default {
     },
     addParam() {
       if (!this.param.name || (this.param.fixed && !this.param.value)) return;
+      // Check if param already exists in this.ep.params
+      const duplicateIndex = this.ep.params.findIndex(
+        v => v.name === this.param.name && v.in === this.param.in
+      );
+      if (duplicateIndex > -1) {
+        this.param = { name: "", in: "query", fixed: false, value: "" };
+        return;
+      }
       this.ep.params.push(this.param);
       this.param = { name: "", in: "query", fixed: false, value: "" };
       // sort this.ep.params by name
