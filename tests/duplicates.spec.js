@@ -20,3 +20,16 @@ test("Overwrite on duplicate", async ({ page }) => {
   await page.click("text=/quotes");
   expect(await page.waitForSelector("text=testParam")).toBeTruthy();
 });
+
+test("Prevent Duplicate Param", async ({ page }) => {
+  await page.goto("http://localhost:8080/");
+
+  await page.click("text=Add Endpoint");
+  await page.type("#paramName", "TestParam");
+  await page.keyboard.press("Enter");
+  expect(await page.waitForSelector("text=TestParam")).toBeTruthy();
+  await page.type("#paramName", "TestParam");
+  await page.keyboard.press("Enter");
+  const params = await page.$$("text=TestParam - query");
+  expect(params.length).toBe(1);
+});
