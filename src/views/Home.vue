@@ -662,21 +662,24 @@
                 </v-list-item-group>
               </v-list>
             </v-card-text>
-            <!-- <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn
-                @click="importSavedConfig()"
-                text
-                color="primary"
-                type="submit"
-                block
-              >
-                Import
-                <v-icon right>
-                  mdi-import
-                </v-icon>
-              </v-btn>
-            </v-card-actions> -->
+            <v-tooltip left>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  absolute
+                  fixed
+                  right
+                  bottom
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="exportAllOIS"
+                >
+                  <v-icon>
+                    mdi-database-export-outline
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Export All OIS's</span>
+            </v-tooltip>
           </v-tab-item>
         </v-tabs-items>
       </v-card>
@@ -1513,6 +1516,17 @@ export default {
         this.makeSnackbar("Deleted! ✅");
       } catch (error) {
         this.makeSnackbar("Delete Failed! 😱");
+      }
+
+      this.loading = false;
+    },
+
+    async exportAllOIS() {
+      this.loading = true;
+      try {
+        await utils.getOISs();
+      } catch (error) {
+        this.makeSnackbar("Export Failed! 😱");
       }
 
       this.loading = false;

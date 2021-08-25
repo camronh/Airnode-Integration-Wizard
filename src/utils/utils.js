@@ -531,6 +531,24 @@ async function getConfigs() {
   return results.data;
 }
 
+async function getOISs() {
+  try {
+    const JSZip = require("jszip");
+    const FileSaver = require("file-saver");
+    let zip = new JSZip();
+
+    const { data: OISs } = await axios.get(`${apiUrl}/OISs`);
+    for (let OIS of OISs) {
+      zip.file(`${OIS.title}/ois.json`, JSON.stringify(OIS, null, 2));
+    }
+    zip.generateAsync({ type: "blob" }).then(function(content) {
+      FileSaver.saveAs(content, `Export-${Date.now()}.zip`);
+    });
+  } catch (error) {
+    return error;
+  }
+}
+
 async function getConfig(title) {
   const results = await axios.get(`${apiUrl}/config/${title}`);
   return results.data;
@@ -556,6 +574,7 @@ module.exports = {
   getConfigNames,
   getConfigs,
   getConfig,
+  getOISs,
   deleteConfig,
   makeReadme,
 };
