@@ -1057,6 +1057,10 @@ export default {
     },
     addParam() {
       if (!this.param.name || (this.param.fixed && !this.param.value)) return;
+
+      // Remove whitespaces from param.name
+      this.param.name = this.param.name.replace(/ /g, "");
+
       // Check if param already exists in this.ep.params
       const duplicateIndex = this.ep.params.findIndex(
         v => v.name === this.param.name && v.in === this.param.in
@@ -1128,6 +1132,8 @@ export default {
       this.bulkEditParamMenu = true;
     },
     bulkAddParam() {
+      // Remove whitespace from this.param.name
+      this.param.name = this.param.name.replace(/ /g, "");
       for (let i of this.selectedEndpoints) {
         this.endpoints[i].params.push(this.param);
       }
