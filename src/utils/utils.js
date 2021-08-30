@@ -214,6 +214,8 @@ function makeConfig(state) {
     });
 
   config.triggers.request = endpoints.map(endpoint => {
+    endpoint.path = endpoint.path.replace(/ /g, "");
+
     const endpointId = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         ["string"],
@@ -288,7 +290,7 @@ function makeConfig(state) {
       [endpoint.method]: {
         parameters: endpoint.params.map(param => {
           return {
-            name: param.name,
+            name: param.name.replace(/ /g, ""),
             in: param.in,
           };
         }),
