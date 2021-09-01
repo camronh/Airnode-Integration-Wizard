@@ -1275,25 +1275,39 @@ export default {
       }
     },
     parsePath() {
+      console.log("Parsing path");
       // get all strings inside of curly braces in this.ep.path
       let paths = this.ep.path.match(/\{[^}]*\}/g);
-      if (!paths) return;
-      let pathParams = [];
-      // remove curly braces from each path
-      paths.forEach(path => {
-        let param = path.replace(path, path.replace(/\{|\}/g, ""));
-        pathParams.push(param);
-      });
-      for (let param of pathParams) {
-        if (this.ep.params.find(v => v.name === param && v.in == "path")) {
-          continue;
-        }
-        this.ep.params.push({
-          name: param,
-          in: "path",
+      if (paths) {
+        let pathParams = [];
+        // remove curly braces from each path
+        paths.forEach(path => {
+          let param = path.replace(path, path.replace(/\{|\}/g, ""));
+          pathParams.push(param);
         });
+        for (let param of pathParams) {
+          if (this.ep.params.find(v => v.name === param && v.in == "path")) {
+            continue;
+          }
+          this.ep.params.push({
+            name: param,
+            in: "path",
+          });
+        }
       }
-      return pathParams;
+      if (this.ep.path.includes("?")) {
+        const querystring = require("querystring");
+        const [path, queryParams] = this.ep.path.split("?");
+        let parsedObject = querystring.parse(queryParams);
+        for (let key in parsedObject) {
+          this.param = {
+            name: key,
+            in: "query",
+          };
+          this.addParam();
+        }
+        this.ep.path = path;
+      }
     },
     storeSession() {
       if (!this.storeSessions) return;
