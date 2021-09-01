@@ -1447,7 +1447,8 @@ export default {
       this.auth = {
         name: "",
         value: "",
-        type: "",
+        type: "apiKey",
+        in: "query",
       };
       this.extraAuth = {
         name: "",
@@ -1456,6 +1457,7 @@ export default {
       };
       this.RPCs = [];
       this.addedExtraAuth = false;
+      this.extraRPC = false;
       this.endpoints = [];
       localStorage.clear();
       this.storeSession();
