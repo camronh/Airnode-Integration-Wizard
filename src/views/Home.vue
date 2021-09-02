@@ -634,6 +634,18 @@
         <v-card-text>
           <v-card-title>
             Endpoints
+            <v-spacer></v-spacer>
+            <v-card-subtitle>
+              <a
+                v-if="selectedEndpoints.length == endpoints.length"
+                @click="selectedEndpoints = []"
+              >
+                Deselect All
+              </a>
+              <a v-else @click="openBulkMenu">
+                Select All
+              </a>
+            </v-card-subtitle>
           </v-card-title>
           <v-row>
             <v-col cols="12" md="12">
