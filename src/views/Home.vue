@@ -852,6 +852,7 @@
                 label="Param Name"
                 placeholder="ex. currency"
                 ref="paramName"
+                autofocus
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
@@ -1267,9 +1268,12 @@ export default {
     bulkAddParam() {
       // Remove whitespace from this.param.name
       this.param.name = this.param.name.replace(/ /g, "");
+      let param = JSON.parse(JSON.stringify(this.param));
+
       for (let i of this.selectedEndpoints) {
-        this.endpoints[i].params.push(this.param);
+        this.endpoints[i].params.push(param);
       }
+      this.param = { name: "", in: "query", fixed: false, value: "" };
       this.bulkAddParamMenu = false;
     },
     bulkDeleteParam() {
