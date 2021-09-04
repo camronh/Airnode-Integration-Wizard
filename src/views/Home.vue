@@ -75,6 +75,9 @@
                   <v-list-item id="clear" @click="confirmClear = true">
                     <v-list-item-title>Clear Session</v-list-item-title>
                   </v-list-item>
+                  <v-list-item id="testing" to="/Testing">
+                    <v-list-item-title>Testing Suite</v-list-item-title>
+                  </v-list-item>
                 </v-list-item-group>
               </v-list>
             </v-menu>
