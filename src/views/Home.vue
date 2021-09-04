@@ -1,20 +1,5 @@
 <template>
   <v-container>
-    <v-app-bar app color="dark" dark>
-      <div class="d-flex align-center">
-        <h1>
-          A I W
-        </h1>
-      </div>
-      <v-spacer></v-spacer>
-      <!-- <v-btn icon color="primary" @click="infoDialog = true">
-        <v-icon>
-          mdi-information-outline
-        </v-icon>
-      </v-btn> -->
-    </v-app-bar>
-    <br />
-
     <v-row align="center" justify="center">
       <v-card max-width="95%" width="90%">
         <v-form v-model="valid">
