@@ -10,9 +10,9 @@
       <v-chip
         label
         large
+        @click="getStats"
         outlined
         color="primary"
-        
         v-if="connected"
         :ripple="false"
       >
@@ -38,8 +38,8 @@
           </p>
           <p v-else>
             Connected!!
-            {{ address }}
-            {{ chainID }}
+            {{ myBalance }}
+            {{ designatedWalletBalance }}
           </p>
         </v-card-text>
         <vue-metamask userMessage="msg" @onComplete="onComplete" />
@@ -50,6 +50,7 @@
 
 <script>
 import VueMetamask from "vue-metamask";
+const designatedWallet = "0x8bC482471A7A7041e277Ec1D0e967b327F6633c8";
 
 export default {
   components: {
@@ -63,6 +64,8 @@ export default {
       address: "",
       chainID: "",
       web3: null,
+      designatedWalletBalance: 0,
+      myBalance: 0,
     };
   },
   methods: {
@@ -74,6 +77,24 @@ export default {
       this.chainID = data.netID;
       this.web3 = web3;
       this.connected = true;
+      await this.getStats();
+    },
+    async getBalance(address) {
+      const ethers = require("ethers");
+      const web3 = this.web3;
+      return new Promise(resolve => {
+        web3.eth.getBalance(address, function(err, result) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log(result.toString());
+            resolve(ethers.utils.formatEther(result.toString()) + " ETH");
+          }
+        });
+      });
+    },
+    async getStats() {
+      this.designatedWalletBalance = await this.getBalance(designatedWallet);
     },
   },
 };
