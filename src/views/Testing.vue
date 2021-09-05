@@ -201,7 +201,10 @@
               outlined
               tile
               :disabled="
-                !selectedConfig || !selectedEndpoint || !receipt.providerId || !paramsAreValid
+                !selectedConfig ||
+                  !selectedEndpoint ||
+                  !receipt.providerId ||
+                  !paramsAreValid
               "
               color="primary"
               @click="makeRequest"
@@ -223,6 +226,23 @@
             class="mb-0"
           ></v-progress-linear>
         </v-card-title>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="requestDialog" persistent width="700">
+      <v-card>
+        <v-card-title>
+          Request
+        </v-card-title>
+        <v-card-text>
+          <v-textarea
+            label="Logs"
+            :value="requestResults"
+            readonly
+            :loading="makingRequest"
+            auto-grow
+          >
+          </v-textarea>
+        </v-card-text>
       </v-card>
     </v-dialog>
     <v-snackbar v-model="snackbar">
@@ -248,12 +268,16 @@ export default {
       msg: "This is demo net work",
       connected: false,
       gettingConfigs: false,
+      makingRequest: true,
       loading: false,
       dragover: false,
+      requestDialog: false,
+      requestDialogMsg: "",
       snackbarText: "",
       snackbar: false,
       selectedConfig: "",
       selectedEndpoint: "",
+      requestResults: "",
       address: "",
       paramValues: {},
       paramTypes: {},
@@ -469,6 +493,8 @@ export default {
           requestObj.artifact.abi,
           this.signer
         );
+        this.requestDialog = true;
+        this.requestResults = "Making the request...";
 
         console.log("Making the request...");
         const airnodeAbi = require("@api3/airnode-abi");
@@ -486,25 +512,25 @@ export default {
             resolve(parsedLog.args.requestId);
           })
         );
-        console.log(
-          `Made the request with ID ${requestId}\nWaiting for it to be fulfilled...`
-        );
+        this.requestResults += `\nMade request!\nRequestId: ${requestId}`;
 
         await new Promise(resolve =>
           this.signer.provider.once(
             this.airnode.filters.ClientRequestFulfilled(null, requestId),
-            resolve()
+            resolve
           )
         );
-        console.log("Request fulfilled");
-        const results = await exampleClient.fulfilledData(requestId);
-        console.log({ results });
-        console.log({ number: Number(results) });
-        console.log({ string: results.toString() });
-        console.log({ bytes32: this.ethers.utils.parseBytes32String(results) });
+        this.requestResults += "\nRequest Fulfilled!\n";
+        this.requestResults += await exampleClient.fulfilledData(requestId);
+        // console.log({ results });
+        // console.log({ number: Number(results) });
+        // console.log({ string: results.toString() });
+        // console.log({ bytes32: this.ethers.utils.parseBytes32String(results) });
       } catch (error) {
         console.log(error);
+        this.requestDialog = false;
       }
+      this.makingRequest = false;
     },
     async openEndpoint() {
       this.loading = true;
