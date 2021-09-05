@@ -173,7 +173,7 @@
         </v-card-actions>
       </v-card>
     </v-row>
-    <vue-metamask userMessage="msg" @onComplete="onComplete" />
+    <!-- <vue-metamask userMessage="msg" @onComplete="onComplete" /> -->
     <v-dialog v-model="loading" persistent width="300">
       <v-card>
         <v-card-title>
@@ -186,18 +186,22 @@
         </v-card-title>
       </v-card>
     </v-dialog>
+    <v-snackbar v-model="snackbar">
+      {{ snackbarText }}
+    </v-snackbar>
   </v-container>
 </template>
 
 <script>
-import VueMetamask from "vue-metamask";
+// import VueMetamask from "vue-metamask";
 import utils from "../utils/utils";
+// import ethers from "ethers";
 
 const designatedWallet = "0x8bC482471A7A7041e277Ec1D0e967b327F6633c8";
 
 export default {
   components: {
-    VueMetamask,
+    // VueMetamask,
   },
   data() {
     return {
@@ -207,6 +211,8 @@ export default {
       gettingConfigs: false,
       loading: false,
       dragover: false,
+      snackbarText: "",
+      snackbar: false,
       selectedConfig: "",
       selectedEndpoint: "",
       address: "",
@@ -217,18 +223,33 @@ export default {
       selectedParams: ["_path", "_type", "_times"],
       receipt: {},
       config: {},
-      web3: null,
+      ethers: null,
+      // web3: null,
       designatedWalletBalance: 0,
     };
+  },
+  async mounted() {
+    try {
+      const ethers = require("ethers");
+      this.ethers = ethers;
+      this.provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+      this.signer = this.provider.getSigner();
+      this.connected = true;
+      this.address = await this.signer.getAddress();
+      await this.getStats();
+    } catch (error) {
+      console.log(error);
+    }
   },
   computed: {
     endpoints() {
       if (!this.config.id) return false;
       let endpoints = this.config.ois[0].endpoints;
       for (let endpoint of endpoints) {
-        endpoint.endpointId = this.config.triggers.request.find(
+        let { endpointId } = this.config.triggers.request.find(
           trigger => trigger.endpointName === endpoint.name
         );
+        endpoint.endpointId = endpointId;
       }
       return endpoints;
     },
@@ -252,12 +273,13 @@ export default {
     },
     airnode() {
       const airnodeProtocol = require("@api3/airnode-protocol");
+      // const ropsetAirnodeAddress = "0xF8d32C3e53F7DA6e7CB82323f2cAB2159776b832";
       const rinkebyAirnodeAddress =
         "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC";
-      console.log(this.web3);
-      return new this.web3.eth.Contract(
+      return new this.ethers.Contract(
+        rinkebyAirnodeAddress,
         airnodeProtocol.AirnodeArtifact.abi,
-        rinkebyAirnodeAddress
+        this.signer
       );
     },
 
@@ -267,32 +289,15 @@ export default {
     },
   },
   methods: {
-    async onComplete(data) {
-      console.log("data:", data);
-      if (!data.web3) return;
-      const { web3 } = data;
-      this.address = data.metaMaskAddress;
-      this.chainID = data.netID;
-      this.web3 = web3;
-      this.connected = true;
-      await this.getStats();
-    },
-    async getBalance(address) {
-      const ethers = require("ethers");
-      const web3 = this.web3;
-      return new Promise(resolve => {
-        web3.eth.getBalance(address, function(err, result) {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log(result.toString());
-            resolve(ethers.utils.formatEther(result.toString()) + " ETH");
-          }
-        });
-      });
+    makeSnackbar(message) {
+      this.snackbarText = message;
+      this.snackbar = true;
     },
     async getStats() {
-      this.designatedWalletBalance = await this.getBalance(designatedWallet);
+      const balanceInWei = await this.provider.getBalance(designatedWallet);
+      this.designatedWalletBalance = this.ethers.utils.formatEther(
+        balanceInWei.toString()
+      );
       this.gettingConfigs = true;
       this.configNames = await utils.getConfigNames();
       this.gettingConfigs = false;
@@ -355,28 +360,26 @@ export default {
       console.log({ requestObj });
     },
     async openEndpoint() {
-      const ethers = require("ethers");
+      this.loading = true;
 
-      const endpoint = this.endpoints.find(
-        endpoint => endpoint.name === this.selectedEndpoint
-      );
-      // const airnodeAdmin = require("@api3/airnode-admin");
+      try {
+        const airnodeAdmin = require("@api3/airnode-admin");
 
-      const airnode = this.airnode;
-      console.log(await airnode.methods);
-      await airnode.methods.updateEndpointAuthorizers(
-        this.receipt.providerId,
-        endpoint.endpointId,
-        [ethers.constants.AddressZero]
-      );
-      // await airnodeAdmin.updateAuthorizers(
-      //   airnode,
-      //   this.receipt.providerId,
-      //   endpoint.endpointId,
-      //   [ethers.constants.AddressZero]
-      // );
-      console.log({ airnode });
-      // await utils.openEndpoint(this.receipt.providerId, endpoint.endpointId);
+        const endpoint = this.endpoints.find(
+          endpoint => endpoint.name === this.selectedEndpoint
+        );
+        const airnode = this.airnode;
+        await airnodeAdmin.updateAuthorizers(
+          airnode,
+          this.receipt.providerId,
+          endpoint.endpointId,
+          [this.ethers.constants.AddressZero]
+        );
+        this.makeSnackbar(`Successfully opened Auth for '${endpoint.name}'!`);
+      } catch (error) {
+        this.makeSnackbar("Open Auth Failed!");
+      }
+      this.loading = false;
     },
   },
 };
