@@ -49,9 +49,9 @@
               <v-col cols="12" md="6" align="center" justify="center">
                 <v-sheet
                   v-if="selectedConfig"
-                  color="transparent"
                   elevation="1"
                   outlined
+                  color="grey darken-3"
                   height="50"
                   width="200"
                 >
@@ -64,6 +64,9 @@
                 <v-select :items="endpointNames" v-model="selectedEndpoint" />
               </v-col>
             </v-row>
+            <v-card-title>
+              Params
+            </v-card-title>
             <v-row>
               <v-col cols="12" md="12" align="center" justify="center">
                 <v-autocomplete
@@ -77,6 +80,7 @@
                 </v-autocomplete>
               </v-col>
             </v-row>
+
             <v-row>
               <v-col
                 v-for="param of selectedParams"
@@ -84,15 +88,49 @@
                 cols="12"
                 md="4"
               >
-                <v-card>
-                  <v-card-title>
-                    {{ param }}
-                  </v-card-title>
+                <v-card color="grey darken-3">
+                  <v-card-text>
+                    <v-row>
+                      <v-col cols="12" md="7">
+                        <v-card-title class="text-no-wrap paramTitle">
+                          {{ param }}
+                        </v-card-title>
+                      </v-col>
+                      <v-col cols="12" md="5">
+                        <v-select
+                          :items="['bytes32', 'int256', 'bool']"
+                          label="Type"
+                        >
+                        </v-select>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                  <v-card-text>
+                    <v-text-field
+                      label="Value"
+                      outlined
+                      v-model="params[param]"
+                    >
+                    </v-text-field>
+                  </v-card-text>
                 </v-card>
               </v-col>
             </v-row>
           </v-form>
         </v-card-text>
+        <v-card-actions>
+          <v-card-text justify="center" align="center">
+            <v-btn class="ma-2" outlined tile color="primary">
+              Fund Master Wallet
+            </v-btn>
+            <v-btn class="ma-2" outlined tile color="primary">
+              Open Endpoint Auth
+            </v-btn>
+            <v-btn class="ma-2" outlined tile color="primary">
+              Make Request
+            </v-btn>
+          </v-card-text>
+        </v-card-actions>
       </v-card>
     </v-row>
     <vue-metamask userMessage="msg" @onComplete="onComplete" />
@@ -131,6 +169,7 @@ export default {
       selectedConfig: "",
       selectedEndpoint: "",
       address: "",
+      params: {},
       chainID: "",
       configNames: [],
       selectedParams: ["_path", "_type", "_times"],
@@ -209,3 +248,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.paramTitle {
+  font-size: 1.2em;
+}
+</style>
