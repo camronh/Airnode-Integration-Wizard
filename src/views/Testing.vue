@@ -232,6 +232,10 @@
       <v-card>
         <v-card-title>
           Request
+          <v-spacer></v-spacer>
+          <v-btn icon @click="requestDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text>
           <v-textarea
@@ -255,7 +259,6 @@
 // import VueMetamask from "vue-metamask";
 import utils from "../utils/utils";
 // import ethers from "ethers";
-
 
 export default {
   components: {
