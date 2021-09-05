@@ -80,16 +80,16 @@
                       <v-card-title>
                         Receipt
                         <v-spacer> </v-spacer>
-                        <v-chip color="green" small outlined>
+                        <v-chip color="primary" small outlined>
                           <v-icon left>
                             mdi-check
                           </v-icon>
-                          Receipt Found
+                          Receipt Found!
                         </v-chip>
                       </v-card-title>
                       <v-card-subtitle align="left">
                         Master Wallet:
-                        0x8bC482471A7A7041e277Ec1D0e967b327F6633c8
+                        {{ receipt.masterWalletAddress }}
                       </v-card-subtitle>
                     </template>
                     <template v-else-if="config.id && !receipt.providerId">
@@ -195,6 +195,12 @@
               class="ma-2"
               outlined
               tile
+              :disabled="
+                !selectedConfig ||
+                  !selectedEndpoint ||
+                  !receipt.providerId ||
+                  !paramsAreValid
+              "
               color="primary"
               @click="makeRequest"
             >
@@ -294,13 +300,43 @@ export default {
     paramsList() {
       if (!this.config.id) return;
       if (!this.selectedEndpoint) return;
-      const endpoint = this.endpoints.find(
-        endpoint => endpoint.name === this.selectedEndpoint
-      );
-      let params = endpoint.parameters.map(param => param.name);
-      const reservedParams = ["_type", "_times", "_path", "_relay_metadata"];
-      params.push(...reservedParams);
-      return params;
+      try {
+        const endpoint = this.endpoints.find(
+          endpoint => endpoint.name === this.selectedEndpoint
+        );
+        let params = endpoint.parameters.map(param => param.name);
+        const reservedParams = ["_type", "_times", "_path", "_relay_metadata"];
+        params.push(...reservedParams);
+        return params;
+      } catch (error) {
+        console.log(error);
+        return false;
+      }
+    },
+    paramsAreValid() {
+      for (let param of this.selectedParams) {
+        if (!this.paramValues[param]) return false;
+        if (!this.paramTypes[param]) return false;
+      }
+      return true;
+    },
+
+    paramsData() {
+      if (!this.config.id) return;
+      if (!this.selectedEndpoint) return;
+      try {
+        let params = this.selectedParams.map(param => {
+          return {
+            name: param,
+            value: this.paramValues[param],
+            type: this.paramTypes[param],
+          };
+        });
+        return params;
+      } catch (error) {
+        console.log(error);
+        return false;
+      }
     },
     airnode() {
       const airnodeProtocol = require("@api3/airnode-protocol");
@@ -350,6 +386,7 @@ export default {
       console.log(e);
       this.dragover = false;
       try {
+        if (!this.selectedConfig) throw "Select a Config";
         let receipt = await new Promise(resolve => {
           if (e.dataTransfer.files.length > 1) {
             console.log("Only 1 at a time");
@@ -364,31 +401,79 @@ export default {
           }
         });
         console.log({ receipt });
-        if (!receipt.providerId) return console.log("Invalid Import");
+        if (!receipt.providerId) throw "Invalid Receipt";
         receipt.title = this.selectedConfig;
         await utils.saveReceipt(receipt);
-        console.log("Saved");
+        this.receipt = receipt;
+        this.makeSnackbar("Saved!");
       } catch (error) {
-        console.log("Import Failed");
+        console.log(error);
+        this.makeSnackbar("Failed to store receipt!");
       }
     },
     async makeRequest() {
-      const endpoint = this.endpoints.find(
-        endpoint => endpoint.name === this.selectedEndpoint
-      );
-      let requestObj = {
-        providerId: this.receipt.providerId,
-        endpointId: endpoint.endpointId,
-      };
-      let params = this.selectedParams.map(param => {
-        return {
-          name: param,
-          value: this.paramValues[param],
-          type: this.paramTypes[param],
+      try {
+        const endpoint = this.endpoints.find(
+          endpoint => endpoint.name === this.selectedEndpoint
+        );
+        let requestObj = {
+          providerId: this.receipt.providerId,
+          endpointId: endpoint.endpointId,
+          clientAddress: "0x8529520B0254C19a04ad72abf592Cb471f5b02Ca",
+          requesterIndex: "6",
+          artifact: require("../utils/TestClient.json"),
         };
-      });
-      requestObj.params = params;
-      console.log({ requestObj });
+        let params = this.selectedParams.map(param => {
+          return {
+            name: param,
+            value: this.paramValues[param],
+            type: this.paramTypes[param],
+          };
+        });
+        requestObj.params = params;
+        console.log({ requestObj });
+
+        const exampleClient = new this.ethers.Contract(
+          requestObj.clientAddress,
+          requestObj.artifact.abi,
+          this.signer
+        );
+
+        console.log("Making the request...");
+        const airnodeAbi = require("@api3/airnode-abi");
+
+        const receipt = await exampleClient.makeRequest(
+          requestObj.providerId,
+          requestObj.endpointId,
+          requestObj.requesterIndex,
+          designatedWallet,
+          airnodeAbi.encode(requestObj.params)
+        );
+        const requestId = await new Promise(resolve =>
+          this.signer.provider.once(receipt.hash, tx => {
+            const parsedLog = this.airnode.interface.parseLog(tx.logs[0]);
+            resolve(parsedLog.args.requestId);
+          })
+        );
+        console.log(
+          `Made the request with ID ${requestId}\nWaiting for it to be fulfilled...`
+        );
+
+        await new Promise(resolve =>
+          this.signer.provider.once(
+            this.airnode.filters.ClientRequestFulfilled(null, requestId),
+            resolve()
+          )
+        );
+        console.log("Request fulfilled");
+        const results = await exampleClient.fulfilledData(requestId);
+        console.log({ results });
+        console.log({ number: Number(results) });
+        console.log({ string: results.toString() });
+        console.log({ bytes32: this.ethers.utils.parseBytes32String(results) });
+      } catch (error) {
+        console.log(error);
+      }
     },
     async openEndpoint() {
       this.loading = true;
