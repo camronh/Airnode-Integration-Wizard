@@ -540,6 +540,20 @@ async function getOISs() {
   }
 }
 
+
+// async function openEndpoint(providerId, endpointId) {
+//   const airnode = await evm.getAirnode();
+//   await airnodeAdmin.updateAuthorizers(
+//     airnode,
+//     params.providerId,
+//     params.endpointId,
+//     [ethers.constants.AddressZero]
+//   );
+//   console.log(
+//     `Updated authorizers of endpoint with ID ${params.endpointId} to allow all public requests`
+//   );
+// }
+
 async function saveConfig(configStr) {
   const config = JSON.parse(configStr);
   const results = await axios.post(`${apiUrl}/configs`, config);
@@ -591,4 +605,5 @@ module.exports = {
   getOISs,
   deleteConfig,
   makeReadme,
+  // openEndpoint,
 };

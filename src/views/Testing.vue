@@ -155,7 +155,8 @@
               outlined
               tile
               color="primary"
-              :disabled="!admin"
+              @click="openEndpoint"
+              :disabled="!admin || !selectedEndpoint"
             >
               Open Endpoint Auth
             </v-btn>
@@ -248,6 +249,16 @@ export default {
       const reservedParams = ["_type", "_times", "_path", "_relay_metadata"];
       params.push(...reservedParams);
       return params;
+    },
+    airnode() {
+      const airnodeProtocol = require("@api3/airnode-protocol");
+      const rinkebyAirnodeAddress =
+        "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC";
+      console.log(this.web3);
+      return new this.web3.eth.Contract(
+        airnodeProtocol.AirnodeArtifact.abi,
+        rinkebyAirnodeAddress
+      );
     },
 
     endpointNames() {
@@ -342,6 +353,30 @@ export default {
       });
       requestObj.params = params;
       console.log({ requestObj });
+    },
+    async openEndpoint() {
+      const ethers = require("ethers");
+
+      const endpoint = this.endpoints.find(
+        endpoint => endpoint.name === this.selectedEndpoint
+      );
+      // const airnodeAdmin = require("@api3/airnode-admin");
+
+      const airnode = this.airnode;
+      console.log(await airnode.methods);
+      await airnode.methods.updateEndpointAuthorizers(
+        this.receipt.providerId,
+        endpoint.endpointId,
+        [ethers.constants.AddressZero]
+      );
+      // await airnodeAdmin.updateAuthorizers(
+      //   airnode,
+      //   this.receipt.providerId,
+      //   endpoint.endpointId,
+      //   [ethers.constants.AddressZero]
+      // );
+      console.log({ airnode });
+      // await utils.openEndpoint(this.receipt.providerId, endpoint.endpointId);
     },
   },
 };
