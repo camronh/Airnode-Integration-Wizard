@@ -48,14 +48,34 @@
               </v-col>
               <v-col cols="12" md="6" align="center" justify="center">
                 <v-sheet
-                  v-if="selectedConfig"
+                  v-if="selectedConfig && receipt.title"
                   elevation="1"
                   outlined
                   color="grey darken-3"
                   height="50"
                   width="200"
+                  @drop.prevent="saveReceipt($event)"
+                  @dragover.prevent="dragover = true"
+                  @dragenter.prevent="dragover = true"
+                  @dragleave.prevent="dragover = false"
+                  :class="{ accent: dragover }"
                 >
-                  Receipt Found
+                  Receipt Found!
+                </v-sheet>
+                <v-sheet
+                  v-else-if="selectedConfig && !receipt.title"
+                  elevation="1"
+                  outlined
+                  color="grey darken-3"
+                  height="50"
+                  width="200"
+                  @drop.prevent="saveReceipt($event)"
+                  @dragover.prevent="dragover = true"
+                  @dragenter.prevent="dragover = true"
+                  @dragleave.prevent="dragover = false"
+                  :class="{ accent: dragover }"
+                >
+                  Add Receipt
                 </v-sheet>
               </v-col>
             </v-row>
@@ -100,6 +120,7 @@
                         <v-select
                           :items="['bytes32', 'int256', 'bool']"
                           label="Type"
+                          v-model="paramTypes[param]"
                         >
                         </v-select>
                       </v-col>
@@ -109,7 +130,7 @@
                     <v-text-field
                       label="Value"
                       outlined
-                      v-model="params[param]"
+                      v-model="paramValues[param]"
                     >
                     </v-text-field>
                   </v-card-text>
@@ -120,13 +141,31 @@
         </v-card-text>
         <v-card-actions>
           <v-card-text justify="center" align="center">
-            <v-btn class="ma-2" outlined tile color="primary">
+            <!-- <v-btn
+              class="ma-2"
+              outlined
+              tile
+              color="primary"
+              :disabled="!admin || !receipt.masterWalletAddress"
+            >
               Fund Master Wallet
-            </v-btn>
-            <v-btn class="ma-2" outlined tile color="primary">
+            </v-btn> -->
+            <v-btn
+              class="ma-2"
+              outlined
+              tile
+              color="primary"
+              :disabled="!admin"
+            >
               Open Endpoint Auth
             </v-btn>
-            <v-btn class="ma-2" outlined tile color="primary">
+            <v-btn
+              class="ma-2"
+              outlined
+              tile
+              color="primary"
+              @click="makeRequest"
+            >
               Make Request
             </v-btn>
           </v-card-text>
@@ -166,10 +205,12 @@ export default {
       connected: false,
       gettingConfigs: false,
       loading: false,
+      dragover: false,
       selectedConfig: "",
       selectedEndpoint: "",
       address: "",
-      params: {},
+      paramValues: {},
+      paramTypes: {},
       chainID: "",
       configNames: [],
       selectedParams: ["_path", "_type", "_times"],
@@ -189,6 +230,13 @@ export default {
         );
       }
       return endpoints;
+    },
+    admin() {
+      if (!this.config.id) return false;
+      return (
+        this.address.toLowerCase() ===
+        this.config.nodeSettings.chains[0].providerAdminForRecordCreation.toLowerCase()
+      );
     },
     paramsList() {
       if (!this.config.id) return;
@@ -239,11 +287,61 @@ export default {
       this.gettingConfigs = false;
     },
     async getConfig() {
-      this.loading = true;
-      this.config = await utils.getConfig(this.selectedConfig);
+      this.receipt = {};
+      this.config = {};
+      try {
+        this.loading = true;
+        this.config = await utils.getConfig(this.selectedConfig);
+        this.receipt = await utils.getReceipt(this.selectedConfig);
+      } catch (error) {
+        console.log(error);
+      }
       this.loading = false;
+    },
 
-      // this.receipt = await utils.getReceipt(this.selectedConfig);
+    async saveReceipt(e) {
+      console.log(e);
+      this.dragover = false;
+      try {
+        let receipt = await new Promise(resolve => {
+          if (e.dataTransfer.files.length > 1) {
+            console.log("Only 1 at a time");
+          } else {
+            const file = e.dataTransfer.files[0];
+            let reader = new FileReader();
+            reader.onload = function(event) {
+              const uploadString = event.target.result;
+              resolve(JSON.parse(uploadString));
+            };
+            reader.readAsText(file);
+          }
+        });
+        console.log({ receipt });
+        if (!receipt.providerId) return console.log("Invalid Import");
+        receipt.title = this.selectedConfig;
+        await utils.saveReceipt(receipt);
+        console.log("Saved");
+      } catch (error) {
+        console.log("Import Failed");
+      }
+    },
+    async makeRequest() {
+      const endpoint = this.endpoints.find(
+        endpoint => endpoint.name === this.selectedEndpoint
+      );
+      let requestObj = {
+        providerId: this.receipt.providerId,
+        endpointId: endpoint.endpointId,
+      };
+      let params = this.selectedParams.map(param => {
+        return {
+          name: param,
+          value: this.paramValues[param],
+          type: this.paramTypes[param],
+        };
+      });
+      requestObj.params = params;
+      console.log({ requestObj });
     },
   },
 };

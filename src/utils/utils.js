@@ -2,8 +2,8 @@ const { v4: uuid } = require("uuid");
 const ethers = require("ethers");
 const axios = require("axios");
 
-// const apiUrl = "http://localhost:3000";
-const apiUrl = "https://clb5462t8j.execute-api.us-east-1.amazonaws.com/latest";
+const apiUrl = "http://localhost:3000";
+// const apiUrl = "https://clb5462t8j.execute-api.us-east-1.amazonaws.com/latest";
 
 function makeOAS(state) {
   const { title, version, server, hasAuth, auth, endpoints } = state;
@@ -522,17 +522,6 @@ __Params:__ {${endpoint.parameters.join("} | {")}}\n`;
   return configStr;
 }
 
-async function saveConfig(configStr) {
-  const config = JSON.parse(configStr);
-  const results = await axios.post(`${apiUrl}/configs`, config);
-  return results.data;
-}
-
-async function getConfigs() {
-  const results = await axios.get(`${apiUrl}/configs`);
-  return results.data;
-}
-
 async function getOISs() {
   try {
     const JSZip = require("jszip");
@@ -551,6 +540,17 @@ async function getOISs() {
   }
 }
 
+async function saveConfig(configStr) {
+  const config = JSON.parse(configStr);
+  const results = await axios.post(`${apiUrl}/configs`, config);
+  return results.data;
+}
+
+async function getConfigs() {
+  const results = await axios.get(`${apiUrl}/configs`);
+  return results.data;
+}
+
 async function getConfig(title) {
   const results = await axios.get(`${apiUrl}/config/${title}`);
   return results.data;
@@ -566,6 +566,16 @@ async function deleteConfig(title) {
   return results.data;
 }
 
+async function saveReceipt(receipt) {
+  const results = await axios.post(`${apiUrl}/receipts`, receipt);
+  return results.data;
+}
+
+async function getReceipt(title) {
+  const results = await axios.get(`${apiUrl}/receipt/${title}`);
+  return results.data;
+}
+
 module.exports = {
   makeOAS,
   parseOAS,
@@ -573,9 +583,11 @@ module.exports = {
   parseConfig,
   makeZip,
   saveConfig,
+  saveReceipt,
   getConfigNames,
   getConfigs,
   getConfig,
+  getReceipt,
   getOISs,
   deleteConfig,
   makeReadme,
