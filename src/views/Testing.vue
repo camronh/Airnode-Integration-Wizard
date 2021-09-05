@@ -43,6 +43,7 @@
                   <v-select
                     :items="configNames"
                     :loading="gettingConfigs"
+                    :disabled="gettingConfigs"
                     label="Config"
                     v-model="selectedConfig"
                     @change="getConfig"
@@ -51,6 +52,7 @@
                     label="Endpoint"
                     :items="endpointNames"
                     v-model="selectedEndpoint"
+                    @change="parseStoredEndpoint"
                   />
                 </v-card-text>
               </v-col>
@@ -125,6 +127,7 @@
                     small-chips
                     deletable-chips
                     :items="paramsList"
+                    @change="storeEndpoint"
                     v-model="selectedParams"
                   >
                   </v-autocomplete>
@@ -150,6 +153,7 @@
                           <v-select
                             :items="['bytes32', 'int256', 'bool']"
                             label="Type"
+                            @change="storeEndpoint"
                             v-model="paramTypes[param]"
                           >
                           </v-select>
@@ -158,6 +162,7 @@
                           <v-text-field
                             label="Value"
                             outlined
+                            @change="storeEndpoint"
                             v-model="paramValues[param]"
                           >
                           </v-text-field>
@@ -196,10 +201,7 @@
               outlined
               tile
               :disabled="
-                !selectedConfig ||
-                  !selectedEndpoint ||
-                  !receipt.providerId ||
-                  !paramsAreValid
+                !selectedConfig || !selectedEndpoint || !receipt.providerId || !paramsAreValid
               "
               color="primary"
               @click="makeRequest"
@@ -360,6 +362,35 @@ export default {
       this.snackbarText = message;
       this.snackbar = true;
     },
+    storeEndpoint() {
+      try {
+        const endpoint = {
+          name: this.selectedEndpoint,
+          params: this.paramsData,
+        };
+        localStorage[endpoint.name] = JSON.stringify(endpoint);
+        console.log("Stored");
+      } catch (error) {
+        console.log("Store Failed", error);
+      }
+    },
+    parseStoredEndpoint() {
+      this.paramValues = {};
+      this.paramTypes = {};
+      this.selectedParams = [];
+      try {
+        const endpoint = JSON.parse(localStorage[this.selectedEndpoint]);
+
+        for (let param of endpoint.params) {
+          this.paramValues[param.name] = param.value;
+          this.paramTypes[param.name] = param.type;
+          this.selectedParams.push(param.name);
+        }
+      } catch (error) {
+        console.log("Parse Failed", error);
+      }
+    },
+
     async getStats() {
       const balanceInWei = await this.provider.getBalance(designatedWallet);
       const balance = this.ethers.utils.formatEther(balanceInWei.toString());
