@@ -38,105 +38,136 @@
           </p>
           <v-form v-else>
             <v-row>
-              <v-col cols="12" md="6">
-                <v-select
-                  :items="configNames"
-                  :loading="gettingConfigs"
-                  v-model="selectedConfig"
-                  @change="getConfig"
-                />
+              <v-col cols="12" md="4">
+                <v-card-text>
+                  <v-select
+                    :items="configNames"
+                    :loading="gettingConfigs"
+                    label="Config"
+                    v-model="selectedConfig"
+                    @change="getConfig"
+                  />
+                  <v-select
+                    label="Endpoint"
+                    :items="endpointNames"
+                    v-model="selectedEndpoint"
+                  />
+                </v-card-text>
               </v-col>
-              <v-col cols="12" md="6" align="center" justify="center">
-                <v-sheet
-                  v-if="selectedConfig && receipt.title"
+              <v-col cols="12" md="8" align="center" justify="center">
+                <v-card
                   elevation="1"
-                  outlined
                   color="grey darken-3"
-                  height="50"
-                  width="200"
+                  height="200"
+                  tile
+                  width="80%"
                   @drop.prevent="saveReceipt($event)"
                   @dragover.prevent="dragover = true"
                   @dragenter.prevent="dragover = true"
                   @dragleave.prevent="dragover = false"
                   :class="{ accent: dragover }"
                 >
-                  Receipt Found!
-                </v-sheet>
-                <v-sheet
-                  v-else-if="selectedConfig && !receipt.title"
-                  elevation="1"
-                  outlined
-                  color="grey darken-3"
-                  height="50"
-                  width="200"
-                  @drop.prevent="saveReceipt($event)"
-                  @dragover.prevent="dragover = true"
-                  @dragenter.prevent="dragover = true"
-                  @dragleave.prevent="dragover = false"
-                  :class="{ accent: dragover }"
-                >
-                  Add Receipt
-                </v-sheet>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-select :items="endpointNames" v-model="selectedEndpoint" />
-              </v-col>
-            </v-row>
-            <v-card-title>
-              Params
-            </v-card-title>
-            <v-row>
-              <v-col cols="12" md="12" align="center" justify="center">
-                <v-autocomplete
-                  multiple
-                  chips
-                  small-chips
-                  deletable-chips
-                  :items="paramsList"
-                  v-model="selectedParams"
-                >
-                </v-autocomplete>
-              </v-col>
-            </v-row>
-
-            <v-row>
-              <v-col
-                v-for="param of selectedParams"
-                :key="param"
-                cols="12"
-                md="4"
-              >
-                <v-card color="grey darken-3">
                   <v-card-text>
-                    <v-row>
-                      <v-col cols="12" md="7">
-                        <v-card-title class="text-no-wrap paramTitle">
-                          {{ param }}
-                        </v-card-title>
-                      </v-col>
-                      <v-col cols="12" md="5">
-                        <v-select
-                          :items="['bytes32', 'int256', 'bool']"
-                          label="Type"
-                          v-model="paramTypes[param]"
-                        >
-                        </v-select>
-                      </v-col>
-                    </v-row>
-                  </v-card-text>
-                  <v-card-text>
-                    <v-text-field
-                      label="Value"
-                      outlined
-                      v-model="paramValues[param]"
-                    >
-                    </v-text-field>
+                    <v-card-title>
+                      Designated Wallet
+                      <v-spacer> </v-spacer>
+                      {{ designatedWalletBalance }} ETH
+                    </v-card-title>
+                    <v-card-subtitle align="left">
+                      Address: 0x8bC482471A7A7041e277Ec1D0e967b327F6633c8
+                    </v-card-subtitle>
+                    <template v-if="receipt.providerId">
+                      <v-card-title>
+                        Receipt
+                        <v-spacer> </v-spacer>
+                        <v-chip color="green" small outlined>
+                          <v-icon left>
+                            mdi-check
+                          </v-icon>
+                          Receipt Found
+                        </v-chip>
+                      </v-card-title>
+                      <v-card-subtitle align="left">
+                        Master Wallet:
+                        0x8bC482471A7A7041e277Ec1D0e967b327F6633c8
+                      </v-card-subtitle>
+                    </template>
+                    <template v-else-if="config.id && !receipt.providerId">
+                      <v-card-title>
+                        Receipt
+                      </v-card-title>
+                      <v-card-subtitle align="left">
+                        Missing Receipt. Drag and drop a receipt.json here.
+                      </v-card-subtitle>
+                    </template>
+                    <template v-else>
+                      <v-card-title>
+                        Receipt
+                      </v-card-title>
+                      <v-card-subtitle align="left">
+                        Select a config on the left
+                      </v-card-subtitle>
+                    </template>
                   </v-card-text>
                 </v-card>
               </v-col>
             </v-row>
+
+            <v-card-title>
+              Params
+            </v-card-title>
+            <v-card-text>
+              <v-row>
+                <v-col cols="12" md="12" align="center" justify="center">
+                  <v-autocomplete
+                    multiple
+                    chips
+                    small-chips
+                    deletable-chips
+                    :items="paramsList"
+                    v-model="selectedParams"
+                  >
+                  </v-autocomplete>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col
+                  v-for="param of selectedParams"
+                  :key="param"
+                  cols="12"
+                  md="4"
+                >
+                  <v-card color="grey darken-3">
+                    <v-card-text>
+                      <v-row justify="center" align="center">
+                        <v-col cols="12" md="7">
+                          <v-card-title class="text-no-wrap paramTitle">
+                            {{ param }}
+                          </v-card-title>
+                        </v-col>
+                        <v-col cols="12" md="5">
+                          <v-select
+                            :items="['bytes32', 'int256', 'bool']"
+                            label="Type"
+                            v-model="paramTypes[param]"
+                          >
+                          </v-select>
+                        </v-col>
+                        <v-col cols="12" md="11">
+                          <v-text-field
+                            label="Value"
+                            outlined
+                            v-model="paramValues[param]"
+                          >
+                          </v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-card-text>
           </v-form>
         </v-card-text>
         <v-card-actions>
@@ -295,9 +326,9 @@ export default {
     },
     async getStats() {
       const balanceInWei = await this.provider.getBalance(designatedWallet);
-      this.designatedWalletBalance = this.ethers.utils.formatEther(
-        balanceInWei.toString()
-      );
+      const balance = this.ethers.utils.formatEther(balanceInWei.toString());
+      this.designatedWalletBalance = Math.round(balance * 1e4) / 1e4;
+
       this.gettingConfigs = true;
       this.configNames = await utils.getConfigNames();
       this.gettingConfigs = false;
