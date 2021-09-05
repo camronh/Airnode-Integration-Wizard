@@ -70,15 +70,15 @@
                   :class="{ accent: dragover }"
                 >
                   <v-card-text>
-                    <v-card-title>
-                      Designated Wallet
-                      <v-spacer> </v-spacer>
-                      {{ designatedWalletBalance }} ETH
-                    </v-card-title>
-                    <v-card-subtitle align="left">
-                      Address: 0x8bC482471A7A7041e277Ec1D0e967b327F6633c8
-                    </v-card-subtitle>
                     <template v-if="receipt.providerId">
+                      <v-card-title>
+                        Designated Wallet
+                        <v-spacer> </v-spacer>
+                        {{ designatedWalletBalance }} ETH
+                      </v-card-title>
+                      <v-card-subtitle align="left">
+                        Address: {{ designatedWallet }}
+                      </v-card-subtitle>
                       <v-card-title>
                         Receipt
                         <v-spacer> </v-spacer>
@@ -256,7 +256,6 @@
 import utils from "../utils/utils";
 // import ethers from "ethers";
 
-const designatedWallet = "0x8bC482471A7A7041e277Ec1D0e967b327F6633c8";
 
 export default {
   components: {
@@ -269,6 +268,7 @@ export default {
       connected: false,
       gettingConfigs: false,
       makingRequest: true,
+      designatedWallet: "",
       loading: false,
       dragover: false,
       requestDialog: false,
@@ -416,13 +416,23 @@ export default {
     },
 
     async getStats() {
-      const balanceInWei = await this.provider.getBalance(designatedWallet);
-      const balance = this.ethers.utils.formatEther(balanceInWei.toString());
-      this.designatedWalletBalance = Math.round(balance * 1e4) / 1e4;
-
       this.gettingConfigs = true;
       this.configNames = await utils.getConfigNames();
       this.gettingConfigs = false;
+    },
+    async getDesignatedWalletStats(providerId) {
+      const airnodeAdmin = require("@api3/airnode-admin");
+      const requesterIndex = "6";
+      this.designatedWallet = await airnodeAdmin.deriveDesignatedWallet(
+        this.airnode,
+        providerId,
+        requesterIndex
+      );
+      const balanceInWei = await this.provider.getBalance(
+        this.designatedWallet
+      );
+      const balance = this.ethers.utils.formatEther(balanceInWei.toString());
+      this.designatedWalletBalance = Math.round(balance * 1e4) / 1e4;
     },
     async getConfig() {
       this.receipt = {};
@@ -431,6 +441,8 @@ export default {
         this.loading = true;
         this.config = await utils.getConfig(this.selectedConfig);
         this.receipt = await utils.getReceipt(this.selectedConfig);
+        if (this.receipt.providerId)
+          await this.getDesignatedWalletStats(this.receipt.providerId);
       } catch (error) {
         console.log(error);
       }
@@ -503,7 +515,7 @@ export default {
           requestObj.providerId,
           requestObj.endpointId,
           requestObj.requesterIndex,
-          designatedWallet,
+          this.designatedWallet,
           airnodeAbi.encode(requestObj.params)
         );
         const requestId = await new Promise(resolve =>
