@@ -2,11 +2,14 @@
   <v-container>
     <v-app-bar app color="dark" dark>
       <div class="d-flex align-center">
-        <h1>
-          A I W
-        </h1>
+        <v-btn text flat to="/">
+          <h1>
+            A I W
+          </h1>
+        </v-btn>
       </div>
       <v-spacer></v-spacer>
+  
       <v-chip
         label
         large
