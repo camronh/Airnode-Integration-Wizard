@@ -321,9 +321,11 @@ export default {
   async mounted() {
     try {
       const ethers = require("ethers");
-      await window.ethereum.enable();
+      // await window.ethereum.enable();
       this.ethers = ethers;
       this.provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+      await this.provider.send("eth_requestAccounts", []);
+
       this.signer = this.provider.getSigner();
       this.address = await this.signer.getAddress();
       if (this.address) this.connected = true;
