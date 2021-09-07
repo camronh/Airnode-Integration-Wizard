@@ -175,7 +175,7 @@
             </v-card-text>
           </v-form>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions v-if="connected">
           <v-card-text justify="center" align="center">
             <!-- <v-btn
               class="ma-2"
@@ -247,6 +247,25 @@
           >
           </v-textarea>
         </v-card-text>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" md="3">
+              <v-select
+                label="_type"
+                :items="['bytes32', 'int256', 'bool']"
+                v-model="parseType"
+              >
+              </v-select>
+            </v-col>
+            <v-col cols="12" md="9">
+              <v-text-field
+                label="Result"
+                readonly
+                v-model="parsedResult"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
       </v-card>
     </v-dialog>
     <v-snackbar v-model="snackbar">
@@ -280,6 +299,8 @@ export default {
       snackbar: false,
       selectedConfig: "",
       selectedEndpoint: "",
+      parseType: "bytes32",
+      result: "",
       requestResults: "",
       address: "",
       paramValues: {},
@@ -300,8 +321,8 @@ export default {
       this.ethers = ethers;
       this.provider = new ethers.providers.Web3Provider(window.ethereum, "any");
       this.signer = this.provider.getSigner();
-      this.connected = true;
       this.address = await this.signer.getAddress();
+      if (this.address) this.connected = true;
       await this.getStats();
     } catch (error) {
       console.log(error);
@@ -348,6 +369,26 @@ export default {
         if (!this.paramTypes[param]) return false;
       }
       return true;
+    },
+    parsedResult() {
+      if (!this.parseType) return;
+      if (!this.result) return;
+      switch (this.parseType) {
+        case "int256":
+          return Number(this.result);
+
+        case "bool":
+          return this.result === "true";
+        case "bytes32":
+          try {
+            return this.ethers.utils.parseBytes32String(this.result);
+          } catch (error) {
+            console.log(error);
+            return "Invalid Bytes32";
+          }
+        default:
+          return this.result;
+      }
     },
 
     paramsData() {
@@ -502,13 +543,14 @@ export default {
         });
         requestObj.params = params;
         console.log({ requestObj });
-
+        this.parseType = this.paramValues["_type"];
         const exampleClient = new this.ethers.Contract(
           requestObj.clientAddress,
           requestObj.artifact.abi,
           this.signer
         );
         this.requestDialog = true;
+        this.makingRequest = true;
         this.requestResults = "Making the request...";
 
         console.log("Making the request...");
@@ -536,11 +578,8 @@ export default {
           )
         );
         this.requestResults += "\nRequest Fulfilled!\n";
-        this.requestResults += await exampleClient.fulfilledData(requestId);
-        // console.log({ results });
-        // console.log({ number: Number(results) });
-        // console.log({ string: results.toString() });
-        // console.log({ bytes32: this.ethers.utils.parseBytes32String(results) });
+        this.result = await exampleClient.fulfilledData(requestId);
+        this.requestResults += `Results: ${this.result}`;
       } catch (error) {
         console.log(error);
         this.requestDialog = false;
