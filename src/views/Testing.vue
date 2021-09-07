@@ -9,7 +9,7 @@
         </v-btn>
       </div>
       <v-spacer></v-spacer>
-  
+
       <v-chip
         label
         large
@@ -321,6 +321,7 @@ export default {
   async mounted() {
     try {
       const ethers = require("ethers");
+      await window.ethereum.enable();
       this.ethers = ethers;
       this.provider = new ethers.providers.Web3Provider(window.ethereum, "any");
       this.signer = this.provider.getSigner();
