@@ -154,7 +154,14 @@
                         </v-col>
                         <v-col cols="12" md="5">
                           <v-select
-                            :items="['bytes32', 'int256', 'bool']"
+                            :items="[
+                              'bytes32',
+                              'bytes',
+                              'string',
+                              'address',
+                              'int256',
+                              'uint256',
+                            ]"
                             label="Type"
                             @change="storeEndpoint"
                             v-model="paramTypes[param]"
