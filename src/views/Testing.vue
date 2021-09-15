@@ -474,7 +474,7 @@ export default {
 
     async getStats() {
       this.gettingConfigs = true;
-      this.configNames = await utils.getConfigNames();
+      this.configNames = await utils.getConfigTitles();
       this.gettingConfigs = false;
     },
     async getDesignatedWalletStats(providerId) {

@@ -1531,7 +1531,7 @@ export default {
     },
     async getConfigNames() {
       this.loading = true;
-      this.savedConfigNames = await utils.getConfigNames();
+      this.savedConfigNames = await utils.getConfigTitles();
       this.loading = false;
     },
 
