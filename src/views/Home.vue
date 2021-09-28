@@ -1385,6 +1385,14 @@ export default {
         if (!this.paramTypes.includes(p.in)) return false;
         if (p.in == "path" && !ep.path.includes(`{${p.name}}`)) return false;
       }
+      // Check if ep.path is in this.endpoints more than once without an endpoint name
+      // Causes EndpointID conflicts
+      let count = 0;
+      for (let e of this.endpoints) {
+        if (e.path == ep.path && !e.name) count++;
+      }
+      if (count > 1) return false;
+ 
       return true;
     },
     async onDrop(e) {
