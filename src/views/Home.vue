@@ -406,7 +406,7 @@
         </v-card-title>
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="5">
+            <v-col cols="12" md="7">
               <v-text-field
                 v-model="ep.path"
                 label="Path"
@@ -424,6 +424,16 @@
                 :items="['get', 'post']"
                 required
               ></v-select>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12" md="9">
+              <v-text-field
+                v-model="ep.name"
+                label="Name"
+                id="endpointName"
+                placeholder="Endpoint Name"
+              ></v-text-field>
             </v-col>
           </v-row>
         </v-card-text>
@@ -1101,12 +1111,8 @@ export default {
       ep: {
         path: "",
         method: "get",
+        name: "",
         params: [],
-        // reservedParam: {
-        //   type: "int256",
-        //   path: "",
-        //   times: false,
-        // },
       },
       rp: {
         type: "int256",
@@ -1181,6 +1187,7 @@ export default {
       this.ep = {
         path: "",
         method: "get",
+        name: "",
         params: [],
         // reservedParam: {
         //   type: "int256",
@@ -1248,6 +1255,7 @@ export default {
       this.ep = {
         path: "",
         method: "get",
+        name: "",
         params: [],
         // reservedParam: {
         //   type: "int256",
@@ -1337,6 +1345,7 @@ export default {
       this.ep = {
         path: "",
         method: "get",
+        name: "",
         params: [],
         // reservedParam: {
         //   type: "int256",
@@ -1503,6 +1512,14 @@ export default {
         if (!this.paramTypes.includes(p.in)) return false;
         if (p.in == "path" && !ep.path.includes(`{${p.name}}`)) return false;
       }
+      // Check if ep.path is in this.endpoints more than once without an endpoint name
+      // Causes EndpointID conflicts
+      let count = 0;
+      for (let e of this.endpoints) {
+        if (e.path == ep.path && !e.name) count++;
+      }
+      if (count > 1) return false;
+ 
       return true;
     },
     async onDrop(e) {
