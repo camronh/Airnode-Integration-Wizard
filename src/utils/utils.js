@@ -215,12 +215,12 @@ function makeConfig(state) {
     const endpointId = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         ["string"],
-        [`${title}/${endpoint.method}-${endpoint.path}`]
+        [`${title}/${endpoint.method}-${endpoint.name || endpoint.path}`]
       )
     );
     return {
       endpointId,
-      endpointName: endpoint.path,
+      endpointName: endpoint.name || endpoint.path,
       oisTitle: title,
     };
   });
@@ -295,7 +295,7 @@ function makeConfig(state) {
   }
   config.ois[0].endpoints = endpoints.map(endpoint => {
     let ep = {
-      name: endpoint.path,
+      name: endpoint.name || endpoint.path,
       operation: {
         method: endpoint.method,
         path: endpoint.path,
@@ -390,7 +390,8 @@ function parseConfig(config) {
   state.endpoints = [];
   for (let endpoint of ois.endpoints) {
     let ep = {
-      path: endpoint.name,
+      path: endpoint.operation.path,
+      name: endpoint.name == endpoint.operation.path ? "" : endpoint.name,
       method: endpoint.operation.method,
       params: [],
     };
