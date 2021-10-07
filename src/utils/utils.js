@@ -669,6 +669,11 @@ async function getReceipt(title) {
   return results.data;
 }
 
+async function getRPC() {
+  const results = await axios.get(`${apiUrl}/RPC`);
+  return results.data;
+}
+
 module.exports = {
   makeOAS,
   parseOAS,
@@ -682,6 +687,7 @@ module.exports = {
   getConfig,
   getReceipt,
   getOISs,
+  getRPC,
   deleteConfig,
   makeReadme,
   // openEndpoint,

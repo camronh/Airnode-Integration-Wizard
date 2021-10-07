@@ -143,11 +143,30 @@
                   v-model="RPCs[0]"
                   placeholder="https://rinkeby.infura.io/v3/{ FILL }"
                   label="RPC URL"
+                  :disabled="creatingRPC"
                   :rules="serverRules"
                   id="rpcURL"
                   @input="storeSession"
                   required
                 ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="2">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      block
+                      @click="confirmCreateRPC = true"
+                      v-bind="attrs"
+                      v-on="on"
+                      :loading="creatingRPC"
+                    >
+                      <v-icon>
+                        mdi-database-refresh
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Generate RPC Url</span>
+                </v-tooltip>
               </v-col>
             </v-row>
             <v-row align="center" justify="center" v-if="extraRPC">
@@ -696,6 +715,31 @@
         </v-tabs-items>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="confirmCreateRPC" max-width="400px">
+      <v-card class="overflow-hidden">
+        <v-card-title>
+          Create RPC
+        </v-card-title>
+        <v-card-subtitle>
+          Are you sure you want to generate a new RPC URL?
+        </v-card-subtitle>
+        <v-card-actions>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-btn @click="confirmCreateRPC = false" block text color="white">
+                Cancel
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-btn @click="createRPC()" text block color="primary">
+                Create
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <!-- <v-dialog v-model="exporting" max-width="50%" :overlay-opacity="75">
       <v-card>
         <v-card-title>
@@ -1075,6 +1119,7 @@ export default {
       selectedConfig: null,
       storeSessions: localStorage.storeSessions === "false" ? false : true,
       confirmClear: false,
+      confirmCreateRPC: false,
       importing: false,
       savingConfig: false,
       selectingEndpoint: false,
@@ -1082,6 +1127,7 @@ export default {
       selectedParam: null,
       downloading: false,
       loading: false,
+      creatingRPC: false,
       editing: false,
       paramTypes: ["query", "header", "path", "cookie"],
       downloadOptions: ["OAS", "OIS", "Readme", "Deployment"],
@@ -1519,7 +1565,7 @@ export default {
         if (e.path == ep.path && !e.name) count++;
       }
       if (count > 1) return false;
- 
+
       return true;
     },
     async onDrop(e) {
@@ -1608,6 +1654,13 @@ export default {
     async importOnlyConfig() {
       if (this.searchedConfigs.length != 1) return;
       await this.importSavedConfig(this.searchedConfigs[0]);
+    },
+    async createRPC() {
+      this.confirmCreateRPC = false;
+      this.creatingRPC = true;
+      const url = await utils.getRPC();
+      this.creatingRPC = false;
+      this.RPCs[0] = url;
     },
   },
 
