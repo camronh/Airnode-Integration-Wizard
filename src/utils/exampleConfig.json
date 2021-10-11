@@ -1,5 +1,5 @@
 {
-  "id": "e0c2ccc3-513c-4446-9cb0-2c506ac10d2b",
+  "id": "8ff4099d-2aba-4014-b3ac-820ef35f798e",
   "nodeSettings": {
     "nodeVersion": "0.1.0",
     "cloudProvider": "aws",
@@ -12,7 +12,7 @@
         "type": "evm",
         "providers": [
           {
-            "name": "rinkeby-alchemy",
+            "name": "rinkeby1",
             "url": "https://rinkeby.infura.io/v3/hbskjanfkasfhbjasfahfbsa"
           }
         ],
@@ -27,7 +27,7 @@
         "type": "evm",
         "providers": [
           {
-            "name": "rinkeby-alchemy",
+            "name": "rinkeby2",
             "url": "https://rinkeby.infura.io/v3/hbskjanfkasfhbjasfahfbsa222"
           }
         ],
@@ -42,18 +42,18 @@
   "triggers": {
     "request": [
       {
-        "endpointId": "0x95d1d14cb8dfab8beb5b451a1476131e77fdbc72058e57f1a6ce19f7218ee894",
-        "endpointName": "/quotes",
+        "endpointId": "0x6d096d1d52c17653c0a5ee44939ca914eb8cee14206cec5189c4ac3cfa068fce",
+        "endpointName": "GET /quotes",
         "oisTitle": "Forge"
       },
       {
-        "endpointId": "0x4ab839438c2d5271c21de81aa1cb7ed572e5c533cc5f578e65f9ad4607e6a61a",
-        "endpointName": "/convert",
+        "endpointId": "0x92c0cf2487735ab89ac32ff56c4e0e035e1afb96557320c2aae7ea9bff81e20f",
+        "endpointName": "GET /convert",
         "oisTitle": "Forge"
       },
       {
-        "endpointId": "0xbf93a151c36ec5703e236c05f871eaa2e5f22674a8dfb363f3a6aebff452735c",
-        "endpointName": "/market_status",
+        "endpointId": "0x87e6acbdb4d87ba23fb6ad4571546d6f2ecf4f4fa4801836d54271e2085f2fdb",
+        "endpointName": "GET /market_status",
         "oisTitle": "Forge"
       }
     ]
@@ -61,6 +61,8 @@
   "ois": [
     {
       "oisFormat": "1.0.0",
+      "title": "Forge",
+      "version": "1.0",
       "apiSpecifications": {
         "servers": [
           {
@@ -68,11 +70,11 @@
           }
         ],
         "security": {
-          "ForgeKey": []
+          "ForgeAuth": []
         },
         "components": {
           "securitySchemes": {
-            "ForgeKey": {
+            "ForgeAuth": {
               "type": "apiKey",
               "in": "query",
               "name": "api_key"
@@ -117,7 +119,7 @@
       },
       "endpoints": [
         {
-          "name": "/quotes",
+          "name": "GET /quotes",
           "operation": {
             "method": "get",
             "path": "/quotes"
@@ -131,6 +133,10 @@
             },
             {
               "name": "_times"
+            },
+            {
+              "name": "_relay_metadata",
+              "default": "v1"
             }
           ],
           "fixedOperationParameters": [],
@@ -145,7 +151,7 @@
           ]
         },
         {
-          "name": "/convert",
+          "name": "GET /convert",
           "operation": {
             "method": "get",
             "path": "/convert"
@@ -156,6 +162,13 @@
             },
             {
               "name": "_path"
+            },
+            {
+              "name": "_times"
+            },
+            {
+              "name": "_relay_metadata",
+              "default": "v1"
             }
           ],
           "fixedOperationParameters": [],
@@ -184,7 +197,7 @@
           ]
         },
         {
-          "name": "/market_status",
+          "name": "GET /market_status",
           "operation": {
             "method": "get",
             "path": "/market_status"
@@ -195,14 +208,19 @@
             },
             {
               "name": "_path"
+            },
+            {
+              "name": "_times"
+            },
+            {
+              "name": "_relay_metadata",
+              "default": "v1"
             }
           ],
           "fixedOperationParameters": [],
           "parameters": []
         }
-      ],
-      "title": "Forge",
-      "version": "1.0"
+      ]
     }
   ]
 }

@@ -215,16 +215,16 @@ function makeConfig(state) {
 
   config.triggers.request = endpoints.map(endpoint => {
     endpoint.path = endpoint.path.replace(/ /g, "");
-
+    endpoint.name = `${endpoint.method.toUpperCase()} ${endpoint.path}`;
     const endpointId = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         ["string"],
-        [`${title}/${endpoint.method}-${endpoint.name || endpoint.path}`]
+        [`${title}/${endpoint.method}-${endpoint.name}`]
       )
     );
     return {
       endpointId,
-      endpointName: endpoint.name || endpoint.path,
+      endpointName: endpoint.name,
       oisTitle: title,
     };
   });
@@ -286,20 +286,20 @@ function makeConfig(state) {
   }
 
   for (let endpoint of endpoints) {
-    config.ois[0].apiSpecifications.paths[endpoint.path] = {
-      [endpoint.method]: {
-        parameters: endpoint.params.map(param => {
-          return {
-            name: param.name.replace(/ /g, ""),
-            in: param.in,
-          };
-        }),
-      },
+    if (!config.ois[0].apiSpecifications.paths[endpoint.path])
+      config.ois[0].apiSpecifications.paths[endpoint.path] = {};
+    config.ois[0].apiSpecifications.paths[endpoint.path][endpoint.method] = {
+      parameters: endpoint.params.map(param => {
+        return {
+          name: param.name.replace(/ /g, ""),
+          in: param.in,
+        };
+      }),
     };
   }
   config.ois[0].endpoints = endpoints.map(endpoint => {
     let ep = {
-      name: endpoint.name || endpoint.path,
+      name: `${endpoint.method.toUpperCase()} ${endpoint.path}`,
       operation: {
         method: endpoint.method,
         path: endpoint.path,

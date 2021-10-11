@@ -319,39 +319,6 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <!-- <v-row align="center" justify="center">
-                <v-col cols="12" md="3">
-                  <v-text-field
-                    :disabled="!hasAuth"
-                    v-model="extraAuth.name"
-                    label="Name"
-                    @input="storeSession"
-                    placeholder="X-API-KEY"
-                    :rules="hasAuth ? required : false"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="2">
-                  <v-select
-                    :disabled="!hasAuth"
-                    v-model="extraAuth.scheme"
-                    label="Scheme"
-                    :items="['basic', 'bearer']"
-                    required
-                    @input="storeSession"
-                  ></v-select>
-                </v-col>
-                <v-col cols="12" md="4">
-                  <v-text-field
-                    :disabled="!hasAuth"
-                    v-model="extraAuth.value"
-                    label="Value"
-                    @input="storeSession"
-                    placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
-                    required
-                  ></v-text-field>
-                </v-col>
-              </v-row> -->
             </template>
             <v-row align="center" justify="center">
               <v-col cols="12" md="1"></v-col>
@@ -443,16 +410,6 @@
                 :items="['get', 'post']"
                 required
               ></v-select>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="9">
-              <v-text-field
-                v-model="ep.name"
-                label="Name"
-                id="endpointName"
-                placeholder="Endpoint Name"
-              ></v-text-field>
             </v-col>
           </v-row>
         </v-card-text>
@@ -1157,7 +1114,6 @@ export default {
       ep: {
         path: "",
         method: "get",
-        name: "",
         params: [],
       },
       rp: {
@@ -1233,13 +1189,7 @@ export default {
       this.ep = {
         path: "",
         method: "get",
-        name: "",
         params: [],
-        // reservedParam: {
-        //   type: "int256",
-        //   path: "",
-        //   times: false,
-        // },
       };
       this.endpointMenu = false;
       this.storeSession();
@@ -1301,13 +1251,7 @@ export default {
       this.ep = {
         path: "",
         method: "get",
-        name: "",
         params: [],
-        // reservedParam: {
-        //   type: "int256",
-        //   path: "",
-        //   times: false,
-        // },
       };
     },
     openBulkMenu() {
@@ -1391,7 +1335,6 @@ export default {
       this.ep = {
         path: "",
         method: "get",
-        name: "",
         params: [],
         // reservedParam: {
         //   type: "int256",
@@ -1558,13 +1501,6 @@ export default {
         if (!this.paramTypes.includes(p.in)) return false;
         if (p.in == "path" && !ep.path.includes(`{${p.name}}`)) return false;
       }
-      // Check if ep.path is in this.endpoints more than once without an endpoint name
-      // Causes EndpointID conflicts
-      let count = 0;
-      for (let e of this.endpoints) {
-        if (e.path == ep.path && !e.name) count++;
-      }
-      if (count > 1) return false;
 
       return true;
     },
