@@ -619,7 +619,11 @@
           </v-tab-item>
           <v-tab-item>
             <v-card-text>
-              <v-list style="max-height: 600px" class="overflow-y-auto">
+              <v-list
+                style="max-height: 600px"
+                class="overflow-y-auto"
+                v-if="!mergingConfigs"
+              >
                 <v-list-item-group
                   v-model="selectedConfig"
                   mandatory
@@ -649,11 +653,68 @@
                   </template>
                 </v-list-item-group>
               </v-list>
+              <v-list style="max-height: 600px" class="overflow-y-auto" v-else>
+                <v-list-item-group
+                  v-model="selectedConfigs"
+                  multiple
+                  color="accent"
+                >
+                  <template>
+                    <v-list-item
+                      v-for="configName in savedConfigNames"
+                      :key="configName"
+                      v-show="found(configName)"
+                    >
+                      <v-list-item-content>
+                        <v-list-item-title
+                          v-text="configName"
+                        ></v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </template>
+                </v-list-item-group>
+              </v-list>
             </v-card-text>
-            <v-tooltip left>
+
+            <v-tooltip left v-if="!mergingConfigs">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
-                  absolute
+                  fixed
+                  right
+                  style="bottom:64px"
+                  bottom
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="mergingConfigs = true"
+                >
+                  <v-icon>
+                    mdi-merge
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Merge Configs</span>
+            </v-tooltip>
+            <v-tooltip left v-else>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  fixed
+                  right
+                  style="bottom:64px"
+                  bottom
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="mergeConfigs"
+                >
+                  <v-icon>
+                    mdi-merge
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Merge!</span>
+            </v-tooltip>
+            <v-tooltip left v-if="!mergingConfigs">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
                   fixed
                   right
                   bottom
@@ -667,6 +728,23 @@
                 </v-btn>
               </template>
               <span>Export All OIS's</span>
+            </v-tooltip>
+            <v-tooltip left v-else>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  fixed
+                  right
+                  bottom
+                  v-bind="attrs"
+                  v-on="on"
+                  @click="mergingConfigs = false"
+                >
+                  <v-icon>
+                    mdi-close
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>Cancel Merge</span>
             </v-tooltip>
           </v-tab-item>
         </v-tabs-items>
@@ -1074,6 +1152,7 @@ export default {
       exportType: "oas",
       exporting: false,
       selectedConfig: null,
+      selectedConfigs: [],
       storeSessions: localStorage.storeSessions === "false" ? false : true,
       confirmClear: false,
       confirmCreateRPC: false,
@@ -1081,6 +1160,7 @@ export default {
       savingConfig: false,
       selectingEndpoint: false,
       confirmDelete: false,
+      mergingConfigs: false,
       selectedParam: null,
       downloading: false,
       loading: false,
@@ -1193,6 +1273,9 @@ export default {
       };
       this.endpointMenu = false;
       this.storeSession();
+    },
+    found(name) {
+      return this.searchedConfigs.includes(name);
     },
     addParam() {
       if (!this.param.name || (this.param.fixed && !this.param.value)) return;
@@ -1597,6 +1680,10 @@ export default {
       const url = await utils.getRPC();
       this.creatingRPC = false;
       this.RPCs[0] = url;
+    },
+    async mergeConfigs() {
+      console.log(this.selectedConfigs);
+      this.mergingConfigs = false;
     },
   },
 
