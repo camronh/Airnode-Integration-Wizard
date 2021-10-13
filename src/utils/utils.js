@@ -442,28 +442,29 @@ async function makeZip(state) {
 
       // Add Security.json
       let security = {
-        apiCredentials: {
-          [state.title]: [],
-        },
+        apiCredentials: {},
         id: config.id,
       };
-      const securitySchemes = Object.keys(
-        config.ois[0].apiSpecifications.components.securitySchemes
-      );
-      if (securitySchemes.length > 0) {
-        security.apiCredentials[state.title][0] = {
-          securitySchemeName: securitySchemes[0],
-          value: state.auth.value ? state.auth.value : "INSERT_API_KEY",
-        };
-      }
-      if (securitySchemes.length > 1) {
-        console.log(state.extraAuth);
-        security.apiCredentials[state.title][1] = {
-          securitySchemeName: securitySchemes[1],
-          value: state.extraAuth.value
-            ? state.extraAuth.value
-            : "INSERT_API_KEY",
-        };
+      for (let ois of config.ois) {
+        security.apiCredentials[ois.title] = [];
+
+        const securitySchemes = Object.keys(
+          ois.apiSpecifications.components.securitySchemes
+        );
+        if (securitySchemes.length > 0) {
+          security.apiCredentials[ois.title][0] = {
+            securitySchemeName: securitySchemes[0],
+            value: state.auth.value ? state.auth.value : "INSERT_API_KEY",
+          };
+        }
+        if (securitySchemes.length > 1) {
+          security.apiCredentials[ois.title][1] = {
+            securitySchemeName: securitySchemes[1],
+            value: state.extraAuth.value
+              ? state.extraAuth.value
+              : "INSERT_API_KEY",
+          };
+        }
       }
 
       configZip.file("security.json", JSON.stringify(security, null, 2));

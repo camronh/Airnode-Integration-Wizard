@@ -529,6 +529,60 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="mergingDialog" width="300">
+      <v-card height="100%">
+        <v-card-title>
+          {{ mergeProgress != 100 ? "Merging Configs..." : "Merge Complete" }}
+        </v-card-title>
+        <v-card-text>
+          <v-progress-linear
+            color="primary"
+            class="mb-0"
+            :value="mergeProgress"
+          ></v-progress-linear>
+        </v-card-text>
+
+        <v-card-text>
+          <ul>
+            <li v-for="name of mergeConfigsNames" :key="name">
+              {{ name }}
+            </li>
+          </ul>
+          <v-card-actions>
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-btn
+                  @click="
+                    exporting = true;
+                    mergingDialog = false;
+                  "
+                  text
+                  block
+                >
+                  <v-icon>
+                    mdi-magnify
+                  </v-icon>
+                </v-btn>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-btn
+                  @click="
+                    downloadOptions = ['Deployment'];
+                    download();
+                  "
+                  text
+                  block
+                >
+                  <v-icon>
+                    mdi-download
+                  </v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="importing" max-width="50%">
       <v-card class="overflow-hidden">
         <v-app-bar flat color="transparent">
@@ -701,6 +755,7 @@
                   right
                   style="bottom:64px"
                   bottom
+                  :disabled="selectedConfigs.length < 2"
                   v-bind="attrs"
                   v-on="on"
                   @click="mergeConfigs"
@@ -737,7 +792,10 @@
                   bottom
                   v-bind="attrs"
                   v-on="on"
-                  @click="mergingConfigs = false"
+                  @click="
+                    mergingConfigs = false;
+                    selectedConfigs = [];
+                  "
                 >
                   <v-icon>
                     mdi-close
@@ -904,9 +962,26 @@
         <v-card-title>
           Export
           <v-spacer></v-spacer>
-          <v-btn icon :loading="savingConfig" @click="saveConfig">
+          <v-btn
+            icon
+            :loading="savingConfig"
+            @click="saveConfig"
+            v-if="exportJson.title"
+          >
             <v-icon>
               mdi-floppy
+            </v-icon>
+          </v-btn>
+          <v-btn
+            icon
+            @click="
+              exporting = false;
+              mergingDialog = true;
+            "
+            v-else
+          >
+            <v-icon>
+              mdi-close
             </v-icon>
           </v-btn>
         </v-card-title>
@@ -924,7 +999,13 @@
           </v-jsoneditor>
         </v-card-text>
 
-        <v-btn block @click="downloading = true" text color="primary">
+        <v-btn
+          block
+          @click="downloading = true"
+          text
+          color="primary"
+          v-if="exportJson.title"
+        >
           Download
         </v-btn>
       </v-card>
@@ -1119,6 +1200,7 @@
 import utils from "../utils/utils";
 import VJsoneditor from "v-jsoneditor/src/index";
 import yaml from "yaml";
+import SwaggerParser from "@apidevtools/swagger-parser";
 
 export default {
   name: "Home",
@@ -1161,6 +1243,9 @@ export default {
       selectingEndpoint: false,
       confirmDelete: false,
       mergingConfigs: false,
+      mergingDialog: false,
+      mergeConfigsNames: [],
+      mergeProgress: 0,
       selectedParam: null,
       downloading: false,
       loading: false,
@@ -1308,7 +1393,6 @@ export default {
     },
 
     download() {
-      console.log("Auth again", this.extraAuth);
       utils.makeZip(this);
     },
 
@@ -1440,6 +1524,7 @@ export default {
       this.selectingEndpoint = false;
     },
     exportConfig() {
+      this.mergingConfigs = false;
       this.oas = utils.makeOAS(this);
       this.exportStr = utils.makeConfig(this);
       console.log(this.exportStr);
@@ -1467,7 +1552,6 @@ export default {
       }
 
       try {
-        const SwaggerParser = require("@apidevtools/swagger-parser");
         let parser = new SwaggerParser();
         const oas = await parser.dereference(JSON.parse(this.importString));
         this.importString = JSON.stringify(oas, null, 2);
@@ -1683,7 +1767,32 @@ export default {
     },
     async mergeConfigs() {
       console.log(this.selectedConfigs);
-      this.mergingConfigs = false;
+      this.mergingDialog = true;
+      try {
+        this.mergeConfigsNames = this.selectedConfigs.map(
+          v => this.savedConfigNames[v]
+        );
+        const progressChunk = 100 / this.selectedConfigs.length;
+        let mainConfig = null;
+        for (let name of this.mergeConfigsNames) {
+          const config = await utils.getConfig(name);
+          this.mergeProgress += progressChunk;
+          if (!mainConfig) mainConfig = config;
+          else {
+            mainConfig.triggers.request.push(...config.triggers.request);
+            mainConfig.ois.push(config.ois[0]);
+          }
+        }
+        delete mainConfig.title;
+        // this.mergingDialog = false;
+        this.exportJson = mainConfig;
+        // this.exporting = true;
+
+        console.log(this.mergeConfigsNames);
+      } catch (error) {
+        console.log(error);
+      }
+      this.loading = false;
     },
   },
 
