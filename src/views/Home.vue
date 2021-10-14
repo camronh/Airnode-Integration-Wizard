@@ -966,7 +966,7 @@
             icon
             :loading="savingConfig"
             @click="saveConfig"
-            v-if="exportJson.title"
+            v-if="!mergingConfigs"
           >
             <v-icon>
               mdi-floppy
@@ -1004,7 +1004,7 @@
           @click="downloading = true"
           text
           color="primary"
-          v-if="exportJson.title"
+          v-if="!mergingConfigs"
         >
           Download
         </v-btn>
