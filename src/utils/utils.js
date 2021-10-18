@@ -55,7 +55,7 @@ function makeOAS(state) {
   if (hasAuth) {
     oas.components = {
       securitySchemes: {
-        [`${title}Auth`]: {
+        [`${title}_${auth.name || auth.scheme}`]: {
           type: auth.type,
           name: auth.name,
           in: auth.in,
@@ -63,18 +63,19 @@ function makeOAS(state) {
       },
     };
     if (auth.scheme) {
-      oas.components.securitySchemes[`${title}Auth`].scheme = auth.scheme;
+      oas.components.securitySchemes[`${title}_${auth.name || auth.scheme}`].scheme = auth.scheme;
     }
   }
   if (state.addedExtraAuth) {
-    oas.components.securitySchemes[`${title}AuthB`] = {
-      type: state.extraAuth.type,
-      name: state.extraAuth.name,
-      in: state.extraAuth.in,
+    let { extraAuth } = state;
+    oas.components.securitySchemes[`${title}_${extraAuth.name || extraAuth.scheme}`] = {
+      type: extraAuth.type,
+      name: extraAuth.name,
+      in: extraAuth.in,
     };
     if (auth.scheme) {
-      oas.components.securitySchemes[`${title}AuthB`].scheme =
-        state.extraAuth.scheme;
+      oas.components.securitySchemes[`${title}_${extraAuth.name || extraAuth.scheme}`].scheme =
+        extraAuth.scheme;
     }
   }
   console.log({ oas });
@@ -244,39 +245,39 @@ function makeConfig(state) {
   };
 
   if (hasAuth) {
-    config.ois[0].apiSpecifications.security[`${title}Auth`] = [];
+    config.ois[0].apiSpecifications.security[`${title}_${auth.name || auth.scheme}`] = [];
     config.ois[0].apiSpecifications.components.securitySchemes[
-      `${title}Auth`
+      `${title}_${auth.name || auth.scheme}`
     ] = {
       type: auth.type,
       in: auth.in,
     };
     if (auth.type == "http") {
       config.ois[0].apiSpecifications.components.securitySchemes[
-        `${title}Auth`
+        `${title}_${auth.name || auth.scheme}`
       ].scheme = auth.scheme;
     } else {
       config.ois[0].apiSpecifications.components.securitySchemes[
-        `${title}Auth`
+        `${title}_${auth.name || auth.scheme}`
       ].name = auth.name;
     }
   }
 
   if (state.addedExtraAuth) {
-    config.ois[0].apiSpecifications.security[`${title}AuthB`] = [];
+    config.ois[0].apiSpecifications.security[`${title}_${state.extraAuth.name || state.extraAuth.scheme}`] = [];
     config.ois[0].apiSpecifications.components.securitySchemes[
-      `${title}AuthB`
+      `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
     ] = {
       type: state.extraAuth.type,
       in: state.extraAuth.in,
     };
     if (extraAuth.type == "http") {
       config.ois[0].apiSpecifications.components.securitySchemes[
-        `${title}AuthB`
+        `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
       ].scheme = extraAuth.scheme;
     } else {
       config.ois[0].apiSpecifications.components.securitySchemes[
-        `${title}AuthB`
+        `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
       ].name = extraAuth.name;
     }
   }
