@@ -1584,6 +1584,10 @@ export default {
     },
     parsePath() {
       console.log("Parsing path");
+      // Remove this.server from this.ep.path
+      this.ep.path = this.ep.path.replace(this.server, "");
+
+
       // get all strings inside of curly braces in this.ep.path
       let paths = this.ep.path.match(/\{[^}]*\}/g);
       if (paths) {
