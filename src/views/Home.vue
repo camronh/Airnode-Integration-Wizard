@@ -398,6 +398,7 @@
                 label="Path"
                 id="path"
                 autofocus
+                @keypress.enter="saveEndpoint"
                 @input="parsePath"
                 placeholder="/endpoint/{pathParam}"
                 required
