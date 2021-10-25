@@ -16,7 +16,7 @@ test("Parse server url from Endpoint path", async ({ page }) => {
   await page.type("text=Server", serverUrl);
   // await page.keyboard.type(serverUrl);
   await page.click("text=add endpoint");
-  await page.type(
+  await page.fill(
     "#path",
     `${serverUrl}​/{technology}​/{blockchain}​/{network}​/icon​/token​/{address}`
   );
