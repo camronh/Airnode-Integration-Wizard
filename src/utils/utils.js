@@ -625,8 +625,11 @@ function parseConfig(config) {
     state.endpoints.push(ep);
   }
 
-  state.RPCs[0] = config.nodeSettings.chains[0].providers[0].url;
-  if (config.nodeSettings.chains[1]) {
+  // If pre-alpha parse RPC
+  if (config.nodeSettings.chains)
+    state.RPCs[0] = config.nodeSettings.chains[0].providers[0].url;
+
+  if (config.nodeSettings.chains && config.nodeSettings.chains[1]) {
     state.RPCs[1] = config.nodeSettings.chains[1].providers[0].url;
     state.extraRPC = true;
   }
