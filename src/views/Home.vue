@@ -968,11 +968,13 @@ export default {
     };
   },
   watch: {
-    exportJson() {
+    async exportJson() {
       console.log("Changed");
       this.exportStr = JSON.stringify(this.exportJson, null, 2);
       this.importString = this.exportStr;
-      this.parseImport();
+      const RPCs = this.RPCs;
+      await this.parseImport();
+      this.RPCs = RPCs;
     },
 
     selectedParam() {
@@ -1057,7 +1059,6 @@ export default {
     },
 
     download() {
-      console.log("Auth again", this.extraAuth);
       utils.makeZip(this);
     },
 
@@ -1185,11 +1186,13 @@ export default {
       this.selectingEndpoint = false;
     },
     exportConfig() {
+      const RPCs = this.RPCs;
       this.oas = utils.makeOAS(this);
       this.exportStr = utils.makeConfig(this);
       console.log(this.exportStr);
       this.exportJson = JSON.parse(this.exportStr);
       this.exporting = true;
+      this.RPCs = RPCs;
     },
 
     async parseImport() {
@@ -1232,16 +1235,19 @@ export default {
         } else {
           state = utils.parseConfig(json);
         }
+        console.log("PARSIN", state.RPCs);
         Object.keys(state).forEach((key) => {
           this[key] = state[key];
         });
         this.auth.value = apiValue;
         this.extraAuth.value = extraValue;
+
         this.storeSession();
       } catch (error) {
         console.log(error);
         this.importError = true;
       }
+      console.log({ RPCs: this.RPCs });
     },
     parsePath() {
       console.log("Parsing path");

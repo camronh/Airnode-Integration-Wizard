@@ -626,8 +626,10 @@ function parseConfig(config) {
   }
 
   // If pre-alpha parse RPC
-  if (config.nodeSettings.chains)
+  if (config.nodeSettings.chains) {
     state.RPCs[0] = config.nodeSettings.chains[0].providers[0].url;
+  }
+  console.log({ StateRPCs: state.RPCs });
 
   if (config.nodeSettings.chains && config.nodeSettings.chains[1]) {
     state.RPCs[1] = config.nodeSettings.chains[1].providers[0].url;
@@ -638,6 +640,7 @@ function parseConfig(config) {
 
 // Download Zip
 async function makeZip(state) {
+  console.log(state.RPCs);
   const downloadOptions = state.downloadOptions;
   const JSZip = require("jszip");
   const FileSaver = require("file-saver");
@@ -648,7 +651,9 @@ async function makeZip(state) {
     await new Promise((resolve) => {
       let configZip = new JSZip();
 
-      configZip.file("config.json", state.exportStr);
+      // Make a config folder
+      configZip.folder("config");
+      configZip.file("config/config.json", state.exportStr);
 
       // Make secrets.env
       // Find all occurrences of ${} in state.exportStr
@@ -659,42 +664,33 @@ async function makeZip(state) {
         secrets.push(match[1]);
       }
 
+      console.log(state);
       let secretsEnv = "";
       secrets.forEach((variable) => {
-        secretsEnv += `${variable}=""\n`;
+        switch (variable) {
+          case "CHAIN_PROVIDER_URL":
+            secretsEnv += `${variable}="${state.RPCs[0]}"\n`;
+            break;
+          case "CHAIN_PROVIDER_URL2":
+            secretsEnv += `${variable}="${state.RPCs[1]}"\n`;
+            break;
+          case "HTTP_GATEWAY_ENABLED":
+            secretsEnv += `\n${variable}="true"\n`;
+            break;
+          case "HTTP_GATEWAY_API_KEY":
+            secretsEnv += `${variable}="${uuid()}"\n\n`;
+            break;
+          case state.auth.name:
+            secretsEnv += `${variable}="${state.auth.value}"\n`;
+            break;
+          default:
+            secretsEnv += `${variable}=""\n`;
+            break;
+        }
       });
       console.log({ secretsEnv });
-      configZip.file("secrets.env", secretsEnv);
-
-      // // Add Security.json
-      // let security = {
-      //   apiCredentials: {
-      //     [state.title]: [],
-      //   },
-      //   id: config.id,
-      // };
-      // const securitySchemes = Object.keys(
-      //   config.ois[0].apiSpecifications.components.securitySchemes
-      // );
-      // if (securitySchemes.length > 0) {
-      //   security.apiCredentials[state.title][0] = {
-      //     securitySchemeName: securitySchemes[0],
-      //     value: state.auth.value ? state.auth.value : "INSERT_API_KEY",
-      //   };
-      // }
-      // if (securitySchemes.length > 1) {
-      //   console.log(state.extraAuth);
-      //   security.apiCredentials[state.title][1] = {
-      //     securitySchemeName: securitySchemes[1],
-      //     value: state.extraAuth.value
-      //       ? state.extraAuth.value
-      //       : "INSERT_API_KEY",
-      //   };
-      // }
-
-      // configZip.file("security.json", JSON.stringify(security, null, 2));
-
-      configZip.file(".env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_KEY=`);
+      configZip.file("config/secrets.env", secretsEnv);
+      configZip.file("aws.env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_ACCESS_KEY=`);
       configZip.generateAsync({ type: "blob" }).then(function(content) {
         console.log("Generated");
         zip.file(`${state.title}-Deployment.zip`, content);
@@ -737,6 +733,7 @@ function makeReadme(config) {
       }),
     };
   });
+
   // Create Markup String
 
   let configStr = `# How to use ${config.ois[0].title} on Web3
