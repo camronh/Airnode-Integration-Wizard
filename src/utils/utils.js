@@ -14,7 +14,7 @@ function makeOAS(state) {
   };
   if (version) oas.info.version = version;
   for (let endpoint of endpoints) {
-    let params = endpoint.params.map(param => {
+    let params = endpoint.params.map((param) => {
       return {
         name: param.name,
         in: param.in,
@@ -216,7 +216,7 @@ function makeConfigPrealpha(state) {
         "0xC22376E2Dd4537D78F088B349Cbf2b9Ce79Fe016",
     });
 
-  config.triggers.request = endpoints.map(endpoint => {
+  config.triggers.request = endpoints.map((endpoint) => {
     endpoint.path = endpoint.path.replace(/ /g, "");
     endpoint.name = `${endpoint.method.toUpperCase()} ${endpoint.path}`;
     const endpointId = ethers.utils.keccak256(
@@ -296,7 +296,7 @@ function makeConfigPrealpha(state) {
     if (!config.ois[0].apiSpecifications.paths[endpoint.path])
       config.ois[0].apiSpecifications.paths[endpoint.path] = {};
     config.ois[0].apiSpecifications.paths[endpoint.path][endpoint.method] = {
-      parameters: endpoint.params.map(param => {
+      parameters: endpoint.params.map((param) => {
         return {
           name: param.name.replace(/ /g, ""),
           in: param.in,
@@ -304,7 +304,7 @@ function makeConfigPrealpha(state) {
       }),
     };
   }
-  config.ois[0].endpoints = endpoints.map(endpoint => {
+  config.ois[0].endpoints = endpoints.map((endpoint) => {
     let ep = {
       name: `${endpoint.method.toUpperCase()} ${endpoint.path}`,
       operation: {
@@ -414,7 +414,7 @@ function makeConfig(state) {
       type: "evm",
     });
 
-  config.triggers.rrp = endpoints.map(endpoint => {
+  config.triggers.rrp = endpoints.map((endpoint) => {
     endpoint.path = endpoint.path.replace(/ /g, "");
     endpoint.name = `${endpoint.method.toUpperCase()} ${endpoint.path}`;
     const endpointId = ethers.utils.keccak256(
@@ -496,7 +496,7 @@ function makeConfig(state) {
     if (!config.ois[0].apiSpecifications.paths[endpoint.path])
       config.ois[0].apiSpecifications.paths[endpoint.path] = {};
     config.ois[0].apiSpecifications.paths[endpoint.path][endpoint.method] = {
-      parameters: endpoint.params.map(param => {
+      parameters: endpoint.params.map((param) => {
         return {
           name: param.name.replace(/ /g, ""),
           in: param.in,
@@ -504,7 +504,7 @@ function makeConfig(state) {
       }),
     };
   }
-  config.ois[0].endpoints = endpoints.map(endpoint => {
+  config.ois[0].endpoints = endpoints.map((endpoint) => {
     let ep = {
       name: `${endpoint.method.toUpperCase()} ${endpoint.path}`,
       operation: {
@@ -645,44 +645,54 @@ async function makeZip(state) {
   const config = JSON.parse(state.exportStr);
   if (downloadOptions.includes("Deployment")) {
     //   Add Deployment Package
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       let configZip = new JSZip();
 
       configZip.file("config.json", state.exportStr);
 
-
       // Make secrets.env
       // Find all occurrences of ${} in state.exportStr
-      
-
-
-      // Add Security.json
-      let security = {
-        apiCredentials: {
-          [state.title]: [],
-        },
-        id: config.id,
-      };
-      const securitySchemes = Object.keys(
-        config.ois[0].apiSpecifications.components.securitySchemes
-      );
-      if (securitySchemes.length > 0) {
-        security.apiCredentials[state.title][0] = {
-          securitySchemeName: securitySchemes[0],
-          value: state.auth.value ? state.auth.value : "INSERT_API_KEY",
-        };
-      }
-      if (securitySchemes.length > 1) {
-        console.log(state.extraAuth);
-        security.apiCredentials[state.title][1] = {
-          securitySchemeName: securitySchemes[1],
-          value: state.extraAuth.value
-            ? state.extraAuth.value
-            : "INSERT_API_KEY",
-        };
+      let secrets = [];
+      let regex = /\$\{([^}]+)\}/g;
+      let match;
+      while ((match = regex.exec(state.exportStr)) !== null) {
+        secrets.push(match[1]);
       }
 
-      configZip.file("security.json", JSON.stringify(security, null, 2));
+      let secretsEnv = "";
+      secrets.forEach((variable) => {
+        secretsEnv += `${variable}=""\n`;
+      });
+      console.log({ secretsEnv });
+      configZip.file("secrets.env", secretsEnv);
+
+      // // Add Security.json
+      // let security = {
+      //   apiCredentials: {
+      //     [state.title]: [],
+      //   },
+      //   id: config.id,
+      // };
+      // const securitySchemes = Object.keys(
+      //   config.ois[0].apiSpecifications.components.securitySchemes
+      // );
+      // if (securitySchemes.length > 0) {
+      //   security.apiCredentials[state.title][0] = {
+      //     securitySchemeName: securitySchemes[0],
+      //     value: state.auth.value ? state.auth.value : "INSERT_API_KEY",
+      //   };
+      // }
+      // if (securitySchemes.length > 1) {
+      //   console.log(state.extraAuth);
+      //   security.apiCredentials[state.title][1] = {
+      //     securitySchemeName: securitySchemes[1],
+      //     value: state.extraAuth.value
+      //       ? state.extraAuth.value
+      //       : "INSERT_API_KEY",
+      //   };
+      // }
+
+      // configZip.file("security.json", JSON.stringify(security, null, 2));
 
       configZip.file(".env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_KEY=`);
       configZip.generateAsync({ type: "blob" }).then(function(content) {
@@ -711,15 +721,15 @@ async function makeZip(state) {
 
 function makeReadme(config) {
   // Create Markup Endpoints
-  let endpoints = config.triggers.request.map(endpoint => {
+  let endpoints = config.triggers.request.map((endpoint) => {
     let endpoints = config.ois[0].endpoints;
-    let correctParams = endpoints.find(e => e.name == endpoint.endpointName);
+    let correctParams = endpoints.find((e) => e.name == endpoint.endpointName);
     if (!correctParams) return endpoint.endpointName;
     return {
       endpointName: endpoint.endpointName,
       endpointId: endpoint.endpointId,
-      parameters: correctParams.parameters.map(p => p.name),
-      fixedParams: correctParams.fixedOperationParameters.map(p => {
+      parameters: correctParams.parameters.map((p) => p.name),
+      fixedParams: correctParams.fixedOperationParameters.map((p) => {
         return {
           name: p.operationParameter.name,
           value: p.value,
@@ -777,7 +787,7 @@ Read the [Airnode developer documentation](https://docs.api3.org/d/call-an-airno
   );
   configStr += `\n# Endpoints\n${tableOfContents.join("\n")}\n---`;
 
-  endpoints.forEach(endpoint => {
+  endpoints.forEach((endpoint) => {
     configStr += `\n## ${endpoint.endpointName} <a name="${endpoint.endpointId}"></a>
 
 {{ Describe the endpoint. Explain what it does and, if possible, deep link to the Web2 documentation. }}
@@ -790,7 +800,7 @@ You'll need the **Endpoint ID** to call this endpoint.
 
 [Request Parameters](https://docs.api3.org/pre-alpha/protocols/request-response/request.html#request-parameters)`;
     let endpointStrs = endpoint.parameters.map(
-      e => `${e}\t\t// Parameter Description...`
+      (e) => `${e}\t\t// Parameter Description...`
     );
     if (endpointStrs.length) {
       configStr += "\n\n```solidity\n" + endpointStrs.join("\n") + "\n```";
@@ -798,7 +808,7 @@ You'll need the **Endpoint ID** to call this endpoint.
 
     if (endpoint.fixedParams.length) {
       let fixedParamStrs = endpoint.parameters.map(
-        e =>
+        (e) =>
           `${e.name} = '${e.value}';\t\t// The ${e.name} parameter is fixed to ${e.value}`
       );
       configStr +=
