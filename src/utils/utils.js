@@ -650,6 +650,12 @@ async function makeZip(state) {
 
       configZip.file("config.json", state.exportStr);
 
+
+      // Make secrets.env
+      // Find all occurrences of ${} in state.exportStr
+      
+
+
       // Add Security.json
       let security = {
         apiCredentials: {
