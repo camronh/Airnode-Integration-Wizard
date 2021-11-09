@@ -331,6 +331,8 @@ export default {
       // await window.ethereum.enable();
       this.ethers = ethers;
       this.provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+      const { chainId } = await this.provider.getNetwork();
+      this.chainID = chainId;
       await this.provider.send("eth_requestAccounts", []);
 
       this.signer = this.provider.getSigner();
@@ -347,11 +349,39 @@ export default {
       let endpoints = this.config.ois[0].endpoints;
       for (let endpoint of endpoints) {
         let { endpointId } = this.config.triggers.request.find(
-          trigger => trigger.endpointName === endpoint.name
+          (trigger) => trigger.endpointName === endpoint.name
         );
         endpoint.endpointId = endpointId;
       }
       return endpoints;
+    },
+    airnodeAddress() {
+      switch (Number(this.chainID)) {
+        case 4:
+          // Rinkeby Airnode Address
+          return "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC";
+        case 31:
+          // RSK Airnode Address
+          return "0x1190a5e1f2afe4c8128fd820a7ac85a95a9e6e3e";
+        case 3:
+          // Ropsten Airnode Address
+          return "0xF8d32C3e53F7DA6e7CB82323f2cAB2159776b832";
+      }
+      throw new Error("Chain ID not found");
+    },
+    requestClientAddress() {
+      switch (Number(this.chainID)) {
+        case 4:
+          // Rinkeby Client Address
+          return "0x8529520B0254C19a04ad72abf592Cb471f5b02Ca";
+        case 31:
+          // RSK Client Address
+          return "0x53fd43cc0559F35E82E53F830a35cA868874b687";
+        case 3:
+          // Ropsten Client Address
+          return "0xF8d32C3e53F7DA6e7CB82323f2cAB2159776b832";
+      }
+      throw new Error("Chain ID not found");
     },
     admin() {
       if (!this.config.id) return false;
@@ -365,9 +395,9 @@ export default {
       if (!this.selectedEndpoint) return;
       try {
         const endpoint = this.endpoints.find(
-          endpoint => endpoint.name === this.selectedEndpoint
+          (endpoint) => endpoint.name === this.selectedEndpoint
         );
-        let params = endpoint.parameters.map(param => param.name);
+        let params = endpoint.parameters.map((param) => param.name);
         const reservedParams = ["_type", "_times", "_path", "_relay_metadata"];
         params.push(...reservedParams);
         return params;
@@ -408,7 +438,7 @@ export default {
       if (!this.config.id) return;
       if (!this.selectedEndpoint) return;
       try {
-        let params = this.selectedParams.map(param => {
+        let params = this.selectedParams.map((param) => {
           return {
             name: param,
             value: this.paramValues[param],
@@ -424,10 +454,12 @@ export default {
     airnode() {
       const airnodeProtocol = require("@api3/airnode-protocol");
       // const ropsetAirnodeAddress = "0xF8d32C3e53F7DA6e7CB82323f2cAB2159776b832";
-      const rinkebyAirnodeAddress =
-        "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC";
+      // const rinkebyAirnodeAddress =
+      //   "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC";
+      // const RSKAirnodeAddress = "0x1190a5e1f2afe4c8128fd820a7ac85a95a9e6e3e";
+      console.log(this.chainID, this.airnodeAddress);
       return new this.ethers.Contract(
-        rinkebyAirnodeAddress,
+        this.airnodeAddress,
         airnodeProtocol.AirnodeArtifact.abi,
         this.signer
       );
@@ -435,7 +467,7 @@ export default {
 
     endpointNames() {
       if (!this.endpoints) return [];
-      return this.endpoints.map(endpoint => endpoint.name);
+      return this.endpoints.map((endpoint) => endpoint.name);
     },
   },
   methods: {
@@ -511,7 +543,7 @@ export default {
       this.dragover = false;
       try {
         if (!this.selectedConfig) throw "Select a Config";
-        let receipt = await new Promise(resolve => {
+        let receipt = await new Promise((resolve) => {
           if (e.dataTransfer.files.length > 1) {
             console.log("Only 1 at a time");
           } else {
@@ -538,16 +570,16 @@ export default {
     async makeRequest() {
       try {
         const endpoint = this.endpoints.find(
-          endpoint => endpoint.name === this.selectedEndpoint
+          (endpoint) => endpoint.name === this.selectedEndpoint
         );
         let requestObj = {
           providerId: this.receipt.providerId,
           endpointId: endpoint.endpointId,
-          clientAddress: "0x8529520B0254C19a04ad72abf592Cb471f5b02Ca",
+          clientAddress: this.requestClientAddress,
           requesterIndex: "6",
           artifact: require("../utils/TestClient.json"),
         };
-        let params = this.selectedParams.map(param => {
+        let params = this.selectedParams.map((param) => {
           return {
             name: param,
             value: this.paramValues[param],
@@ -576,15 +608,15 @@ export default {
           this.designatedWallet,
           airnodeAbi.encode(requestObj.params)
         );
-        const requestId = await new Promise(resolve =>
-          this.signer.provider.once(receipt.hash, tx => {
+        const requestId = await new Promise((resolve) =>
+          this.signer.provider.once(receipt.hash, (tx) => {
             const parsedLog = this.airnode.interface.parseLog(tx.logs[0]);
             resolve(parsedLog.args.requestId);
           })
         );
         this.requestResults += `\nMade request!\nRequestId: ${requestId}`;
 
-        await new Promise(resolve =>
+        await new Promise((resolve) =>
           this.signer.provider.once(
             this.airnode.filters.ClientRequestFulfilled(null, requestId),
             resolve
@@ -606,7 +638,7 @@ export default {
         const airnodeAdmin = require("@api3/airnode-admin");
 
         const endpoint = this.endpoints.find(
-          endpoint => endpoint.name === this.selectedEndpoint
+          (endpoint) => endpoint.name === this.selectedEndpoint
         );
         const airnode = this.airnode;
         await airnodeAdmin.updateAuthorizers(
