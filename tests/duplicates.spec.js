@@ -13,7 +13,7 @@ test("Overwrite on duplicate", async ({ page }) => {
   await page.type("#paramName", "testParam");
   await page.keyboard.press("Enter");
 
-  await page.click("text=Save");
+  await page.click("#saveEndpoint");
   //   await page.waitForTimeout(999999);
   const quoteEndpoints = await page.$$("text=/quotes");
   expect(quoteEndpoints.length).toBe(1);

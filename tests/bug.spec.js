@@ -18,7 +18,7 @@ test.describe("Bug Fix", () => {
     await page.keyboard.press("Enter");
     await page.dblclick("#path");
     await page.keyboard.type("EndpointName");
-    await page.click("text=save");
+    await page.click("#saveEndpoint");
     await page.click("text=quotes");
     expect(await page.isVisible("text=test")).toBeFalsy();
     //   await page.click(

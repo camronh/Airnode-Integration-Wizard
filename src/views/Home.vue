@@ -510,6 +510,7 @@
             @click="saveEndpoint"
             :disabled="!savableEndpoint"
             text
+            id="saveEndpoint"
             type="submit"
             color="primary"
           >
