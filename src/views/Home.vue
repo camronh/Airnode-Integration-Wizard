@@ -243,6 +243,7 @@
                   :disabled="!hasAuth"
                   v-model="auth.value"
                   label="Value"
+                  id="authValue"
                   @input="storeSession"
                   placeholder="XXXAPI_KEYXXX (Leave blank if N/A)"
                   required
@@ -1628,6 +1629,16 @@ export default {
         this.ep.path = path;
       }
     },
+    parseSecrets(config) {
+      console.log({ secrets: config.secrets });
+      this.RPCs = config.secrets.RPCs;
+      if (config.secrets.auth) this.auth = config.secrets.auth;
+      if (config.secrets.extraAuth) {
+        this.extraAuth = config.secrets.extraAuth;
+      }
+      delete config.secrets;
+      return config;
+    },
     storeSession() {
       if (!this.storeSessions) return;
       console.log("Storing session");
@@ -1715,7 +1726,16 @@ export default {
     async saveConfig() {
       this.loading = true;
       try {
-        const results = await utils.saveConfig(this.exportStr);
+        let config = JSON.parse(this.exportStr);
+        config.secrets = {
+          RPCs: this.RPCs,
+        };
+        if (this.hasAuth && this.auth.value) config.secrets.auth = this.auth;
+        if (this.addedExtraAuth && this.extraAuth.value) {
+          config.secrets.extraAuth = this.extraAuth;
+        }
+        console.log({ config });
+        const results = await utils.saveConfig(JSON.stringify(config));
         console.log(results);
         this.makeSnackbar("Saved! ✅");
       } catch (error) {
@@ -1755,9 +1775,12 @@ export default {
         console.log(this.selectedConfig);
         let configName = this.searchedConfigs[this.selectedConfig];
         if (title) configName = title;
-        const config = await utils.getConfig(configName);
+        let config = await utils.getConfig(configName);
+        config = this.parseSecrets(config);
+        const RPCs = this.RPCs;
         this.importString = JSON.stringify(config, null, 2);
         await this.parseImport();
+        this.RPCs = RPCs;
         this.importing = false;
         this.makeSnackbar(`Imported ${configName}! ✅`);
       } catch (error) {
@@ -1781,7 +1804,7 @@ export default {
       this.mergingDialog = true;
       try {
         this.mergeConfigsNames = this.selectedConfigs.map(
-          v => this.savedConfigNames[v]
+          (v) => this.savedConfigNames[v]
         );
         const progressChunk = 100 / this.selectedConfigs.length;
         let mainConfig = null;
@@ -1827,7 +1850,7 @@ export default {
     },
     searchedConfigs() {
       if (!this.configSearch) return this.savedConfigNames;
-      return this.savedConfigNames.filter(config => {
+      return this.savedConfigNames.filter((config) => {
         return config.toLowerCase().includes(this.configSearch.toLowerCase());
       });
     },

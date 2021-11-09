@@ -61,7 +61,7 @@
   "ois": [
     {
       "oisFormat": "1.0.0",
-      "title": "Forge",
+      "title": "TesterForge",
       "version": "1.0",
       "apiSpecifications": {
         "servers": [
