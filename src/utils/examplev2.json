@@ -1,0 +1,233 @@
+{
+  "chains": [
+    {
+      "authorizers": [],
+      "contracts": {
+        "AirnodeRrp": "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC"
+      },
+      "id": "4",
+      "providers": {
+        "rinkeby1": {
+          "url": "${CHAIN_PROVIDER_URL}"
+        }
+      },
+      "type": "evm"
+    },
+    {
+      "authorizers": [],
+      "contracts": {
+        "AirnodeRrp": "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC"
+      },
+      "id": "4",
+      "providers": {
+        "rinkeby2": {
+          "url": "${CHAIN_PROVIDER_URL2}"
+        }
+      },
+      "type": "evm"
+    }
+  ],
+  "httpGateway": {
+    "enabled": "${HTTP_GATEWAY_ENABLED}",
+    "apiKey": "${HTTP_GATEWAY_API_KEY}"
+  },
+  "nodeSettings": {
+    "cloudProvider": "aws",
+    "airnodeWalletMnemonic": "${MNEMONIC}",
+    "logFormat": "json",
+    "nodeVersion": "0.2.2",
+    "region": "us-east-1",
+    "stage": "Staging"
+  },
+  "triggers": {
+    "rrp": [
+      {
+        "endpointId": "0x6d096d1d52c17653c0a5ee44939ca914eb8cee14206cec5189c4ac3cfa068fce",
+        "endpointName": "GET /quotes",
+        "oisTitle": "Forge"
+      },
+      {
+        "endpointId": "0x92c0cf2487735ab89ac32ff56c4e0e035e1afb96557320c2aae7ea9bff81e20f",
+        "endpointName": "GET /convert",
+        "oisTitle": "Forge"
+      },
+      {
+        "endpointId": "0x87e6acbdb4d87ba23fb6ad4571546d6f2ecf4f4fa4801836d54271e2085f2fdb",
+        "endpointName": "GET /market_status",
+        "oisTitle": "Forge"
+      }
+    ]
+  },
+  "ois": [
+    {
+      "oisFormat": "1.0.0",
+      "title": "Forge",
+      "version": "1.0",
+      "apiSpecifications": {
+        "servers": [
+          {
+            "url": "https://api.1forge.com"
+          }
+        ],
+        "security": {
+          "Forge_api_key": []
+        },
+        "components": {
+          "securitySchemes": {
+            "Forge_api_key": {
+              "type": "apiKey",
+              "in": "query",
+              "name": "api_key"
+            }
+          }
+        },
+        "paths": {
+          "/quotes": {
+            "get": {
+              "parameters": [
+                {
+                  "name": "pairs",
+                  "in": "query"
+                }
+              ]
+            }
+          },
+          "/convert": {
+            "get": {
+              "parameters": [
+                {
+                  "name": "from",
+                  "in": "query"
+                },
+                {
+                  "name": "to",
+                  "in": "query"
+                },
+                {
+                  "name": "quantity",
+                  "in": "query"
+                }
+              ]
+            }
+          },
+          "/market_status": {
+            "get": {
+              "parameters": []
+            }
+          }
+        }
+      },
+      "endpoints": [
+        {
+          "name": "GET /quotes",
+          "operation": {
+            "method": "get",
+            "path": "/quotes"
+          },
+          "reservedParameters": [
+            {
+              "name": "_type"
+            },
+            {
+              "name": "_path"
+            },
+            {
+              "name": "_times"
+            },
+            {
+              "name": "_relay_metadata",
+              "default": "v1"
+            }
+          ],
+          "fixedOperationParameters": [],
+          "parameters": [
+            {
+              "name": "pairs",
+              "operationParameter": {
+                "name": "pairs",
+                "in": "query"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /convert",
+          "operation": {
+            "method": "get",
+            "path": "/convert"
+          },
+          "reservedParameters": [
+            {
+              "name": "_type"
+            },
+            {
+              "name": "_path"
+            },
+            {
+              "name": "_times"
+            },
+            {
+              "name": "_relay_metadata",
+              "default": "v1"
+            }
+          ],
+          "fixedOperationParameters": [],
+          "parameters": [
+            {
+              "name": "from",
+              "operationParameter": {
+                "name": "from",
+                "in": "query"
+              }
+            },
+            {
+              "name": "to",
+              "operationParameter": {
+                "name": "to",
+                "in": "query"
+              }
+            },
+            {
+              "name": "quantity",
+              "operationParameter": {
+                "name": "quantity",
+                "in": "query"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /market_status",
+          "operation": {
+            "method": "get",
+            "path": "/market_status"
+          },
+          "reservedParameters": [
+            {
+              "name": "_type"
+            },
+            {
+              "name": "_path"
+            },
+            {
+              "name": "_times"
+            },
+            {
+              "name": "_relay_metadata",
+              "default": "v1"
+            }
+          ],
+          "fixedOperationParameters": [],
+          "parameters": []
+        }
+      ]
+    }
+  ],
+  "apiCredentials": [
+    {
+      "oisTitle": "Forge",
+      "securitySchemeName": "Forge_api_key",
+      "securitySchemeValue": "${api_key}"
+    }
+  ]
+}

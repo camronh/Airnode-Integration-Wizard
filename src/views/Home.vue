@@ -1294,19 +1294,21 @@ export default {
         fixed: false,
         value: "",
       },
-      required: [v => !!v || "Required"],
+      required: [(v) => !!v || "Required"],
       serverRules: [
-        v => !!v || "Required",
-        v => v.includes("://") || "Invalid Server",
+        (v) => !!v || "Required",
+        (v) => v.includes("://") || "Invalid Server",
       ],
     };
   },
   watch: {
-    exportJson() {
+    async exportJson() {
       console.log("Changed");
       this.exportStr = JSON.stringify(this.exportJson, null, 2);
       this.importString = this.exportStr;
-      this.parseImport();
+      const RPCs = this.RPCs;
+      await this.parseImport();
+      this.RPCs = RPCs;
     },
 
     selectedParam() {
@@ -1346,7 +1348,7 @@ export default {
       // this.ep.reservedParam = this.rp;
       // if endpoint.path exists in endpoints get index
       const duplicateIndex = this.endpoints.findIndex(
-        v => v.path === this.ep.path && v.method === this.ep.method
+        (v) => v.path === this.ep.path && v.method === this.ep.method
       );
       console.log({ duplicateIndex });
       if (duplicateIndex > -1) this.endpoints[duplicateIndex] = this.ep;
@@ -1371,7 +1373,7 @@ export default {
 
       // Check if param already exists in this.ep.params
       const duplicateIndex = this.ep.params.findIndex(
-        v => v.name === this.param.name && v.in === this.param.in
+        (v) => v.name === this.param.name && v.in === this.param.in
       );
       if (duplicateIndex > -1) {
         this.param = { name: "", in: "query", fixed: false, value: "" };
@@ -1456,7 +1458,7 @@ export default {
         const endpoint = this.endpoints[index];
         // delete paramToDel from endpoint.params
         const indexOfParam = endpoint.params.findIndex(
-          v => v.name === paramToDel.name && v.in === paramToDel.in
+          (v) => v.name === paramToDel.name && v.in === paramToDel.in
         );
         if (indexOfParam > -1) {
           endpoint.params.splice(indexOfParam, 1);
@@ -1483,7 +1485,7 @@ export default {
         }
         const endpoint = this.endpoints[index];
         const indexOfParam = endpoint.params.findIndex(
-          v => v.name === paramToEdit.name && v.in === paramToEdit.in
+          (v) => v.name === paramToEdit.name && v.in === paramToEdit.in
         );
         if (indexOfParam > -1) {
           endpoint.params[indexOfParam] = this.param;
@@ -1526,11 +1528,13 @@ export default {
     },
     exportConfig() {
       this.mergingConfigs = false;
+      const RPCs = this.RPCs;
       this.oas = utils.makeOAS(this);
       this.exportStr = utils.makeConfig(this);
       console.log(this.exportStr);
       this.exportJson = JSON.parse(this.exportStr);
       this.exporting = true;
+      this.RPCs = RPCs;
     },
 
     async parseImport() {
@@ -1572,34 +1576,36 @@ export default {
         } else {
           state = utils.parseConfig(json);
         }
-        Object.keys(state).forEach(key => {
+        console.log("PARSIN", state.RPCs);
+        Object.keys(state).forEach((key) => {
           this[key] = state[key];
         });
         this.auth.value = apiValue;
         this.extraAuth.value = extraValue;
+
         this.storeSession();
       } catch (error) {
         console.log(error);
         this.importError = true;
       }
+      console.log({ RPCs: this.RPCs });
     },
     parsePath() {
       console.log("Parsing path");
       // Remove this.server from this.ep.path
       this.ep.path = this.ep.path.replace(this.server, "");
 
-
       // get all strings inside of curly braces in this.ep.path
       let paths = this.ep.path.match(/\{[^}]*\}/g);
       if (paths) {
         let pathParams = [];
         // remove curly braces from each path
-        paths.forEach(path => {
+        paths.forEach((path) => {
           let param = path.replace(path, path.replace(/\{|\}/g, ""));
           pathParams.push(param);
         });
         for (let param of pathParams) {
-          if (this.ep.params.find(v => v.name === param && v.in == "path")) {
+          if (this.ep.params.find((v) => v.name === param && v.in == "path")) {
             continue;
           }
           this.ep.params.push({
@@ -1679,7 +1685,7 @@ export default {
     async onDrop(e) {
       this.dragover = false;
       try {
-        this.importString = await new Promise(resolve => {
+        this.importString = await new Promise((resolve) => {
           if (e.dataTransfer.files.length > 1) {
             console.log("Only 1 at a time");
           } else {
@@ -1828,7 +1834,7 @@ export default {
 
     selectedEndpointParams() {
       let selectedEndpointParams = [];
-      this.selectedEndpoints.forEach(i => {
+      this.selectedEndpoints.forEach((i) => {
         try {
           selectedEndpointParams = selectedEndpointParams.concat(
             this.endpoints[i].params
@@ -1840,8 +1846,10 @@ export default {
       });
 
       let uniqueParams = [];
-      selectedEndpointParams.forEach(param => {
-        if (uniqueParams.find(v => v.name === param.name && v.in === param.in))
+      selectedEndpointParams.forEach((param) => {
+        if (
+          uniqueParams.find((v) => v.name === param.name && v.in === param.in)
+        )
           return;
         uniqueParams.push(param);
       });

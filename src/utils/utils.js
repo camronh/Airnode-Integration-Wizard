@@ -18,7 +18,7 @@ function makeOAS(state) {
   };
   if (version) oas.info.version = version;
   for (let endpoint of endpoints) {
-    let params = endpoint.params.map(param => {
+    let params = endpoint.params.map((param) => {
       return {
         name: param.name,
         in: param.in,
@@ -67,19 +67,24 @@ function makeOAS(state) {
       },
     };
     if (auth.scheme) {
-      oas.components.securitySchemes[`${title}_${auth.name || auth.scheme}`].scheme = auth.scheme;
+      oas.components.securitySchemes[
+        `${title}_${auth.name || auth.scheme}`
+      ].scheme = auth.scheme;
     }
   }
   if (state.addedExtraAuth) {
     let { extraAuth } = state;
-    oas.components.securitySchemes[`${title}_${extraAuth.name || extraAuth.scheme}`] = {
+    oas.components.securitySchemes[
+      `${title}_${extraAuth.name || extraAuth.scheme}`
+    ] = {
       type: extraAuth.type,
       name: extraAuth.name,
       in: extraAuth.in,
     };
     if (auth.scheme) {
-      oas.components.securitySchemes[`${title}_${extraAuth.name || extraAuth.scheme}`].scheme =
-        extraAuth.scheme;
+      oas.components.securitySchemes[
+        `${title}_${extraAuth.name || extraAuth.scheme}`
+      ].scheme = extraAuth.scheme;
     }
   }
   console.log({ oas });
@@ -161,7 +166,8 @@ async function parseOAS(oas) {
   return state;
 }
 
-function makeConfig(state) {
+// Pre-alpha
+function makeConfigPrealpha(state) {
   const { title, endpoints, server, hasAuth, auth, version, extraAuth } = state;
 
   let config = {
@@ -214,7 +220,7 @@ function makeConfig(state) {
         "0xC22376E2Dd4537D78F088B349Cbf2b9Ce79Fe016",
     });
 
-  config.triggers.request = endpoints.map(endpoint => {
+  config.triggers.request = endpoints.map((endpoint) => {
     endpoint.path = endpoint.path.replace(/ /g, "");
     endpoint.name = `${endpoint.method.toUpperCase()} ${endpoint.path}`;
     const endpointId = ethers.utils.keccak256(
@@ -249,7 +255,9 @@ function makeConfig(state) {
   };
 
   if (hasAuth) {
-    config.ois[0].apiSpecifications.security[`${title}_${auth.name || auth.scheme}`] = [];
+    config.ois[0].apiSpecifications.security[
+      `${title}_${auth.name || auth.scheme}`
+    ] = [];
     config.ois[0].apiSpecifications.components.securitySchemes[
       `${title}_${auth.name || auth.scheme}`
     ] = {
@@ -268,7 +276,9 @@ function makeConfig(state) {
   }
 
   if (state.addedExtraAuth) {
-    config.ois[0].apiSpecifications.security[`${title}_${state.extraAuth.name || state.extraAuth.scheme}`] = [];
+    config.ois[0].apiSpecifications.security[
+      `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
+    ] = [];
     config.ois[0].apiSpecifications.components.securitySchemes[
       `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
     ] = {
@@ -290,7 +300,7 @@ function makeConfig(state) {
     if (!config.ois[0].apiSpecifications.paths[endpoint.path])
       config.ois[0].apiSpecifications.paths[endpoint.path] = {};
     config.ois[0].apiSpecifications.paths[endpoint.path][endpoint.method] = {
-      parameters: endpoint.params.map(param => {
+      parameters: endpoint.params.map((param) => {
         return {
           name: param.name.replace(/ /g, ""),
           in: param.in,
@@ -298,7 +308,7 @@ function makeConfig(state) {
       }),
     };
   }
-  config.ois[0].endpoints = endpoints.map(endpoint => {
+  config.ois[0].endpoints = endpoints.map((endpoint) => {
     let ep = {
       name: `${endpoint.method.toUpperCase()} ${endpoint.path}`,
       operation: {
@@ -347,6 +357,206 @@ function makeConfig(state) {
 
   //   remove duplicate endpointId from config.triggers.request
   config.triggers.request = config.triggers.request.filter(
+    (item, index, self) => self.indexOf(item) === index
+  );
+
+  return JSON.stringify(config, null, 2);
+}
+
+// V0.2
+function makeConfig(state) {
+  const { title, endpoints, server, hasAuth, auth, version, extraAuth } = state;
+
+  let config = {
+    chains: [
+      {
+        authorizers: [],
+        contracts: {
+          AirnodeRrp: "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC",
+        },
+        id: "4",
+        providers: {
+          rinkeby1: {
+            url: "${CHAIN_PROVIDER_URL}",
+          },
+        },
+
+        type: "evm",
+      },
+    ],
+    httpGateway: {
+      enabled: "${HTTP_GATEWAY_ENABLED}",
+      apiKey: "${HTTP_GATEWAY_API_KEY}", // In secrets.env
+    },
+    nodeSettings: {
+      cloudProvider: "aws",
+      airnodeWalletMnemonic: "${MNEMONIC}",
+      logFormat: "json",
+      nodeVersion: "0.2.2",
+      region: "us-east-1",
+      stage: "Staging",
+    },
+    triggers: {
+      rrp: [],
+    },
+    ois: [],
+    apiCredentials: [],
+  };
+  if (state.RPCs[1])
+    config.chains.push({
+      authorizers: [],
+      contracts: {
+        AirnodeRrp: "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC",
+      },
+      id: "4",
+      providers: {
+        rinkeby2: {
+          url: "${CHAIN_PROVIDER_URL2}",
+        },
+      },
+
+      type: "evm",
+    });
+
+  config.triggers.rrp = endpoints.map((endpoint) => {
+    endpoint.path = endpoint.path.replace(/ /g, "");
+    endpoint.name = `${endpoint.method.toUpperCase()} ${endpoint.path}`;
+    const endpointId = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+        ["string"],
+        [`${title}/${endpoint.method}-${endpoint.name}`]
+      )
+    );
+    return {
+      endpointId,
+      endpointName: endpoint.name,
+      oisTitle: title,
+    };
+  });
+
+  config.ois[0] = {
+    oisFormat: "1.0.0",
+    title,
+    version,
+    apiSpecifications: {
+      servers: [
+        {
+          url: server,
+        },
+      ],
+      security: {},
+      components: {
+        securitySchemes: {},
+      },
+      paths: {},
+    },
+  };
+
+  if (hasAuth) {
+    let schemeTitle = `${title}_${auth.name || auth.scheme}`;
+    config.ois[0].apiSpecifications.security[schemeTitle] = [];
+    config.ois[0].apiSpecifications.components.securitySchemes[schemeTitle] = {
+      type: auth.type,
+      in: auth.in,
+    };
+    if (auth.type == "http") {
+      config.ois[0].apiSpecifications.components.securitySchemes[
+        schemeTitle
+      ].scheme = auth.scheme;
+    } else {
+      config.ois[0].apiSpecifications.components.securitySchemes[
+        schemeTitle
+      ].name = auth.name;
+    }
+    config.apiCredentials.push({
+      oisTitle: title,
+      securitySchemeName: schemeTitle,
+      securitySchemeValue: "${" + (auth.name || auth.scheme) + "}",
+    });
+  }
+
+  if (state.addedExtraAuth) {
+    config.ois[0].apiSpecifications.security[
+      `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
+    ] = [];
+    config.ois[0].apiSpecifications.components.securitySchemes[
+      `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
+    ] = {
+      type: state.extraAuth.type,
+      in: state.extraAuth.in,
+    };
+    if (extraAuth.type == "http") {
+      config.ois[0].apiSpecifications.components.securitySchemes[
+        `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
+      ].scheme = extraAuth.scheme;
+    } else {
+      config.ois[0].apiSpecifications.components.securitySchemes[
+        `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
+      ].name = extraAuth.name;
+    }
+  }
+
+  for (let endpoint of endpoints) {
+    if (!config.ois[0].apiSpecifications.paths[endpoint.path])
+      config.ois[0].apiSpecifications.paths[endpoint.path] = {};
+    config.ois[0].apiSpecifications.paths[endpoint.path][endpoint.method] = {
+      parameters: endpoint.params.map((param) => {
+        return {
+          name: param.name.replace(/ /g, ""),
+          in: param.in,
+        };
+      }),
+    };
+  }
+  config.ois[0].endpoints = endpoints.map((endpoint) => {
+    let ep = {
+      name: `${endpoint.method.toUpperCase()} ${endpoint.path}`,
+      operation: {
+        method: endpoint.method,
+        path: endpoint.path,
+      },
+      reservedParameters: [
+        {
+          name: "_type",
+        },
+        {
+          name: "_path",
+        },
+        {
+          name: "_times",
+        },
+        {
+          name: "_relay_metadata",
+          default: "v1",
+        },
+      ],
+      fixedOperationParameters: [],
+      parameters: [],
+    };
+    for (let param of endpoint.params) {
+      if (param.fixed) {
+        ep.fixedOperationParameters.push({
+          operationParameter: {
+            name: param.name,
+            in: param.in,
+          },
+          value: param.value,
+        });
+      } else {
+        ep.parameters.push({
+          name: param.name,
+          operationParameter: {
+            name: param.name,
+            in: param.in,
+          },
+        });
+      }
+    }
+    return ep;
+  });
+
+  //   remove duplicate endpointId from config.triggers.request
+  config.triggers.rrp = config.triggers.rrp.filter(
     (item, index, self) => self.indexOf(item) === index
   );
 
@@ -419,8 +629,13 @@ function parseConfig(config) {
     state.endpoints.push(ep);
   }
 
-  state.RPCs[0] = config.nodeSettings.chains[0].providers[0].url;
-  if (config.nodeSettings.chains[1]) {
+  // If pre-alpha parse RPC
+  if (config.nodeSettings.chains) {
+    state.RPCs[0] = config.nodeSettings.chains[0].providers[0].url;
+  }
+  console.log({ StateRPCs: state.RPCs });
+
+  if (config.nodeSettings.chains && config.nodeSettings.chains[1]) {
     state.RPCs[1] = config.nodeSettings.chains[1].providers[0].url;
     state.extraRPC = true;
   }
@@ -429,6 +644,7 @@ function parseConfig(config) {
 
 // Download Zip
 async function makeZip(state) {
+  console.log(state.RPCs);
   const downloadOptions = state.downloadOptions;
   const JSZip = require("jszip");
   const FileSaver = require("file-saver");
@@ -436,41 +652,49 @@ async function makeZip(state) {
   const config = JSON.parse(state.exportStr);
   if (downloadOptions.includes("Deployment")) {
     //   Add Deployment Package
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       let configZip = new JSZip();
 
-      configZip.file("config.json", state.exportStr);
+      // Make a config folder
+      configZip.folder("config");
+      configZip.file("config/config.json", state.exportStr);
 
-      // Add Security.json
-      let security = {
-        apiCredentials: {},
-        id: config.id,
-      };
-      for (let ois of config.ois) {
-        security.apiCredentials[ois.title] = [];
-
-        const securitySchemes = Object.keys(
-          ois.apiSpecifications.components.securitySchemes
-        );
-        if (securitySchemes.length > 0) {
-          security.apiCredentials[ois.title][0] = {
-            securitySchemeName: securitySchemes[0],
-            value: state.auth.value ? state.auth.value : "INSERT_API_KEY",
-          };
-        }
-        if (securitySchemes.length > 1) {
-          security.apiCredentials[ois.title][1] = {
-            securitySchemeName: securitySchemes[1],
-            value: state.extraAuth.value
-              ? state.extraAuth.value
-              : "INSERT_API_KEY",
-          };
-        }
+      // Make secrets.env
+      // Find all occurrences of ${} in state.exportStr
+      let secrets = [];
+      let regex = /\$\{([^}]+)\}/g;
+      let match;
+      while ((match = regex.exec(state.exportStr)) !== null) {
+        secrets.push(match[1]);
       }
 
-      configZip.file("security.json", JSON.stringify(security, null, 2));
-
-      configZip.file(".env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_KEY=`);
+      console.log(state);
+      let secretsEnv = "";
+      secrets.forEach((variable) => {
+        switch (variable) {
+          case "CHAIN_PROVIDER_URL":
+            secretsEnv += `${variable}="${state.RPCs[0]}"\n`;
+            break;
+          case "CHAIN_PROVIDER_URL2":
+            secretsEnv += `${variable}="${state.RPCs[1]}"\n`;
+            break;
+          case "HTTP_GATEWAY_ENABLED":
+            secretsEnv += `\n${variable}="true"\n`;
+            break;
+          case "HTTP_GATEWAY_API_KEY":
+            secretsEnv += `${variable}="${uuid()}"\n\n`;
+            break;
+          case state.auth.name:
+            secretsEnv += `${variable}="${state.auth.value}"\n`;
+            break;
+          default:
+            secretsEnv += `${variable}=""\n`;
+            break;
+        }
+      });
+      console.log({ secretsEnv });
+      configZip.file("config/secrets.env", secretsEnv);
+      configZip.file("aws.env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_ACCESS_KEY=`);
       configZip.generateAsync({ type: "blob" }).then(function(content) {
         console.log("Generated");
         zip.file(`${state.title}-Deployment.zip`, content);
@@ -497,15 +721,15 @@ async function makeZip(state) {
 
 async function makeReadme(config) {
   // Create Markup Endpoints
-  let endpoints = config.triggers.request.map(endpoint => {
+  let endpoints = config.triggers.request.map((endpoint) => {
     let endpoints = config.ois[0].endpoints;
-    let correctParams = endpoints.find(e => e.name == endpoint.endpointName);
+    let correctParams = endpoints.find((e) => e.name == endpoint.endpointName);
     if (!correctParams) return endpoint.endpointName;
     return {
       endpointName: endpoint.endpointName,
       endpointId: endpoint.endpointId,
-      parameters: correctParams.parameters.map(p => p.name),
-      fixedParams: correctParams.fixedOperationParameters.map(p => {
+      parameters: correctParams.parameters.map((p) => p.name),
+      fixedParams: correctParams.fixedOperationParameters.map((p) => {
         return {
           name: p.operationParameter.name,
           value: p.value,
@@ -566,7 +790,7 @@ Read the [Airnode developer documentation](https://docs.api3.org/d/call-an-airno
   );
   configStr += `\n# Endpoints\n${tableOfContents.join("\n")}\n---`;
 
-  endpoints.forEach(endpoint => {
+  endpoints.forEach((endpoint) => {
     configStr += `\n## ${endpoint.endpointName} <a name="${endpoint.endpointId}"></a>
 
 {{ Describe the endpoint. Explain what it does and, if possible, deep link to the Web2 documentation. }}
@@ -579,7 +803,7 @@ You'll need the **Endpoint ID** to call this endpoint.
 
 [Request Parameters](https://docs.api3.org/pre-alpha/protocols/request-response/request.html#request-parameters)`;
     let endpointStrs = endpoint.parameters.map(
-      e => `${e}\t\t// Parameter Description...`
+      (e) => `${e}\t\t// Parameter Description...`
     );
     if (endpointStrs.length) {
       configStr += "\n\n```solidity\n" + endpointStrs.join("\n") + "\n```";
@@ -587,7 +811,7 @@ You'll need the **Endpoint ID** to call this endpoint.
 
     if (endpoint.fixedParams.length) {
       let fixedParamStrs = endpoint.parameters.map(
-        e =>
+        (e) =>
           `${e.name} = '${e.value}';\t\t// The ${e.name} parameter is fixed to ${e.value}`
       );
       configStr +=
@@ -680,6 +904,7 @@ module.exports = {
   makeOAS,
   parseOAS,
   makeConfig,
+  makeConfigPrealpha,
   parseConfig,
   makeZip,
   saveConfig,
