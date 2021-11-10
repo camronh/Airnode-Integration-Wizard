@@ -380,17 +380,22 @@ function makeConfig(state) {
         type: "evm",
       },
     ],
-    httpGateway: {
-      enabled: "${HTTP_GATEWAY_ENABLED}",
-      apiKey: "${HTTP_GATEWAY_API_KEY}", // In secrets.env
-    },
+
     nodeSettings: {
       cloudProvider: "aws",
       airnodeWalletMnemonic: "${MNEMONIC}",
-      logFormat: "json",
+      logFormat: "plain",
+      logLevel: "INFO",
       nodeVersion: "0.2.2",
       region: "us-east-1",
-      stage: "Staging",
+      stage: "staging",
+      heartbeat: {
+        enabled: false,
+      },
+      httpGateway: {
+        enabled: true,
+        apiKey: "${HTTP_GATEWAY_API_KEY}", // In secrets.env
+      },
     },
     triggers: {
       rrp: [],
@@ -674,14 +679,11 @@ async function makeZip(state) {
           case "CHAIN_PROVIDER_URL2":
             secretsEnv += `${variable}="${state.RPCs[1]}"\n`;
             break;
-          case "HTTP_GATEWAY_ENABLED":
-            secretsEnv += `\n${variable}="true"\n`;
-            break;
           case "HTTP_GATEWAY_API_KEY":
-            secretsEnv += `${variable}="${uuid()}"\n\n`;
+            secretsEnv += `\n${variable}="${uuid()}"\n\n`;
             break;
           case state.auth.name:
-            secretsEnv += `${variable}="${state.auth.value}"\n`;
+            secretsEnv += `${variable}="${state.auth.value || ""}"\n`;
             break;
           default:
             secretsEnv += `${variable}=""\n`;
