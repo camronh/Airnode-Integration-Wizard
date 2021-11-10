@@ -1777,7 +1777,7 @@ export default {
         let configName = this.searchedConfigs[this.selectedConfig];
         if (title) configName = title;
         let config = await utils.getConfig(configName);
-        config = this.parseSecrets(config);
+        if (config.secrets) config = this.parseSecrets(config);
         const RPCs = this.RPCs;
         this.importString = JSON.stringify(config, null, 2);
         await this.parseImport();
