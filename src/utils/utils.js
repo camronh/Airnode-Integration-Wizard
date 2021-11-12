@@ -806,7 +806,7 @@ You'll need the **Endpoint ID** to call this endpoint.
     } else configStr += "\n\n```solidity\nNone\n```";
 
     if (endpoint.fixedParams.length) {
-      let fixedParamStrs = endpoint.parameters.map(
+      let fixedParamStrs = endpoint.fixedParams.map(
         (e) =>
           `${e.name} = '${e.value}';\t\t// The ${e.name} parameter is fixed to ${e.value}`
       );
