@@ -54,4 +54,6 @@ test("Import Saved Config", async ({ page }) => {
     (el) => el.value
   );
   expect(titleValue).toContain("CamsCSRNG");
+  const RPCValue = await page.$eval("#rpcURL", (el) => el.value);
+  expect(RPCValue).toContain("https://");
 });
