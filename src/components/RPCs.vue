@@ -24,7 +24,7 @@
               RPCMenu = true;
               getChains();
             "
-            color="accent"
+            color="primary"
             :loading="creatingRPC"
           >
             <v-icon>
@@ -39,13 +39,38 @@
       <v-card :loading="loading">
         <v-card-title>
           Chains
+          <v-spacer></v-spacer>
+          <v-btn @click="RPCMenu = false" icon>
+            <v-icon>
+              mdi-close
+            </v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text v-if="loading">
           Getting Chain Options...
         </v-card-text>
         <v-card-text v-else>
-          {{ chainOptions }}
+          <v-row v-for="(chain, i) of chains" :key="i">
+            <v-col cols="12" md="3">
+              <v-checkbox
+                v-model="chain.enabled"
+                :label="chain.name"
+                color="accent"
+              ></v-checkbox>
+            </v-col>
+            <v-col cols="12" md="9">
+              <v-text-field
+                placeholder="Input Custom RPC URL or leave blank to generate"
+                :disabled="!chain.enabled"
+              ></v-text-field>
+            </v-col>
+          </v-row>
         </v-card-text>
+        <v-card-actions>
+          <v-btn block text color="primary">
+            Submit
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-row>
@@ -56,7 +81,7 @@ import utils from "../utils/utils";
 
 export default {
   data: () => ({
-    chainOptions: [],
+    chains: [],
     selectedChains: [],
     RPCMenu: false,
     loading: false,
@@ -65,7 +90,13 @@ export default {
     async getChains() {
       this.loading = true;
       const chains = await utils.getChains();
-      this.chainOptions = chains;
+      this.chains = chains.map((chain) => {
+        return {
+          name: chain,
+          enabled: true,
+          url: "",
+        };
+      });
       this.loading = false;
     },
   },
