@@ -530,6 +530,7 @@ export default {
         this.loading = true;
         this.config = await utils.getConfig(this.selectedConfig);
         this.receipt = await utils.getReceipt(this.selectedConfig);
+        console.log({ receipt: this.receipt, config: this.config });
         if (this.receipt.providerId)
           await this.getDesignatedWalletStats(this.receipt.providerId);
       } catch (error) {
