@@ -137,7 +137,8 @@
                 ></v-text-field>
               </v-col>
             </v-row>
-            <v-row align="center" justify="center">
+            <RPCs />
+            <!-- <v-row align="center" justify="center">
               <v-col cols="12" md="7">
                 <v-text-field
                   v-model="RPCs[0]"
@@ -168,7 +169,7 @@
                   <span>Generate RPC Url</span>
                 </v-tooltip>
               </v-col>
-            </v-row>
+            </v-row> -->
             <v-row align="center" justify="center" v-if="extraRPC">
               <v-col cols="12" md="7">
                 <v-text-field
@@ -1204,11 +1205,13 @@ import utils from "../utils/utils";
 import VJsoneditor from "v-jsoneditor/src/index";
 import yaml from "yaml";
 import SwaggerParser from "@apidevtools/swagger-parser";
+import RPCs from "../components/RPCs.vue";
 
 export default {
   name: "Home",
   components: {
     VJsoneditor,
+    RPCs,
   },
   data() {
     return {

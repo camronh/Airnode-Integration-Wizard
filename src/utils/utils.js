@@ -2,8 +2,8 @@ const { v4: uuid } = require("uuid");
 const ethers = require("ethers");
 const axios = require("axios");
 
-// const apiUrl = "http://localhost:3000";
-const apiUrl = "https://clb5462t8j.execute-api.us-east-1.amazonaws.com/latest";
+const apiUrl = "http://localhost:3000";
+// const apiUrl = "https://clb5462t8j.execute-api.us-east-1.amazonaws.com/latest";
 
 function makeOAS(state) {
   const { title, version, server, hasAuth, auth, endpoints } = state;
@@ -902,6 +902,18 @@ async function getRPC() {
   return results.data;
 }
 
+// Get chain options
+async function getChains() {
+  const results = await axios.get(`${apiUrl}/RPC/providers`);
+  return results.data.providers;
+}
+
+// Create a new RPC URL for the chain
+async function newRPC(chain) {
+  const results = await axios.post(`${apiUrl}/RPC`, { chain });
+  return results.data;
+}
+
 module.exports = {
   makeOAS,
   parseOAS,
@@ -919,5 +931,7 @@ module.exports = {
   getRPC,
   deleteConfig,
   makeReadme,
+  getChains,
+  newRPC,
   // openEndpoint,
 };
