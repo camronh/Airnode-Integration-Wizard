@@ -137,7 +137,7 @@
                 ></v-text-field>
               </v-col>
             </v-row>
-            <RPCs />
+            <RPCs :chains.sync="chains" />
             <!-- <v-row align="center" justify="center">
               <v-col cols="12" md="7">
                 <v-text-field
@@ -1232,10 +1232,12 @@ export default {
         mode: "code",
         enableTransform: false,
       },
+      chains: [],
       RPCs: [""],
       extraRPC: false,
       addedExtraAuth: false,
       importError: false,
+      importing: false,
       savedConfigNames: [],
       exportType: "oas",
       exporting: false,
@@ -1244,7 +1246,6 @@ export default {
       storeSessions: localStorage.storeSessions === "false" ? false : true,
       confirmClear: false,
       confirmCreateRPC: false,
-      importing: false,
       savingConfig: false,
       selectingEndpoint: false,
       confirmDelete: false,

@@ -576,7 +576,7 @@ function parseConfig(config) {
     title: ois.title,
     version: ois.version,
     server: ois.apiSpecifications.servers[0].url,
-    RPCs: [],
+    // RPCs: [],
   };
   const securitySchemes = Object.keys(
     ois.apiSpecifications.components.securitySchemes
@@ -636,14 +636,22 @@ function parseConfig(config) {
 
   // If pre-alpha parse RPC
   if (config.nodeSettings.chains) {
-    state.RPCs[0] = config.nodeSettings.chains[0].providers[0].url;
+    state.chains = config.nodeSettings.chains.map((chain) => {
+      return {
+        id: chain.id,
+        name: chain.providers[0].name,
+        url: chain.providers[0].url,
+        airnodeAddress: chain.contracts.Airnode,
+        enabled: true,
+        loading: false,
+      };
+    });
   }
-  console.log({ StateRPCs: state.RPCs });
 
-  if (config.nodeSettings.chains && config.nodeSettings.chains[1]) {
-    state.RPCs[1] = config.nodeSettings.chains[1].providers[0].url;
-    state.extraRPC = true;
-  }
+  // if (config.nodeSettings.chains && config.nodeSettings.chains[1]) {
+  //   state.RPCs[1] = config.nodeSettings.chains[1].providers[0].url;
+  //   state.extraRPC = true;
+  // }
   return state;
 }
 
@@ -903,9 +911,16 @@ async function getRPC() {
 }
 
 // Get chain options
-async function getChains() {
+async function getChains(enabled = true) {
   const results = await axios.get(`${apiUrl}/RPC/chains`);
-  return results.data.chains;
+  return results.data.chains.map((chain) => {
+    return {
+      ...chain,
+      enabled,
+      url: "",
+      loading: false,
+    };
+  });
 }
 
 // Create a new RPC URL for the chain

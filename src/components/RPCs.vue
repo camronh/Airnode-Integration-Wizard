@@ -6,9 +6,9 @@
         label="Chains"
         multiple
         readonly
-        :items="selectedChains"
+        :items="enabledChainNames"
         small-chips
-        v-model="selectedChains"
+        v-model="enabledChainNames"
       >
       </v-autocomplete>
     </v-col>
@@ -25,7 +25,6 @@
               getChains();
             "
             color="primary"
-            :loading="creatingRPC"
           >
             <v-icon>
               mdi-database-cog
@@ -106,7 +105,7 @@
                   label="ChainID"
                   outlined
                   type="number"
-                  v-model="newChain.chainId"
+                  v-model="newChain.id"
                 >
                 </v-text-field>
               </v-col>
@@ -194,36 +193,55 @@
 import utils from "../utils/utils";
 
 export default {
+  props: ["chains"],
   data: () => ({
-    chains: [],
-    selectedChains: [],
+    // selectedChains: [],
+    // chains: [],
     RPCMenu: false,
     loading: false,
     newChainForm: false,
     newChain: {
       name: "",
       RPC: "",
-      chainId: null,
+      id: null,
       airnodeAddress: "",
       authorizersAddress: "",
       loading: false,
     },
   }),
+  watch: {
+    chains: {
+      handler: function(newVal, oldVal) {
+        console.log({ newVal, oldVal });
+      },
+    },
+  },
   methods: {
     async getChains() {
-      if (this.chains.length) return;
+      //   if (this.chains.length) return;
       this.loading = true;
-      const chains = await utils.getChains();
-      this.chains = chains.map((chain) => {
-        return {
-          ...chain,
-          enabled: true,
-          url: "",
-          loading: false,
-        };
-      });
+      let dbChains;
+      if (this.chains.length) dbChains = await utils.getChains(false);
+      else dbChains = await utils.getChains();
+      this.chains = this.syncChainData(this.enabledChains, dbChains);
+      this.$emit("update:chains", this.chains);
       console.log(this.chains);
       this.loading = false;
+    },
+    syncChainData(configChains, dbChains, enabled = false) {
+      dbChains.forEach((dbChain) => {
+        dbChain.enabled = enabled;
+      });
+      for (let chain of configChains) {
+        const i = dbChains.findIndex((dbChain) => dbChain.id === chain.id);
+        if (i > -1) {
+          dbChains[i].url = chain.url;
+          dbChains[i].enabled = true;
+        } else {
+          dbChains.push(chain);
+        }
+      }
+      return dbChains;
     },
     async submitForm() {
       let chains = this.chains.filter((chain) => chain.enabled);
@@ -235,7 +253,7 @@ export default {
           chain.loading = false;
         }
       }
-      this.selectedChains = chains.map((chain) => chain.name);
+      //   this.selectedChains = chains.map((chain) => chain.name);
       this.RPCMenu = false;
     },
     async saveNewChain() {
@@ -249,7 +267,7 @@ export default {
         this.newChain = {
           name: "",
           RPC: "",
-          chainId: null,
+          id: null,
           airnodeAddress: "",
           authorizersAddress: "",
           loading: false,
@@ -278,11 +296,18 @@ export default {
       return chains.every((chain) => this.validURL(chain.url));
     },
     validNewChain() {
-      const { name, chainId, RPC, airnodeAddress } = this.newChain;
-      if (!name || !chainId || !RPC || !airnodeAddress) return false;
-      if (!Number(chainId)) return false;
+      const { name, id, RPC, airnodeAddress } = this.newChain;
+      if (!name || !id || !RPC || !airnodeAddress) return false;
+      if (!Number(id)) return false;
       if (!this.validURL(RPC)) return false;
       return true;
+    },
+    enabledChainNames() {
+      const chains = this.chains.filter((chain) => chain.enabled && chain.url);
+      return chains.map((chain) => chain.name);
+    },
+    enabledChains() {
+      return this.chains.filter((chain) => chain.enabled && chain.url);
     },
   },
 };
