@@ -914,6 +914,12 @@ async function newRPC(chain, RPC) {
   return results.data.url;
 }
 
+// Create a new RPC URL for the chain
+async function saveChain(chain) {
+  const results = await axios.post(`${apiUrl}/RPC/chains`, { ...chain });
+  return results;
+}
+
 module.exports = {
   makeOAS,
   parseOAS,
@@ -933,5 +939,6 @@ module.exports = {
   makeReadme,
   getChains,
   newRPC,
+  saveChain,
   // openEndpoint,
 };

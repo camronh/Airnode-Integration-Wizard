@@ -56,24 +56,27 @@
           Getting Chain Options...
         </v-card-text>
         <v-card-text v-else>
-          <v-row v-for="(chain, i) of chains" :key="i">
-            <v-col cols="12" md="3">
-              <v-checkbox
-                v-model="chain.enabled"
-                :label="chain.name"
-                color="accent"
-              ></v-checkbox>
-            </v-col>
-            <v-col cols="12" md="9">
-              <v-text-field
-                placeholder="Input Custom RPC URL or leave blank to generate"
-                v-model="chain.url"
-                :disabled="!chain.enabled"
-                :rules="[validURL(chain.url)]"
-                :loading="chain.loading"
-              ></v-text-field>
-            </v-col>
-          </v-row>
+          <v-sheet max-height="10%">
+            <v-row v-for="(chain, i) of chains" :key="i" dense>
+              <v-col cols="12" md="3">
+                <v-checkbox
+                  v-model="chain.enabled"
+                  :label="chain.name"
+                  color="accent"
+                ></v-checkbox>
+              </v-col>
+              <v-col cols="12" md="9">
+                <v-text-field
+                  placeholder="Input Custom RPC URL or leave blank to generate"
+                  v-model="chain.url"
+                  :disabled="!chain.enabled"
+                  :rules="[validURL(chain.url)]"
+                  :loading="chain.loading"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-sheet>
+
           <v-btn
             block
             dense
@@ -84,7 +87,7 @@
             <v-icon color="primary">
               mdi-plus
             </v-icon>
-            Add New Chain
+            Create New Chain
           </v-btn>
           <template v-else>
             <v-row dense>
@@ -121,6 +124,7 @@
                 <v-text-field
                   label="Airnode RRP Address"
                   dense
+                  :rules="[validAddress]"
                   outlined
                   v-model="newChain.airnodeAddress"
                 />
@@ -164,7 +168,7 @@
                       </v-icon>
                     </v-btn>
                   </template>
-                  <span>Save New Chain</span>
+                  <span>Create New Chain</span>
                 </v-tooltip>
               </v-col>
             </v-row>
@@ -237,11 +241,32 @@ export default {
     async saveNewChain() {
       if (!this.validNewChain) return;
       this.newChain.loading = true;
+      const results = await utils.saveChain(this.newChain);
+      if (results.status === 201) {
+        this.chains = [];
+        this.getChains();
+        this.newChainForm = false;
+        this.newChain = {
+          name: "",
+          RPC: "",
+          chainId: null,
+          airnodeAddress: "",
+          authorizersAddress: "",
+          loading: false,
+        };
+      }
+      console.log({ results });
     },
     validURL(url) {
       if (!url) return true;
       let regex = /https:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
       if (regex.test(url)) return true;
+      else return false;
+    },
+    validAddress(address) {
+      if (!address) return true;
+      let regex = /^(0x)?[0-9a-f]{40}$/i;
+      if (regex.test(address)) return true;
       else return false;
     },
   },
