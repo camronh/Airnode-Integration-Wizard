@@ -35,7 +35,13 @@
         <span>Configure RPCs</span>
       </v-tooltip>
     </v-col>
-    <v-dialog v-model="RPCMenu" max-width="900px">
+    <v-dialog
+      v-model="RPCMenu"
+      max-width="900px"
+      :overlay-opacity="15"
+      persistent
+      overlay-color="black"
+    >
       <v-card :loading="loading">
         <v-card-title>
           Chains
@@ -68,6 +74,56 @@
               ></v-text-field>
             </v-col>
           </v-row>
+
+          <v-row>
+            <v-col cols="12" md="3">
+              <v-text-field
+                dense
+                label="New Chain Name"
+                v-model="newChain.name"
+                outlined
+              >
+              </v-text-field>
+            </v-col>
+            <v-col cols="12" md="2">
+              <v-text-field
+                dense
+                label="ChainID"
+                outlined
+                type="number"
+                v-model="newChain.chainId"
+              >
+              </v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="RPC"
+                dense
+                outlined
+                v-model="newChain.RPC"
+                :rules="[validURL]"
+              >
+              </v-text-field>
+            </v-col>
+            <v-col cols="12" md="1">
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    v-bind="attrs"
+                    v-on="on"
+                    :loading="newChain.loading"
+                    :disabled="!validNewChain"
+                    @click="saveNewChain"
+                  >
+                    <v-icon>
+                      mdi-plus
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <span>Save New Chain</span>
+              </v-tooltip>
+            </v-col>
+          </v-row>
         </v-card-text>
         <v-card-actions>
           <v-btn
@@ -94,6 +150,12 @@ export default {
     selectedChains: [],
     RPCMenu: false,
     loading: false,
+    newChain: {
+      name: "",
+      RPC: "",
+      chainId: null,
+      loading: false,
+    },
   }),
   methods: {
     async getChains() {
@@ -124,6 +186,10 @@ export default {
       this.selectedChains = chains.map((chain) => chain.name);
       this.RPCMenu = false;
     },
+    async saveNewChain() {
+      if (!this.validNewChain) return;
+      this.newChain.loading = true;
+    },
     validURL(url) {
       if (!url) return true;
       let regex = /https:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
@@ -135,6 +201,13 @@ export default {
     submittable() {
       let chains = this.chains.filter((chain) => chain.enabled);
       return chains.every((chain) => this.validURL(chain.url));
+    },
+    validNewChain() {
+      const { name, chainId, RPC } = this.newChain;
+      if (!name || !chainId || !RPC) return false;
+      if (!Number(chainId)) return false;
+      if (!this.validURL(RPC)) return false;
+      return true;
     },
   },
 };
