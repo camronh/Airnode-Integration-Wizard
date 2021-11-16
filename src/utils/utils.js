@@ -904,14 +904,14 @@ async function getRPC() {
 
 // Get chain options
 async function getChains() {
-  const results = await axios.get(`${apiUrl}/RPC/providers`);
-  return results.data.providers;
+  const results = await axios.get(`${apiUrl}/RPC/chains`);
+  return results.data.chains;
 }
 
 // Create a new RPC URL for the chain
-async function newRPC(chain) {
-  const results = await axios.post(`${apiUrl}/RPC`, { chain });
-  return results.data;
+async function newRPC(chain, RPC) {
+  const results = await axios.post(`${apiUrl}/RPC`, { chain, RPC });
+  return results.data.url;
 }
 
 module.exports = {

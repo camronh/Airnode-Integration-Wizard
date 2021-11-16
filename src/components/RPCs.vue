@@ -6,7 +6,7 @@
         label="Chains"
         multiple
         readonly
-        :items="chainOptions"
+        :items="selectedChains"
         small-chips
         v-model="selectedChains"
       >
@@ -61,13 +61,22 @@
             <v-col cols="12" md="9">
               <v-text-field
                 placeholder="Input Custom RPC URL or leave blank to generate"
+                v-model="chain.url"
                 :disabled="!chain.enabled"
+                :rules="[validURL(chain.url)]"
+                :loading="chain.loading"
               ></v-text-field>
             </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-btn block text color="primary">
+          <v-btn
+            block
+            text
+            color="primary"
+            @click="submitForm"
+            :disabled="!submittable"
+          >
             Submit
           </v-btn>
         </v-card-actions>
@@ -88,16 +97,44 @@ export default {
   }),
   methods: {
     async getChains() {
+      if (this.chains.length) return;
       this.loading = true;
       const chains = await utils.getChains();
       this.chains = chains.map((chain) => {
         return {
-          name: chain,
+          ...chain,
           enabled: true,
           url: "",
+          loading: false,
         };
       });
+      console.log(this.chains);
       this.loading = false;
+    },
+    async submitForm() {
+      let chains = this.chains.filter((chain) => chain.enabled);
+      for (let chain of chains) {
+        if (!chain.enabled) continue;
+        if (!chain.url) {
+          chain.loading = true;
+          chain.url = await utils.newRPC(chain.name, chain.RPC);
+          chain.loading = false;
+        }
+      }
+      this.selectedChains = chains.map((chain) => chain.name);
+      this.RPCMenu = false;
+    },
+    validURL(url) {
+      if (!url) return true;
+      let regex = /https:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+      if (regex.test(url)) return true;
+      else return false;
+    },
+  },
+  computed: {
+    submittable() {
+      let chains = this.chains.filter((chain) => chain.enabled);
+      return chains.every((chain) => this.validURL(chain.url));
     },
   },
 };
