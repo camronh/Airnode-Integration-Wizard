@@ -368,22 +368,7 @@ function makeConfig(state) {
   const { title, endpoints, server, hasAuth, auth, version, extraAuth } = state;
 
   let config = {
-    chains: [
-      {
-        authorizers: [],
-        contracts: {
-          AirnodeRrp: "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC",
-        },
-        id: "4",
-        providers: {
-          rinkeby1: {
-            url: "${CHAIN_PROVIDER_URL}",
-          },
-        },
-
-        type: "evm",
-      },
-    ],
+    chains: [],
 
     nodeSettings: {
       cloudProvider: "aws",
@@ -407,21 +392,36 @@ function makeConfig(state) {
     ois: [],
     apiCredentials: [],
   };
-  if (state.RPCs[1])
+  for (let chain of state.chains) {
     config.chains.push({
-      authorizers: [],
+      authorizers: chain.authorizersAddress ? [chain.authorizersAddress] : [],
       contracts: {
-        AirnodeRrp: "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC",
+        AirnodeRrp: chain.airnodeAddress,
       },
-      id: "4",
+      id: chain.id,
       providers: {
-        rinkeby2: {
-          url: "${CHAIN_PROVIDER_URL2}",
+        [chain.name]: {
+          url: "${" + chain.name + "_RPC}",
         },
       },
-
       type: "evm",
     });
+  }
+  // if (state.RPCs[1])
+  //   config.chains.push({
+  //     authorizers: [],
+  //     contracts: {
+  //       AirnodeRrp: "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC",
+  //     },
+  //     id: "4",
+  //     providers: {
+  //       rinkeby2: {
+  //         url: "${CHAIN_PROVIDER_URL2}",
+  //       },
+  //     },
+
+  //     type: "evm",
+  //   });
 
   config.triggers.rrp = endpoints.map((endpoint) => {
     endpoint.path = endpoint.path.replace(/ /g, "");

@@ -224,7 +224,6 @@ export default {
       if (this.chains.length) dbChains = await utils.getChains(false);
       else dbChains = await utils.getChains();
       this.chains = this.syncChainData(this.enabledChains, dbChains);
-      this.$emit("update:chains", this.chains);
       console.log(this.chains);
       this.loading = false;
     },
@@ -253,6 +252,8 @@ export default {
           chain.loading = false;
         }
       }
+      this.$emit("update:chains", chains);
+
       //   this.selectedChains = chains.map((chain) => chain.name);
       this.RPCMenu = false;
     },
