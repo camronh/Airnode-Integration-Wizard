@@ -74,56 +74,101 @@
               ></v-text-field>
             </v-col>
           </v-row>
-
-          <v-row>
-            <v-col cols="12" md="3">
-              <v-text-field
-                dense
-                label="New Chain Name"
-                v-model="newChain.name"
-                outlined
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" md="2">
-              <v-text-field
-                dense
-                label="ChainID"
-                outlined
-                type="number"
-                v-model="newChain.chainId"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="RPC"
-                dense
-                outlined
-                v-model="newChain.RPC"
-                :rules="[validURL]"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" md="1">
-              <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    v-bind="attrs"
-                    v-on="on"
-                    :loading="newChain.loading"
-                    :disabled="!validNewChain"
-                    @click="saveNewChain"
-                  >
-                    <v-icon>
-                      mdi-plus
-                    </v-icon>
-                  </v-btn>
-                </template>
-                <span>Save New Chain</span>
-              </v-tooltip>
-            </v-col>
-          </v-row>
+          <v-btn
+            block
+            dense
+            outlined
+            @click="newChainForm = true"
+            v-if="!newChainForm"
+          >
+            <v-icon color="primary">
+              mdi-plus
+            </v-icon>
+            Add New Chain
+          </v-btn>
+          <template v-else>
+            <v-row dense>
+              <v-col cols="12" md="3">
+                <v-text-field
+                  dense
+                  label="New Chain Name"
+                  v-model="newChain.name"
+                  outlined
+                >
+                </v-text-field>
+              </v-col>
+              <v-col cols="12" md="2">
+                <v-text-field
+                  dense
+                  label="ChainID"
+                  outlined
+                  type="number"
+                  v-model="newChain.chainId"
+                >
+                </v-text-field>
+              </v-col>
+              <v-col cols="12" md="7">
+                <v-text-field
+                  label="RPC"
+                  dense
+                  outlined
+                  v-model="newChain.RPC"
+                  :rules="[validURL]"
+                >
+                </v-text-field>
+              </v-col>
+              <v-col cols="12" md="5">
+                <v-text-field
+                  label="Airnode RRP Address"
+                  dense
+                  outlined
+                  v-model="newChain.airnodeAddress"
+                />
+              </v-col>
+              <v-col cols="12" md="5">
+                <v-text-field
+                  label="Authorizers Address (Optional)"
+                  dense
+                  outlined
+                  v-model="newChain.authorizersAddress"
+                />
+              </v-col>
+              <v-col cols="12" md="1">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="newChainForm = false"
+                    >
+                      <v-icon>
+                        mdi-delete
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Cancel New Chain</span>
+                </v-tooltip>
+              </v-col>
+              <v-col cols="12" md="1">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      v-bind="attrs"
+                      v-on="on"
+                      :loading="newChain.loading"
+                      :disabled="!validNewChain"
+                      @click="saveNewChain"
+                    >
+                      <v-icon>
+                        mdi-plus
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Save New Chain</span>
+                </v-tooltip>
+              </v-col>
+            </v-row>
+          </template>
         </v-card-text>
         <v-card-actions>
           <v-btn
@@ -150,10 +195,13 @@ export default {
     selectedChains: [],
     RPCMenu: false,
     loading: false,
+    newChainForm: false,
     newChain: {
       name: "",
       RPC: "",
       chainId: null,
+      airnodeAddress: "",
+      authorizersAddress: "",
       loading: false,
     },
   }),
@@ -203,8 +251,8 @@ export default {
       return chains.every((chain) => this.validURL(chain.url));
     },
     validNewChain() {
-      const { name, chainId, RPC } = this.newChain;
-      if (!name || !chainId || !RPC) return false;
+      const { name, chainId, RPC, airnodeAddress } = this.newChain;
+      if (!name || !chainId || !RPC || !airnodeAddress) return false;
       if (!Number(chainId)) return false;
       if (!this.validURL(RPC)) return false;
       return true;
