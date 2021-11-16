@@ -646,6 +646,8 @@ function parseConfig(config) {
         loading: false,
       };
     });
+  } else if (config.secrets && config.secrets.chains) {
+    state.chains = config.secrets.chains;
   }
 
   // if (config.nodeSettings.chains && config.nodeSettings.chains[1]) {

@@ -1636,7 +1636,18 @@ export default {
     },
     parseSecrets(config) {
       console.log({ secrets: config.secrets });
-      this.RPCs = config.secrets.RPCs;
+      if (config.secrets.RPCs.length) {
+        this.chains.push({
+          name: "Rinkeby",
+          chainId: 4,
+          url: config.secrets.RPCs[0],
+          airnodeAddress: "0xC11593B87f258672b8eB02d9A723a429b15E9E03",
+          authorizersAddress: "0x38DF5b7120b3B9b27238598d374779a37699379F",
+          enabled: true,
+          loading: false,
+        });
+      } else this.chains = config.secrets.chains;
+
       if (config.secrets.auth) this.auth = config.secrets.auth;
       if (config.secrets.extraAuth) {
         this.extraAuth = config.secrets.extraAuth;
@@ -1679,7 +1690,7 @@ export default {
         value: "",
         type: "",
       };
-      this.RPCs = [];
+      this.chains = [];
       this.addedExtraAuth = false;
       this.extraRPC = false;
       this.endpoints = [];
@@ -1733,7 +1744,7 @@ export default {
       try {
         let config = JSON.parse(this.exportStr);
         config.secrets = {
-          RPCs: this.RPCs,
+          chains: this.chains,
         };
         if (this.hasAuth && this.auth.value) config.secrets.auth = this.auth;
         if (this.addedExtraAuth && this.extraAuth.value) {
