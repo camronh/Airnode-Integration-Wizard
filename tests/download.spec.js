@@ -9,11 +9,13 @@ test("Export works", async ({ page }) => {
   await page.fill("textarea", JSON.stringify(exampleConfig));
   await page.click("[type='submit']");
 
-  const titleValue = await page.$eval("[placeholder='Title']", el => el.value);
+  const titleValue = await page.$eval(
+    "[placeholder='Title']",
+    (el) => el.value
+  );
   expect(titleValue).toContain("Forge");
 
-  const RPCValue = await page.$eval("#rpcURL", el => el.value);
-  expect(RPCValue).toContain("https://");
+  expect(await page.isVisible("text=rsk-tn")).toBeTruthy();
   await page.click("#menuButton");
 
   await page.click("text=Export");

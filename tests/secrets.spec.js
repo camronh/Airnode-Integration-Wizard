@@ -17,8 +17,8 @@ test("Import Secrets", async ({ page }) => {
   );
   expect(titleValue).toContain("TesterForge");
 
-  const RPCValue = await page.$eval("#rpcURL", (el) => el.value);
-  expect(RPCValue).toContain("https://");
+  expect(await page.isVisible("text=rinkeby1")).toBeTruthy();
+
   const authValue = await page.$eval("#authValue", (el) => el.value);
   expect(authValue).toContain("TEstingsAPIKEyt");
 });

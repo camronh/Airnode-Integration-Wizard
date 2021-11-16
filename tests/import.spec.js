@@ -30,8 +30,8 @@ test("Import Config", async ({ page }) => {
   );
   expect(titleValue).toContain("Forge");
 
-  const RPCValue = await page.$eval("#rpcURL", (el) => el.value);
-  expect(RPCValue).toContain("https://");
+  expect(await page.isVisible("text=rsk-tn")).toBeTruthy();
+
   await page.click("#menuButton");
   await page.click("text=Export");
   expect(await page.isVisible("text=Edit your config.json")).toBeTruthy();
@@ -54,6 +54,6 @@ test("Import Saved Config", async ({ page }) => {
     (el) => el.value
   );
   expect(titleValue).toContain("CamsCSRNG");
-  const RPCValue = await page.$eval("#rpcURL", (el) => el.value);
-  expect(RPCValue).toContain("https://");
+  expect(await page.isVisible("text=rinkeby1")).toBeTruthy();
+
 });

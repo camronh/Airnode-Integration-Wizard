@@ -41,7 +41,7 @@
       persistent
       overlay-color="black"
     >
-      <v-card :loading="loading">
+      <v-card :loading="loading" id="chainsCard">
         <v-card-title>
           Chains
           <v-spacer></v-spacer>

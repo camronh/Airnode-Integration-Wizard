@@ -1339,7 +1339,7 @@ export default {
         this.version = session.version;
         this.hasAuth = session.hasAuth;
         this.addedExtraAuth = session.addedExtraAuth;
-        this.RPCs = session.RPCs;
+        this.chains = session.chains;
         this.auth = session.auth;
         this.extraRPC = session.extraRPC;
         this.extraAuth = session.extraAuth;
@@ -1654,7 +1654,7 @@ export default {
         version: this.version,
         auth: this.auth,
         extraAuth: this.extraAuth,
-        RPCs: this.RPCs,
+        chains: this.chains,
         extraRPC: this.extraRPC,
         hasAuth: this.hasAuth,
         addedExtraAuth: this.addedExtraAuth,
