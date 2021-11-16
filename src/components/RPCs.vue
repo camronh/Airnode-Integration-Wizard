@@ -247,6 +247,8 @@ export default {
   },
   computed: {
     submittable() {
+      if (this.newChain.loading || this.loading) return false;
+      if (this.chains.some((chain) => chain.loading)) return false;
       let chains = this.chains.filter((chain) => chain.enabled);
       return chains.every((chain) => this.validURL(chain.url));
     },
