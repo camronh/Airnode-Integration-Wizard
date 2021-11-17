@@ -1312,9 +1312,9 @@ export default {
       console.log("Changed");
       this.exportStr = JSON.stringify(this.exportJson, null, 2);
       this.importString = this.exportStr;
-      const RPCs = this.RPCs;
+      const chains = this.chains;
       await this.parseImport();
-      this.RPCs = RPCs;
+      this.chains = chains;
     },
 
     selectedParam() {
@@ -1534,13 +1534,13 @@ export default {
     },
     exportConfig() {
       this.mergingConfigs = false;
-      const RPCs = this.RPCs;
+      // const chains = this.chains;
       this.oas = utils.makeOAS(this);
       this.exportStr = utils.makeConfig(this);
       console.log(this.exportStr);
       this.exportJson = JSON.parse(this.exportStr);
+      // this.chains = chains;
       this.exporting = true;
-      this.RPCs = RPCs;
     },
 
     async parseImport() {
@@ -1635,7 +1635,7 @@ export default {
       }
     },
     parseSecrets(config) {
-      console.log(config);
+      console.log("Found Secrets");
       console.log({ secrets: config.secrets });
       if (config.secrets.RPCs && config.secrets.RPCs.length) {
         this.chains.push({
@@ -1796,11 +1796,16 @@ export default {
         let configName = this.searchedConfigs[this.selectedConfig];
         if (title) configName = title;
         let config = await utils.getConfig(configName);
-        if (config.secrets) config = this.parseSecrets(config);
-        const RPCs = this.RPCs;
+        let chains;
+        if (config.secrets) {
+          config = this.parseSecrets(config);
+          chains = this.chains;
+        }
+        // const chains = this.chains;
         this.importString = JSON.stringify(config, null, 2);
         await this.parseImport();
-        this.RPCs = RPCs;
+        if (chains) this.chains = chains;
+        // this.chains = chains;
         this.importing = false;
         this.makeSnackbar(`Imported ${configName}! ✅`);
       } catch (error) {

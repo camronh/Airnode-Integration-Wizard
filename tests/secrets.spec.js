@@ -17,7 +17,7 @@ test("Import Secrets", async ({ page }) => {
   );
   expect(titleValue).toContain("TesterForge");
 
-  expect(await page.isVisible("text=rinkeby1")).toBeTruthy();
+  expect(await page.isVisible("text=Rinkeby")).toBeTruthy();
 
   const authValue = await page.$eval("#authValue", (el) => el.value);
   expect(authValue).toContain("TEstingsAPIKEyt");
