@@ -1635,8 +1635,9 @@ export default {
       }
     },
     parseSecrets(config) {
+      console.log(config);
       console.log({ secrets: config.secrets });
-      if (config.secrets.RPCs.length) {
+      if (config.secrets.RPCs && config.secrets.RPCs.length) {
         this.chains.push({
           name: "Rinkeby",
           chainId: 4,
@@ -1646,8 +1647,11 @@ export default {
           enabled: true,
           loading: false,
         });
-      } else this.chains = config.secrets.chains;
-
+        // If v0.2 and includes secrets
+      } else if (config.secrets && config.secrets.chains) {
+        this.chains = config.secrets.chains;
+        // If v0.2 and no secrets
+      }
       if (config.secrets.auth) this.auth = config.secrets.auth;
       if (config.secrets.extraAuth) {
         this.extraAuth = config.secrets.extraAuth;

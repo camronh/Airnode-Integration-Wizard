@@ -6,10 +6,21 @@
         label="Chains"
         multiple
         readonly
-        :items="enabledChainNames"
+        :items="enabledChains"
         small-chips
-        v-model="enabledChainNames"
+        v-model="enabledChains"
       >
+        <template v-slot:selection="{ attr, on, item }">
+          <v-chip
+            v-bind="attr"
+            :color="item.url ? 'accent' : 'red'"
+            small
+            outlined
+            v-on="on"
+          >
+            {{ item.name }}
+          </v-chip>
+        </template>
       </v-autocomplete>
     </v-col>
     <v-col cols="12" md="2">
@@ -304,11 +315,11 @@ export default {
       return true;
     },
     enabledChainNames() {
-      const chains = this.chains.filter((chain) => chain.enabled && chain.url);
+      const chains = this.chains.filter((chain) => chain.enabled);
       return chains.map((chain) => chain.name);
     },
     enabledChains() {
-      return this.chains.filter((chain) => chain.enabled && chain.url);
+      return this.chains.filter((chain) => chain.enabled);
     },
   },
 };

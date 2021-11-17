@@ -646,14 +646,21 @@ function parseConfig(config) {
         loading: false,
       };
     });
-  } else if (config.secrets && config.secrets.chains) {
-    state.chains = config.secrets.chains;
+    // If v0.2 and includes secrets
+  } else if (config.chains) {
+    state.chains = config.chains.map((chain) => {
+      const chainName = Object.keys(chain.providers)[0];
+      return {
+        id: chain.id,
+        name: chainName,
+        url: "",
+        airnodeAddress: chain.contracts.AirnodeRrp,
+        enabled: true,
+        loading: false,
+        authorizersAddress: chain.authorizers[0],
+      };
+    });
   }
-
-  // if (config.nodeSettings.chains && config.nodeSettings.chains[1]) {
-  //   state.RPCs[1] = config.nodeSettings.chains[1].providers[0].url;
-  //   state.extraRPC = true;
-  // }
   return state;
 }
 
