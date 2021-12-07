@@ -537,6 +537,7 @@ function makeConfig(state) {
       ],
       fixedOperationParameters: [],
       parameters: [],
+      testable: true,
     };
     for (let param of endpoint.params) {
       if (param.fixed) {
