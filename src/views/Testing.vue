@@ -66,12 +66,20 @@
                   height="200"
                   tile
                   width="80%"
+                  :loading="savingReceipt"
                   @drop.prevent="saveReceipt($event)"
                   @dragover.prevent="dragover = true"
                   @dragenter.prevent="dragover = true"
                   @dragleave.prevent="dragover = false"
                   :class="{ accent: dragover }"
                 >
+                  <template slot="progress">
+                    <v-progress-linear
+                      color="accent"
+                      height="5"
+                      indeterminate
+                    ></v-progress-linear>
+                  </template>
                   <v-card-text>
                     <template v-if="receipt.providerId">
                       <v-card-title>
@@ -299,6 +307,7 @@ export default {
       msg: "This is demo net work",
       connected: false,
       gettingConfigs: false,
+      savingReceipt: false,
       makingRequest: true,
       designatedWallet: "",
       loading: false,
@@ -540,6 +549,7 @@ export default {
     },
 
     async saveReceipt(e) {
+      this.savingReceipt = true;
       console.log(e);
       this.dragover = false;
       try {
@@ -558,7 +568,8 @@ export default {
           }
         });
         console.log({ receipt });
-        if (!receipt.providerId) throw "Invalid Receipt";
+        if (receipt.providerId || !receipt.airnodeWallet)
+          throw "Invalid Receipt";
         receipt.title = this.selectedConfig;
         await utils.saveReceipt(receipt);
         this.receipt = receipt;
@@ -567,6 +578,7 @@ export default {
         console.log(error);
         this.makeSnackbar("Failed to store receipt!");
       }
+      this.savingReceipt = false;
     },
     async makeRequest() {
       try {
