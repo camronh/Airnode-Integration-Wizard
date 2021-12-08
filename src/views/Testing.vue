@@ -81,14 +81,14 @@
                     ></v-progress-linear>
                   </template>
                   <v-card-text>
-                    <template v-if="receipt.providerId">
+                    <template v-if="receipt.airnodeWallet">
                       <v-card-title>
-                        Designated Wallet
+                        Sponsor Wallet
                         <v-spacer> </v-spacer>
-                        {{ designatedWalletBalance }} ETH
+                        {{ sponsorWalletBalance }} ETH
                       </v-card-title>
                       <v-card-subtitle align="left">
-                        Address: {{ designatedWallet }}
+                        Address: {{ sponsorWallet }}
                       </v-card-subtitle>
                       <v-card-title>
                         Receipt
@@ -100,10 +100,10 @@
                           Receipt Found!
                         </v-chip>
                       </v-card-title>
-                      <v-card-subtitle align="left">
+                      <!-- <v-card-subtitle align="left">
                         Master Wallet:
                         {{ receipt.masterWalletAddress }}
-                      </v-card-subtitle>
+                      </v-card-subtitle> -->
                     </template>
                     <template v-else-if="config.id && !receipt.providerId">
                       <v-card-title>
@@ -221,7 +221,7 @@
               :disabled="
                 !selectedConfig ||
                   !selectedEndpoint ||
-                  !receipt.providerId ||
+                  !receipt.airnodeWallet ||
                   !paramsAreValid
               "
               color="primary"
@@ -309,7 +309,7 @@ export default {
       gettingConfigs: false,
       savingReceipt: false,
       makingRequest: true,
-      designatedWallet: "",
+      sponsorWallet: "",
       loading: false,
       dragover: false,
       requestDialog: false,
@@ -331,7 +331,7 @@ export default {
       config: {},
       ethers: null,
       // web3: null,
-      designatedWalletBalance: 0,
+      sponsorWalletBalance: 0,
     };
   },
   async mounted() {
@@ -354,11 +354,12 @@ export default {
   },
   computed: {
     endpoints() {
-      if (!this.config.id) return false;
+      if (!this.config.nodeSettings) return false;
       let endpoints = this.config.ois[0].endpoints;
       for (let endpoint of endpoints) {
-        let { endpointId } = this.config.triggers.request.find(
-          (trigger) => trigger.endpointName === endpoint.name
+        let triggers = this.config.triggers.rrp || this.config.triggers.request;
+        let { endpointId } = triggers.find(
+          (trigger) => trigger.endpointName == endpoint.name
         );
         endpoint.endpointId = endpointId;
       }
@@ -382,7 +383,7 @@ export default {
       switch (Number(this.chainID)) {
         case 4:
           // Rinkeby Client Address
-          return "0x8529520B0254C19a04ad72abf592Cb471f5b02Ca";
+          return "0xfB5797F644D79d053CCC1F9aaD40b8C6806C430f";
         case 31:
           // RSK Client Address
           return "0x53fd43cc0559F35E82E53F830a35cA868874b687";
@@ -400,14 +401,14 @@ export default {
       );
     },
     paramsList() {
-      if (!this.config.id) return;
+      if (!this.config.nodeSettings) return;
       if (!this.selectedEndpoint) return;
       try {
         const endpoint = this.endpoints.find(
           (endpoint) => endpoint.name === this.selectedEndpoint
         );
         let params = endpoint.parameters.map((param) => param.name);
-        const reservedParams = ["_type", "_times", "_path", "_relay_metadata"];
+        const reservedParams = ["_type", "_times", "_path"];
         params.push(...reservedParams);
         return params;
       } catch (error) {
@@ -469,7 +470,7 @@ export default {
       console.log(this.chainID, this.airnodeAddress);
       return new this.ethers.Contract(
         this.airnodeAddress,
-        airnodeProtocol.AirnodeArtifact.abi,
+        airnodeProtocol.AirnodeRrpFactory.abi,
         this.signer
       );
     },
@@ -518,19 +519,17 @@ export default {
       this.configNames = await utils.getConfigTitles();
       this.gettingConfigs = false;
     },
-    async getDesignatedWalletStats(providerId) {
+    async getSponsorWalletStats({ airnodeWallet }) {
       const airnodeAdmin = require("@api3/airnode-admin");
-      const requesterIndex = "6";
-      this.designatedWallet = await airnodeAdmin.deriveDesignatedWallet(
-        this.airnode,
-        providerId,
-        requesterIndex
+
+      this.sponsorWallet = await airnodeAdmin.deriveSponsorWalletAddress(
+        airnodeWallet.airnodeXpub,
+        airnodeWallet.airnodeAddress,
+        this.address
       );
-      const balanceInWei = await this.provider.getBalance(
-        this.designatedWallet
-      );
+      const balanceInWei = await this.provider.getBalance(this.sponsorWallet);
       const balance = this.ethers.utils.formatEther(balanceInWei.toString());
-      this.designatedWalletBalance = Math.round(balance * 1e4) / 1e4;
+      this.sponsorWalletBalance = Math.round(balance * 1e4) / 1e4;
     },
     async getConfig() {
       this.receipt = {};
@@ -540,8 +539,8 @@ export default {
         this.config = await utils.getConfig(this.selectedConfig);
         this.receipt = await utils.getReceipt(this.selectedConfig);
         console.log({ receipt: this.receipt, config: this.config });
-        if (this.receipt.providerId)
-          await this.getDesignatedWalletStats(this.receipt.providerId);
+        if (this.receipt && this.receipt.airnodeWallet)
+          await this.getSponsorWalletStats(this.receipt);
       } catch (error) {
         console.log(error);
       }
@@ -586,10 +585,10 @@ export default {
           (endpoint) => endpoint.name === this.selectedEndpoint
         );
         let requestObj = {
-          providerId: this.receipt.providerId,
+          airnodeAddress: this.receipt.airnodeWallet.airnodeAddress,
           endpointId: endpoint.endpointId,
           clientAddress: this.requestClientAddress,
-          requesterIndex: "6",
+          sponsorAddress: this.address,
           artifact: require("../utils/TestClient.json"),
         };
         let params = this.selectedParams.map((param) => {
@@ -615,10 +614,10 @@ export default {
         const airnodeAbi = require("@api3/airnode-abi");
 
         const receipt = await exampleClient.makeRequest(
-          requestObj.providerId,
+          requestObj.airnodeAddress,
           requestObj.endpointId,
-          requestObj.requesterIndex,
-          this.designatedWallet,
+          requestObj.sponsorAddress,
+          this.sponsorWallet,
           airnodeAbi.encode(requestObj.params)
         );
         const requestId = await new Promise((resolve) =>
@@ -631,7 +630,7 @@ export default {
 
         await new Promise((resolve) =>
           this.signer.provider.once(
-            this.airnode.filters.ClientRequestFulfilled(null, requestId),
+            this.airnode.filters.FulfilledRequest(null, requestId),
             resolve
           )
         );
