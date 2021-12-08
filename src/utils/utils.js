@@ -542,7 +542,7 @@ async function makeZip(state) {
 
 async function makeReadme(config) {
   // Create Markup Endpoints
-  let endpoints = config.triggers.request.map((endpoint) => {
+  let endpoints = config.triggers.rrp.map((endpoint) => {
     let endpoints = config.ois[0].endpoints;
     let correctParams = endpoints.find((e) => e.name == endpoint.endpointName);
     if (!correctParams) return endpoint.endpointName;
@@ -576,9 +576,9 @@ async function makeReadme(config) {
 
 Read the [Airnode developer documentation](https://docs.api3.org/d/call-an-airnode) to learn how to call Airnode APIs. You'll need the **Provider ID** to call any endpoint in this API.
 
-**Provider ID:** ${receipt.providerId || "{ ************ }"}
+**AirnodeAddress:** ${receipt.airnodeAddress || "{ ************ }"}
 
-**Provider XPub:** ${receipt.xpub || "{ ************ }"} 
+**Airnode XPub:** ${receipt.airnodeXpub || "{ ************ }"} 
 
 [Reserved Parameters](https://docs.api3.org/r/reserved-parameters) are used to control Airnode behavior and are available for all endpoints.
 
@@ -589,12 +589,12 @@ Read the [Airnode developer documentation](https://docs.api3.org/d/call-an-airno
 | Chain                                | Airnode RRP Contract                       |
 | ------------------------------------ | ------------------------------------------ |\n`;
   let chains = [];
-  for (let chain of config.nodeSettings.chains) {
+  for (let chain of config.chains) {
     if (chains.includes(chain.id)) continue;
     let { name } = ethers.providers.getNetwork(Number(chain.id));
     // capitalize the first letter of name
     name = name.charAt(0).toUpperCase() + name.slice(1);
-    const address = chain.contracts.Airnode;
+    const address = chain.contracts.AirnodeRrp;
     configStr += `| ${name}                                 | ${address}                                 |\n`;
   }
 
@@ -622,7 +622,7 @@ You'll need the **Endpoint ID** to call this endpoint.
 
 **Endpoint ID:** ${endpoint.endpointId}
 
-[Request Parameters](https://docs.api3.org/pre-alpha/protocols/request-response/request.html#request-parameters)`;
+[Request Parameters](https://docs.api3.org/airnode/v0.3/grp-developers/call-an-airnode.html#request-parameters)`;
     let endpointStrs = endpoint.parameters.map(
       (e) => `${e}\t\t// Parameter Description...`
     );
@@ -636,12 +636,12 @@ You'll need the **Endpoint ID** to call this endpoint.
           `${e.name} = '${e.value}';\t\t// The ${e.name} parameter is fixed to ${e.value}`
       );
       configStr +=
-        "[Fixed Parameters](https://docs.api3.org/pre-alpha/airnode/specifications/ois.html#_5-3-fixedoperationparameters)\n\n```solidity\n" +
+        "[Fixed Parameters](https://docs.api3.org/airnode/v0.3/grp-providers/guides/build-an-airnode/api-integration.html#fixedoperationparameters)\n\n```solidity\n" +
         fixedParamStrs.join("\n") +
         "\n```";
     }
     configStr +=
-      "\n\n[Response](https://docs.api3.org/pre-alpha/airnode/specifications/reserved-parameters.html#path)\n\n```json\n{ Add example response json here }\n```\n----";
+      "\n\n[Response](https://docs.api3.org/airnode/v0.3/reference/specifications/reserved-parameters.html#path)\n\n```json\n{ Add example response json here }\n```\n----";
   });
   // console.log(configStr);
   return configStr;
