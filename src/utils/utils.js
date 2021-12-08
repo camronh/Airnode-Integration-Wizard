@@ -489,19 +489,13 @@ async function makeZip(state) {
       let regex = /\$\{([^}]+)\}/g;
       let match;
       while ((match = regex.exec(state.exportStr)) !== null) {
-        secrets.push(match[1]);
+        if (!match[1].includes("RPC")) secrets.push(match[1]);
       }
 
       console.log(state);
       let secretsEnv = "";
       secrets.forEach((variable) => {
         switch (variable) {
-          case "CHAIN_PROVIDER_URL":
-            secretsEnv += `${variable}="${state.RPCs[0]}"\n`;
-            break;
-          case "CHAIN_PROVIDER_URL2":
-            secretsEnv += `${variable}="${state.RPCs[1]}"\n`;
-            break;
           case "HTTP_GATEWAY_API_KEY":
             secretsEnv += `\n${variable}="${uuid()}"\n\n`;
             break;
@@ -513,6 +507,12 @@ async function makeZip(state) {
             break;
         }
       });
+
+      for (let chain of state.chains) {
+        if (chain.enabled) {
+          secretsEnv += `\n${chain.name}_RPC="${chain.url}"`;
+        }
+      }
       console.log({ secretsEnv });
       configZip.file("config/secrets.env", secretsEnv);
       configZip.file("aws.env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_ACCESS_KEY=`);

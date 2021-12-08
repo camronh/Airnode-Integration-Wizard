@@ -44,7 +44,7 @@ test("Import Saved Config", async ({ page }) => {
   await page.click("text=Import");
   await page.click("text=Saved");
   await page.waitForSelector("text=Loading", { visible: false });
-  await page.keyboard.type("Cams");
+  await page.keyboard.type("CamsCSRNG");
   await page.waitForTimeout(1000);
   await page.keyboard.press("Enter");
   await page.waitForSelector("text=Loading", { visible: false });
