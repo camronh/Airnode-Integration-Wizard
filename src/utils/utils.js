@@ -166,203 +166,6 @@ async function parseOAS(oas) {
   return state;
 }
 
-// Pre-alpha
-function makeConfigPrealpha(state) {
-  const { title, endpoints, server, hasAuth, auth, version, extraAuth } = state;
-
-  let config = {
-    id: uuid(),
-    nodeSettings: {
-      nodeVersion: "0.1.0",
-      cloudProvider: "aws",
-      region: "us-east-1",
-      stage: "Staging",
-      logFormat: "json",
-      chains: [
-        {
-          id: "4",
-          type: "evm",
-          providers: [
-            {
-              name: "rinkeby1",
-              url: state.RPCs[0],
-            },
-          ],
-          contracts: {
-            Airnode: "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC",
-            Convenience: "0xC9fb36DfAE95AD52E32ad48CCe9A1A169EfFaC6E",
-          },
-          providerAdminForRecordCreation:
-            "0xC22376E2Dd4537D78F088B349Cbf2b9Ce79Fe016",
-        },
-      ],
-    },
-    triggers: {
-      request: [],
-    },
-    ois: [],
-  };
-  if (state.RPCs[1])
-    config.nodeSettings.chains.push({
-      id: "4",
-      type: "evm",
-      providers: [
-        {
-          name: "rinkeby2",
-          url: state.RPCs[1],
-        },
-      ],
-      contracts: {
-        Airnode: "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC",
-        Convenience: "0xC9fb36DfAE95AD52E32ad48CCe9A1A169EfFaC6E",
-      },
-      providerAdminForRecordCreation:
-        "0xC22376E2Dd4537D78F088B349Cbf2b9Ce79Fe016",
-    });
-
-  config.triggers.request = endpoints.map((endpoint) => {
-    endpoint.path = endpoint.path.replace(/ /g, "");
-    endpoint.name = `${endpoint.method.toUpperCase()} ${endpoint.path}`;
-    const endpointId = ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-        ["string"],
-        [`${title}/${endpoint.method}-${endpoint.name}`]
-      )
-    );
-    return {
-      endpointId,
-      endpointName: endpoint.name,
-      oisTitle: title,
-    };
-  });
-
-  config.ois[0] = {
-    oisFormat: "1.0.0",
-    title,
-    version,
-    apiSpecifications: {
-      servers: [
-        {
-          url: server,
-        },
-      ],
-      security: {},
-      components: {
-        securitySchemes: {},
-      },
-      paths: {},
-    },
-  };
-
-  if (hasAuth) {
-    config.ois[0].apiSpecifications.security[
-      `${title}_${auth.name || auth.scheme}`
-    ] = [];
-    config.ois[0].apiSpecifications.components.securitySchemes[
-      `${title}_${auth.name || auth.scheme}`
-    ] = {
-      type: auth.type,
-      in: auth.in,
-    };
-    if (auth.type == "http") {
-      config.ois[0].apiSpecifications.components.securitySchemes[
-        `${title}_${auth.name || auth.scheme}`
-      ].scheme = auth.scheme;
-    } else {
-      config.ois[0].apiSpecifications.components.securitySchemes[
-        `${title}_${auth.name || auth.scheme}`
-      ].name = auth.name;
-    }
-  }
-
-  if (state.addedExtraAuth) {
-    config.ois[0].apiSpecifications.security[
-      `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
-    ] = [];
-    config.ois[0].apiSpecifications.components.securitySchemes[
-      `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
-    ] = {
-      type: state.extraAuth.type,
-      in: state.extraAuth.in,
-    };
-    if (extraAuth.type == "http") {
-      config.ois[0].apiSpecifications.components.securitySchemes[
-        `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
-      ].scheme = extraAuth.scheme;
-    } else {
-      config.ois[0].apiSpecifications.components.securitySchemes[
-        `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
-      ].name = extraAuth.name;
-    }
-  }
-
-  for (let endpoint of endpoints) {
-    if (!config.ois[0].apiSpecifications.paths[endpoint.path])
-      config.ois[0].apiSpecifications.paths[endpoint.path] = {};
-    config.ois[0].apiSpecifications.paths[endpoint.path][endpoint.method] = {
-      parameters: endpoint.params.map((param) => {
-        return {
-          name: param.name.replace(/ /g, ""),
-          in: param.in,
-        };
-      }),
-    };
-  }
-  config.ois[0].endpoints = endpoints.map((endpoint) => {
-    let ep = {
-      name: `${endpoint.method.toUpperCase()} ${endpoint.path}`,
-      operation: {
-        method: endpoint.method,
-        path: endpoint.path,
-      },
-      reservedParameters: [
-        {
-          name: "_type",
-        },
-        {
-          name: "_path",
-        },
-        {
-          name: "_times",
-        },
-        {
-          name: "_relay_metadata",
-          default: "v1",
-        },
-      ],
-      fixedOperationParameters: [],
-      parameters: [],
-    };
-    for (let param of endpoint.params) {
-      if (param.fixed) {
-        ep.fixedOperationParameters.push({
-          operationParameter: {
-            name: param.name,
-            in: param.in,
-          },
-          value: param.value,
-        });
-      } else {
-        ep.parameters.push({
-          name: param.name,
-          operationParameter: {
-            name: param.name,
-            in: param.in,
-          },
-        });
-      }
-    }
-    return ep;
-  });
-
-  //   remove duplicate endpointId from config.triggers.request
-  config.triggers.request = config.triggers.request.filter(
-    (item, index, self) => self.indexOf(item) === index
-  );
-
-  return JSON.stringify(config, null, 2);
-}
-
 // V0.2
 function makeConfig(state) {
   const { title, endpoints, server, hasAuth, auth, version, extraAuth } = state;
@@ -371,12 +174,14 @@ function makeConfig(state) {
     chains: [],
 
     nodeSettings: {
-      cloudProvider: "aws",
+      cloudProvider: {
+        type: "aws",
+        region: "us-east-1",
+      },
       airnodeWalletMnemonic: "${MNEMONIC}",
       logFormat: "plain",
       logLevel: "INFO",
-      nodeVersion: "0.2.2",
-      region: "us-east-1",
+      nodeVersion: "0.3.0",
       stage: "staging",
       heartbeat: {
         enabled: false,
@@ -529,10 +334,6 @@ function makeConfig(state) {
         },
         {
           name: "_times",
-        },
-        {
-          name: "_relay_metadata",
-          default: "v1",
         },
       ],
       fixedOperationParameters: [],
@@ -949,7 +750,6 @@ module.exports = {
   makeOAS,
   parseOAS,
   makeConfig,
-  makeConfigPrealpha,
   parseConfig,
   makeZip,
   saveConfig,

@@ -27,13 +27,17 @@
       "type": "evm"
     }
   ],
-  "httpGateway": {
-    "enabled": "${HTTP_GATEWAY_ENABLED}",
-    "apiKey": "${HTTP_GATEWAY_API_KEY}"
-  },
+
   "nodeSettings": {
     "cloudProvider": "aws",
     "airnodeWalletMnemonic": "${MNEMONIC}",
+    "httpGateway": {
+      "enabled": true,
+      "apiKey": "${HTTP_GATEWAY_API_KEY}"
+    },
+    "heartbeat": {
+      "enabled": false
+    },
     "logFormat": "json",
     "nodeVersion": "0.2.2",
     "region": "us-east-1",
