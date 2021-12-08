@@ -369,7 +369,7 @@ export default {
       switch (Number(this.chainID)) {
         case 4:
           // Rinkeby Airnode Address
-          return "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC";
+          return "0xC11593B87f258672b8eB02d9A723a429b15E9E03";
         case 31:
           // RSK Airnode Address
           return "0x1190a5e1f2afe4c8128fd820a7ac85a95a9e6e3e";
