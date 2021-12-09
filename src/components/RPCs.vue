@@ -264,6 +264,7 @@ export default {
         }
       }
       this.$emit("update:chains", chains);
+      this.$emit("submitted");
 
       //   this.selectedChains = chains.map((chain) => chain.name);
       this.RPCMenu = false;

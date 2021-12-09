@@ -137,7 +137,7 @@
                 ></v-text-field>
               </v-col>
             </v-row>
-            <RPCs :chains.sync="chains" />
+            <RPCs :chains.sync="chains" @submitted="storeSession" />
             <!-- <v-row align="center" justify="center">
               <v-col cols="12" md="7">
                 <v-text-field
