@@ -1,4 +1,4 @@
-const { v4: uuid } = require("uuid");
+// const { v4: uuid } = require("uuid");
 const ethers = require("ethers");
 const axios = require("axios");
 
@@ -497,7 +497,7 @@ async function makeZip(state) {
       secrets.forEach((variable) => {
         switch (variable) {
           case "HTTP_GATEWAY_API_KEY":
-            secretsEnv += `\n${variable}="${uuid()}"\n\n`;
+            secretsEnv += `\n${variable}="${state.gateWayKey}"\n\n`;
             break;
           case state.auth.name:
             secretsEnv += `${variable}="${state.auth.value || ""}"\n`;

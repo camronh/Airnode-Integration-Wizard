@@ -1206,6 +1206,7 @@ import VJsoneditor from "v-jsoneditor/src/index";
 import yaml from "yaml";
 import SwaggerParser from "@apidevtools/swagger-parser";
 import RPCs from "../components/RPCs.vue";
+import { v4 as uuid } from "uuid";
 
 export default {
   name: "Home",
@@ -1241,6 +1242,7 @@ export default {
       savedConfigNames: [],
       exportType: "oas",
       exporting: false,
+      gateWayKey: "",
       selectedConfig: null,
       selectedConfigs: [],
       storeSessions: localStorage.storeSessions === "false" ? false : true,
@@ -1341,6 +1343,7 @@ export default {
         this.addedExtraAuth = session.addedExtraAuth;
         this.chains = session.chains;
         this.auth = session.auth;
+        this.gateWayKey = session.gateWayKey;
         this.extraRPC = session.extraRPC;
         this.extraAuth = session.extraAuth;
         this.endpoints = session.endpoints;
@@ -1534,6 +1537,7 @@ export default {
     },
     exportConfig() {
       this.mergingConfigs = false;
+      if (!this.gateWayKey) this.gateWayKey = uuid();
       // const chains = this.chains;
       this.oas = utils.makeOAS(this);
       this.exportStr = utils.makeConfig(this);
@@ -1652,6 +1656,9 @@ export default {
         this.chains = config.secrets.chains;
         // If v0.2 and no secrets
       }
+      if (config.secrets && config.secrets.gateWayKey) {
+        this.gateWayKey = config.secrets.gateWayKey;
+      }
       if (config.secrets.auth) this.auth = config.secrets.auth;
       if (config.secrets.extraAuth) {
         this.extraAuth = config.secrets.extraAuth;
@@ -1670,6 +1677,7 @@ export default {
         auth: this.auth,
         extraAuth: this.extraAuth,
         chains: this.chains,
+        gateWayKey: this.gateWayKey,
         extraRPC: this.extraRPC,
         hasAuth: this.hasAuth,
         addedExtraAuth: this.addedExtraAuth,
@@ -1747,8 +1755,10 @@ export default {
       this.loading = true;
       try {
         let config = JSON.parse(this.exportStr);
+        if (!this.gateWayKey) this.gateWayKey = uuid();
         config.secrets = {
           chains: this.chains,
+          gateWayKey: this.gateWayKey,
         };
         if (this.hasAuth && this.auth.value) config.secrets.auth = this.auth;
         if (this.addedExtraAuth && this.extraAuth.value) {
