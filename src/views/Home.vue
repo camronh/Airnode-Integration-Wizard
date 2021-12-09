@@ -1317,11 +1317,11 @@ export default {
       this.chains = chains;
     },
 
-    selectedParam() {
-      console.log(this.selectedEndpointParams[this.selectedParam]);
-    },
     storeSessions() {
       localStorage.storeSessions = this.storeSessions;
+    },
+    chains() {
+      this.storeSession();
     },
   },
   mounted() {

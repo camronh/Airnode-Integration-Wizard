@@ -26,4 +26,8 @@ test("Parse chains from pre-alpha config", async ({ page }) => {
   await page.click("text=Submit");
   await page.waitForSelector("#chainsCard", { state: "hidden" });
   expect(await page.isVisible("text=Kovan")).toBeTruthy();
+  await page.reload();
+  expect(await page.isVisible("text=Kovan")).toBeTruthy();
+  // expect(await page.isVisible('text=scheme')).toBeTruthy();
+  // expect(await page.isVisible('text="basic"')).toBeTruthy();
 });
