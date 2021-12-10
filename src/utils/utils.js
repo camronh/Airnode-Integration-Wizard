@@ -503,8 +503,12 @@ async function makeZip(state) {
       });
 
       for (let chain of state.chains) {
-        if (chain.enabled) {
-          secretsEnv += `\n${chain.name}_RPC="${chain.url}"`;
+        if (!chain.enabled) continue;
+        secretsEnv += `\n${chain.name}_RPC="${chain.url}"`;
+        if (chain.extraRPCs) {
+          chain.extraRPCs.forEach((rpc, i) => {
+            secretsEnv += `\n${chain.name}${i + 2}_RPC="${rpc}"`;
+          });
         }
       }
       console.log({ secretsEnv });
