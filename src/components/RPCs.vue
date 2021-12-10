@@ -90,6 +90,7 @@
                           <v-btn
                             icon
                             small
+                            :id="'delete' + chain.name"
                             @click="
                               selectedChain = chain;
                               confirmDelete = true;
@@ -142,6 +143,7 @@
               width="48%"
               outlined
               text
+              id="addChain"
               class="mx-2"
               @click="newRPCForm = true"
             >

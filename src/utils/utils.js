@@ -2,8 +2,8 @@
 const ethers = require("ethers");
 const axios = require("axios");
 
-const apiUrl = "http://localhost:3000";
-// const apiUrl = "https://clb5462t8j.execute-api.us-east-1.amazonaws.com/latest";
+// const apiUrl = "http://localhost:3000";
+const apiUrl = "https://clb5462t8j.execute-api.us-east-1.amazonaws.com/latest";
 
 function makeOAS(state) {
   const { title, version, server, hasAuth, auth, endpoints } = state;
