@@ -47,7 +47,7 @@
     </v-col>
     <v-dialog
       v-model="RPCMenu"
-      max-width="900px"
+      fullscreen
       :overlay-opacity="15"
       persistent
       overlay-color="black"
@@ -68,10 +68,8 @@
         <v-card-text v-else>
           <v-sheet max-height="10%">
             <template v-for="(chain, i) of chains">
-              <v-divider :key="i" />
-
               <v-row dense :key="i">
-                <v-col cols="12" md="3">
+                <v-col cols="12" md="2">
                   <v-checkbox
                     v-model="chain.enabled"
                     :label="chain.name"
@@ -85,7 +83,28 @@
                     :disabled="!chain.enabled"
                     :rules="[validURL(chain.url)]"
                     :loading="chain.loading"
-                  ></v-text-field>
+                  >
+                    <template v-slot:append>
+                      <v-tooltip bottom>
+                        <template v-slot:activator="{ on }">
+                          <v-btn
+                            icon
+                            small
+                            @click="
+                              selectedChain = chain;
+                              confirmDelete = true;
+                            "
+                          >
+                            <v-icon v-on="on">
+                              mdi-delete
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        Delete Chain
+                      </v-tooltip>
+                    </template>
+                  </v-text-field>
+
                   <v-text-field
                     v-for="(rpc, j) of chain.extraRPCs"
                     :key="j"
@@ -95,7 +114,24 @@
                     :disabled="!chain.enabled"
                     :rules="[validURL(chain.url)]"
                     :loading="chain.loading"
-                  ></v-text-field>
+                  >
+                    <template v-slot:append>
+                      <v-tooltip bottom>
+                        <template v-slot:activator="{ on }">
+                          <v-btn
+                            icon
+                            small
+                            @click="chain.extraRPCs.splice(j, 1)"
+                          >
+                            <v-icon v-on="on">
+                              mdi-close
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        Remove extra RPC
+                      </v-tooltip>
+                    </template>
+                  </v-text-field>
                 </v-col>
               </v-row>
             </template>
@@ -283,6 +319,32 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="confirmDelete" max-width="400px">
+      <v-card class="overflow-hidden">
+        <v-card-title>
+          Delete Chain?
+        </v-card-title>
+        <v-card-subtitle>
+          Are you sure you want to delete the chain from the Database? (Cam may
+          be pissed)
+        </v-card-subtitle>
+        <v-card-actions>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-btn @click="confirmDelete = false" block text color="white">
+                Cancel
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-btn @click="deleteChain()" text block color="red">
+                Delete
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-row>
 </template>
 
@@ -297,6 +359,8 @@ export default {
     RPCMenu: false,
     loading: false,
     newChainForm: false,
+    selectedChain: null,
+    confirmDelete: false,
     newRPCForm: false,
     newChain: {
       name: "",
@@ -409,6 +473,20 @@ export default {
       let regex = /^(0x)?[0-9a-f]{40}$/i;
       if (regex.test(address)) return true;
       else return false;
+    },
+    async deleteChain() {
+      this.confirmDelete = false;
+      console.log(this.selectedChain);
+      const results = await utils.deleteChain(this.selectedChain);
+      console.log({ results });
+      if (results.status === 200) {
+        // delete this.selectedChain from this.chains
+        this.chains = this.chains.filter(
+          (chain) => chain.id !== this.selectedChain.id
+        );
+        this.selectedChain = null;
+        this.getChains();
+      }
     },
   },
   computed: {

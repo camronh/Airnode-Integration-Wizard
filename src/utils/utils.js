@@ -2,8 +2,8 @@
 const ethers = require("ethers");
 const axios = require("axios");
 
-// const apiUrl = "http://localhost:3000";
-const apiUrl = "https://clb5462t8j.execute-api.us-east-1.amazonaws.com/latest";
+const apiUrl = "http://localhost:3000";
+// const apiUrl = "https://clb5462t8j.execute-api.us-east-1.amazonaws.com/latest";
 
 function makeOAS(state) {
   const { title, version, server, hasAuth, auth, endpoints } = state;
@@ -744,6 +744,12 @@ async function saveChain(chain) {
   return results;
 }
 
+// Delete chain from DB
+async function deleteChain(chain) {
+  const results = await axios.delete(`${apiUrl}/RPC/chains/${chain.name}`);
+  return results;
+}
+
 module.exports = {
   makeOAS,
   parseOAS,
@@ -763,5 +769,6 @@ module.exports = {
   getChains,
   newRPC,
   saveChain,
+  deleteChain,
   // openEndpoint,
 };
