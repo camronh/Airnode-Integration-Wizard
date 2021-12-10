@@ -213,7 +213,7 @@ function makeConfig(state) {
     };
     if (chain.extraRPCs) {
       chain.extraRPCs.forEach((rpc, i) => {
-        const count = `${i + 1}`;
+        const count = `${i + 2}`;
         chainObj.providers[chain.name + count] = {
           url: "${" + chain.name + count + "_RPC}",
         };
