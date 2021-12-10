@@ -89,6 +89,8 @@
                   <v-text-field
                     v-for="(rpc, j) of chain.extraRPCs"
                     :key="j"
+                    readonly
+                    dense
                     v-model="chain.extraRPCs[j]"
                     :disabled="!chain.enabled"
                     :rules="[validURL(chain.url)]"
@@ -217,6 +219,7 @@
                   dense
                   :items="enabledChainNames"
                   label="Chain"
+                  id="chainSelect"
                   v-model="newRPC.chain"
                   outlined
                 />
@@ -254,8 +257,9 @@
                       :loading="newRPC.loading"
                       :disabled="!validNewRPC"
                       @click="saveNewRPC"
+                      id="saveNewRPC"
                     >
-                      <v-icon>
+                      <v-icon color="primary">
                         mdi-plus
                       </v-icon>
                     </v-btn>
@@ -290,7 +294,7 @@ export default {
   data: () => ({
     // selectedChains: [],
     // chains: [],
-    RPCMenu: true,
+    RPCMenu: false,
     loading: false,
     newChainForm: false,
     newRPCForm: false,
@@ -330,13 +334,10 @@ export default {
       dbChains.forEach((dbChain) => (dbChain.enabled = enabled));
       for (let chain of configChains) {
         const i = dbChains.findIndex((dbChain) => dbChain.id === chain.id);
-        // Get count of chains with the same id
-        const count = configChains.filter((dbChain) => dbChain.id === chain.id)
-          .length;
-        console.log({ count });
-        if (i > -1 && count == 1) {
+        if (i > -1) {
           dbChains[i].url = chain.url;
           dbChains[i].enabled = true;
+          if (chain.extraRPCs) dbChains[i].extraRPCs = chain.extraRPCs;
         } else {
           dbChains.push(chain);
         }
