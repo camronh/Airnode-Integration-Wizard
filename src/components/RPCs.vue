@@ -47,7 +47,7 @@
     </v-col>
     <v-dialog
       v-model="RPCMenu"
-      max-width="900px"
+      fullscreen
       :overlay-opacity="15"
       persistent
       overlay-color="black"
@@ -67,39 +67,106 @@
         </v-card-text>
         <v-card-text v-else>
           <v-sheet max-height="10%">
-            <v-row v-for="(chain, i) of chains" :key="i" dense>
-              <v-col cols="12" md="3">
-                <v-checkbox
-                  v-model="chain.enabled"
-                  :label="chain.name"
-                  color="accent"
-                ></v-checkbox>
-              </v-col>
-              <v-col cols="12" md="9">
-                <v-text-field
-                  placeholder="Input Custom RPC URL or leave blank to generate"
-                  v-model="chain.url"
-                  :disabled="!chain.enabled"
-                  :rules="[validURL(chain.url)]"
-                  :loading="chain.loading"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-          </v-sheet>
+            <template v-for="(chain, i) of chains">
+              <v-row dense :key="i">
+                <v-col cols="12" md="2">
+                  <v-checkbox
+                    v-model="chain.enabled"
+                    :label="chain.name"
+                    color="accent"
+                  ></v-checkbox>
+                </v-col>
+                <v-col cols="12" md="9">
+                  <v-text-field
+                    placeholder="Input Custom RPC URL or leave blank to generate"
+                    v-model="chain.url"
+                    :disabled="!chain.enabled"
+                    :rules="[validURL(chain.url)]"
+                    :loading="chain.loading"
+                  >
+                    <template v-slot:append>
+                      <v-tooltip bottom>
+                        <template v-slot:activator="{ on }">
+                          <v-btn
+                            icon
+                            small
+                            :id="'delete' + chain.name"
+                            @click="
+                              selectedChain = chain;
+                              confirmDelete = true;
+                            "
+                          >
+                            <v-icon v-on="on">
+                              mdi-delete
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        Delete Chain
+                      </v-tooltip>
+                    </template>
+                  </v-text-field>
 
-          <v-btn
-            block
-            dense
-            outlined
-            @click="newChainForm = true"
-            v-if="!newChainForm"
-          >
-            <v-icon color="primary">
-              mdi-plus
-            </v-icon>
-            Create New Chain
-          </v-btn>
-          <template v-else>
+                  <v-text-field
+                    v-for="(rpc, j) of chain.extraRPCs"
+                    :key="j"
+                    readonly
+                    dense
+                    v-model="chain.extraRPCs[j]"
+                    :disabled="!chain.enabled"
+                    :rules="[validURL(chain.url)]"
+                    :loading="chain.loading"
+                  >
+                    <template v-slot:append>
+                      <v-tooltip bottom>
+                        <template v-slot:activator="{ on }">
+                          <v-btn
+                            icon
+                            small
+                            @click="chain.extraRPCs.splice(j, 1)"
+                          >
+                            <v-icon v-on="on">
+                              mdi-close
+                            </v-icon>
+                          </v-btn>
+                        </template>
+                        Remove extra RPC
+                      </v-tooltip>
+                    </template>
+                  </v-text-field>
+                </v-col>
+              </v-row>
+            </template>
+          </v-sheet>
+          <template v-if="!newChainForm && !newRPCForm">
+            <v-btn
+              dense
+              width="48%"
+              outlined
+              text
+              id="addChain"
+              class="mx-2"
+              @click="newRPCForm = true"
+            >
+              <v-icon color="primary">
+                mdi-plus
+              </v-icon>
+              Add Provider
+            </v-btn>
+            <v-btn
+              width="48%"
+              outlined
+              dense
+              class="mx-2"
+              text
+              @click="newChainForm = true"
+            >
+              <v-icon color="primary">
+                mdi-plus
+              </v-icon>
+              Create New Chain
+            </v-btn>
+          </template>
+          <template v-else-if="newChainForm">
             <v-row dense>
               <v-col cols="12" md="3">
                 <v-text-field
@@ -183,6 +250,63 @@
               </v-col>
             </v-row>
           </template>
+          <template v-else-if="newRPCForm">
+            <v-row dense>
+              <v-col cols="12" md="2">
+                <v-select
+                  dense
+                  :items="enabledChainNames"
+                  label="Chain"
+                  id="chainSelect"
+                  v-model="newRPC.chain"
+                  outlined
+                />
+              </v-col>
+
+              <v-col cols="12" md="8">
+                <v-text-field
+                  label="RPC URL"
+                  dense
+                  outlined
+                  v-model="newRPC.RPC"
+                  :rules="[validURL]"
+                >
+                </v-text-field>
+              </v-col>
+
+              <v-col cols="12" md="1">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn v-bind="attrs" v-on="on" @click="newRPCForm = false">
+                      <v-icon>
+                        mdi-delete
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Cancel New RPC</span>
+                </v-tooltip>
+              </v-col>
+              <v-col cols="12" md="1">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      v-bind="attrs"
+                      v-on="on"
+                      :loading="newRPC.loading"
+                      :disabled="!validNewRPC"
+                      @click="saveNewRPC"
+                      id="saveNewRPC"
+                    >
+                      <v-icon color="primary">
+                        mdi-plus
+                      </v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Add RPC</span>
+                </v-tooltip>
+              </v-col>
+            </v-row>
+          </template>
         </v-card-text>
         <v-card-actions>
           <v-btn
@@ -194,6 +318,32 @@
           >
             Submit
           </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="confirmDelete" max-width="400px">
+      <v-card class="overflow-hidden">
+        <v-card-title>
+          Delete Chain?
+        </v-card-title>
+        <v-card-subtitle>
+          Are you sure you want to delete the chain from the Database? (Cam may
+          be pissed)
+        </v-card-subtitle>
+        <v-card-actions>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-btn @click="confirmDelete = false" block text color="white">
+                Cancel
+              </v-btn>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-btn @click="deleteChain()" text block color="red">
+                Delete
+              </v-btn>
+            </v-col>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -211,12 +361,20 @@ export default {
     RPCMenu: false,
     loading: false,
     newChainForm: false,
+    selectedChain: null,
+    confirmDelete: false,
+    newRPCForm: false,
     newChain: {
       name: "",
       RPC: "",
       id: null,
       airnodeAddress: "",
       authorizersAddress: "",
+      loading: false,
+    },
+    newRPC: {
+      chain: "",
+      RPC: "",
       loading: false,
     },
   }),
@@ -239,18 +397,23 @@ export default {
       this.loading = false;
     },
     syncChainData(configChains, dbChains, enabled = false) {
-      dbChains.forEach((dbChain) => {
-        dbChain.enabled = enabled;
-      });
+      dbChains.forEach((dbChain) => (dbChain.enabled = enabled));
       for (let chain of configChains) {
         const i = dbChains.findIndex((dbChain) => dbChain.id === chain.id);
         if (i > -1) {
           dbChains[i].url = chain.url;
           dbChains[i].enabled = true;
+          if (chain.extraRPCs) dbChains[i].extraRPCs = chain.extraRPCs;
         } else {
           dbChains.push(chain);
         }
       }
+      // Remove chains that are duplicated by name
+      dbChains = dbChains.filter((dbChain) => {
+        const count = dbChains.filter((c) => c.name === dbChain.name).length;
+        return count === 1;
+      });
+      console.log({ dbChains });
       return dbChains;
     },
     async submitForm() {
@@ -272,10 +435,12 @@ export default {
     async saveNewChain() {
       if (!this.validNewChain) return;
       this.newChain.loading = true;
+      console.log(this.newChain);
       const results = await utils.saveChain(this.newChain);
       if (results.status === 201) {
         this.chains = [];
         this.getChains();
+
         this.newChainForm = false;
         this.newChain = {
           name: "",
@@ -287,6 +452,17 @@ export default {
         };
       }
       console.log({ results });
+    },
+    async saveNewRPC() {
+      if (!this.validNewRPC) return;
+      this.newRPC.loading = true;
+      const oldChain = this.chains.find(
+        (chain) => chain.name === this.newRPC.chain
+      );
+      if (!oldChain.extraRPCs) oldChain.extraRPCs = [];
+      oldChain.extraRPCs.push(this.newRPC.RPC);
+      this.newRPC.loading = false;
+      this.newRPCForm = false;
     },
     validURL(url) {
       if (!url) return true;
@@ -300,6 +476,20 @@ export default {
       if (regex.test(address)) return true;
       else return false;
     },
+    async deleteChain() {
+      this.confirmDelete = false;
+      console.log(this.selectedChain);
+      const results = await utils.deleteChain(this.selectedChain);
+      console.log({ results });
+      if (results.status === 200) {
+        // delete this.selectedChain from this.chains
+        this.chains = this.chains.filter(
+          (chain) => chain.id !== this.selectedChain.id
+        );
+        this.selectedChain = null;
+        this.getChains();
+      }
+    },
   },
   computed: {
     submittable() {
@@ -312,6 +502,13 @@ export default {
       const { name, id, RPC, airnodeAddress } = this.newChain;
       if (!name || !id || !RPC || !airnodeAddress) return false;
       if (!Number(id)) return false;
+      if (!this.validURL(RPC)) return false;
+      return true;
+    },
+
+    validNewRPC() {
+      const { chain, RPC } = this.newRPC;
+      if (!chain || !RPC) return false;
       if (!this.validURL(RPC)) return false;
       return true;
     },

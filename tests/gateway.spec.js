@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-test("Parse chains from pre-alpha config", async ({ page }) => {
+test("RPC component works", async ({ page }) => {
   await page.goto("http://localhost:8080/");
   await page.click("#menuButton");
 
@@ -20,7 +20,7 @@ test("Parse chains from pre-alpha config", async ({ page }) => {
   let chainsCard = await page.waitForSelector("#chainsCard");
   await chainsCard.waitForSelector('[type="checkbox"]');
   const checkboxes = await chainsCard.$$('[type="checkbox"]');
-  expect(checkboxes.length).toBe(5);
+  expect(checkboxes.length).toBeGreaterThanOrEqual(5);
   await page.check("text=Kovan");
 
   await page.click("text=Submit");

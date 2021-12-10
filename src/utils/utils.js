@@ -181,7 +181,7 @@ function makeConfig(state) {
       airnodeWalletMnemonic: "${MNEMONIC}",
       logFormat: "plain",
       logLevel: "INFO",
-      nodeVersion: "0.3.0",
+      nodeVersion: "0.3.1",
       stage: "staging",
       heartbeat: {
         enabled: false,
@@ -198,7 +198,7 @@ function makeConfig(state) {
     apiCredentials: [],
   };
   for (let chain of state.chains) {
-    config.chains.push({
+    let chainObj = {
       authorizers: chain.authorizersAddress ? [chain.authorizersAddress] : [],
       contracts: {
         AirnodeRrp: chain.airnodeAddress,
@@ -210,23 +210,17 @@ function makeConfig(state) {
         },
       },
       type: "evm",
-    });
+    };
+    if (chain.extraRPCs) {
+      chain.extraRPCs.forEach((rpc, i) => {
+        const count = `${i + 2}`;
+        chainObj.providers[chain.name + count] = {
+          url: "${" + chain.name + count + "_RPC}",
+        };
+      });
+    }
+    config.chains.push(chainObj);
   }
-  // if (state.RPCs[1])
-  //   config.chains.push({
-  //     authorizers: [],
-  //     contracts: {
-  //       AirnodeRrp: "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC",
-  //     },
-  //     id: "4",
-  //     providers: {
-  //       rinkeby2: {
-  //         url: "${CHAIN_PROVIDER_URL2}",
-  //       },
-  //     },
-
-  //     type: "evm",
-  //   });
 
   config.triggers.rrp = endpoints.map((endpoint) => {
     endpoint.path = endpoint.path.replace(/ /g, "");
@@ -509,8 +503,12 @@ async function makeZip(state) {
       });
 
       for (let chain of state.chains) {
-        if (chain.enabled) {
-          secretsEnv += `\n${chain.name}_RPC="${chain.url}"`;
+        if (!chain.enabled) continue;
+        secretsEnv += `\n${chain.name}_RPC="${chain.url}"`;
+        if (chain.extraRPCs) {
+          chain.extraRPCs.forEach((rpc, i) => {
+            secretsEnv += `\n${chain.name}${i + 2}_RPC="${rpc}"`;
+          });
         }
       }
       console.log({ secretsEnv });
@@ -746,6 +744,12 @@ async function saveChain(chain) {
   return results;
 }
 
+// Delete chain from DB
+async function deleteChain(chain) {
+  const results = await axios.delete(`${apiUrl}/RPC/chains/${chain.name}`);
+  return results;
+}
+
 module.exports = {
   makeOAS,
   parseOAS,
@@ -765,5 +769,6 @@ module.exports = {
   getChains,
   newRPC,
   saveChain,
+  deleteChain,
   // openEndpoint,
 };
