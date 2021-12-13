@@ -168,21 +168,30 @@ async function parseOAS(oas) {
 
 // V0.2
 function makeConfig(state) {
-  const { title, endpoints, server, hasAuth, auth, version, extraAuth } = state;
+  const {
+    title,
+    endpoints,
+    server,
+    hasAuth,
+    auth,
+    version,
+    extraAuth,
+    exportSettings,
+  } = state;
 
   let config = {
     chains: [],
 
     nodeSettings: {
       cloudProvider: {
-        type: "aws",
-        region: "us-east-1",
+        type: exportSettings.cloudProvider,
+        // region: "us-east-1",
       },
       airnodeWalletMnemonic: "${MNEMONIC}",
       logFormat: "plain",
       logLevel: "INFO",
       nodeVersion: "0.3.1",
-      stage: "staging",
+      stage: exportSettings.stage,
       heartbeat: {
         enabled: false,
       },
@@ -197,9 +206,15 @@ function makeConfig(state) {
     ois: [],
     apiCredentials: [],
   };
+  if (exportSettings.cloudProvider === "aws") {
+    config.nodeSettings.cloudProvider.region = "us-east-1";
+  }
   for (let chain of state.chains) {
     let chainObj = {
-      authorizers: chain.authorizersAddress ? [chain.authorizersAddress] : [],
+      authorizers:
+        chain.authorizersAddress && exportSettings.authorizers
+          ? [chain.authorizersAddress]
+          : [],
       contracts: {
         AirnodeRrp: chain.airnodeAddress,
       },
