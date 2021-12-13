@@ -837,36 +837,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <!-- <v-dialog v-model="exporting" max-width="50%" :overlay-opacity="75">
-      <v-card>
-        <v-card-title>
-          Export2
-          <v-spacer></v-spacer>
-          <v-btn icon>
-            <v-icon>
-              mdi-plus
-            </v-icon>
-          </v-btn>
-        </v-card-title>
-        <v-card-subtitle>
-          Edit your config.json
-        </v-card-subtitle>
-        <v-card-text>
-          <v-jsoneditor
-            v-model="exportJson"
-            :plus="true"
-            @error="importError = true"
-            height="600px"
-            :options="options"
-          >
-          </v-jsoneditor>
-        </v-card-text>
-
-        <v-btn block @click="downloading = true" text color="primary">
-          Download
-        </v-btn>
-      </v-card>
-    </v-dialog> -->
     <v-dialog
       v-model="bulkMenu"
       max-width="50%"
@@ -961,8 +931,8 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="exporting" max-width="50%" :overlay-opacity="75">
-      <v-card>
+    <v-dialog v-model="exporting" max-width="70%" :overlay-opacity="75">
+      <v-card color="grey darken-3">
         <v-card-title>
           Export
           <v-spacer></v-spacer>
@@ -993,14 +963,38 @@
           Edit your config.json
         </v-card-subtitle>
         <v-card-text>
-          <v-jsoneditor
-            v-model="exportJson"
-            :plus="true"
-            @error="importError = true"
-            height="600px"
-            :options="options"
-          >
-          </v-jsoneditor>
+          <v-row>
+            <v-col cols="12" md="9">
+              <v-jsoneditor
+                v-model="exportJson"
+                :plus="true"
+                @error="importError = true"
+                height="600px"
+                :options="options"
+              >
+              </v-jsoneditor>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-select
+                label="Cloud Provider"
+                v-model="exportSettings.cloudProvider"
+                :items="['aws', 'gcp', 'local']"
+              ></v-select>
+              <v-checkbox
+                label="Authorizers"
+                v-model="exportSettings.authorizers"
+              ></v-checkbox>
+              <v-checkbox
+                label="Heartbeat"
+                v-model="exportSettings.heartbeat"
+              ></v-checkbox>
+              <v-select
+                label="Stage"
+                v-model="exportSettings.stage"
+                :items="['Staging', 'Prod']"
+              ></v-select>
+            </v-col>
+          </v-row>
         </v-card-text>
 
         <v-btn
@@ -1243,6 +1237,12 @@ export default {
       exportType: "oas",
       exporting: false,
       gateWayKey: "",
+      exportSettings: {
+        cloudProvider: "aws",
+        authorizers: true,
+        heartbeat: false,
+        stage: "Staging",
+      },
       selectedConfig: null,
       selectedConfigs: [],
       storeSessions: localStorage.storeSessions === "false" ? false : true,
@@ -1863,6 +1863,7 @@ export default {
       }
       this.loading = false;
     },
+    updateAuthorizers() {},
   },
 
   computed: {
