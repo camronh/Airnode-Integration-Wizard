@@ -978,7 +978,8 @@
               <v-select
                 label="Cloud Provider"
                 v-model="exportSettings.cloudProvider"
-                :items="['aws', 'gcp', 'local']"
+                @change="exportConfig()"
+                :items="['aws', 'local']"
               ></v-select>
               <v-checkbox
                 label="Authorizers"
@@ -988,8 +989,10 @@
               <v-checkbox
                 label="Heartbeat"
                 v-model="exportSettings.heartbeat"
+                disabled
               ></v-checkbox>
               <v-select
+                @change="exportConfig()"
                 label="Stage"
                 v-model="exportSettings.stage"
                 :items="['Staging', 'Prod']"
