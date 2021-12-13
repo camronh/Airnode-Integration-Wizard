@@ -199,7 +199,10 @@ function makeConfig(state) {
   };
   for (let chain of state.chains) {
     let chainObj = {
-      authorizers: chain.authorizersAddress ? [chain.authorizersAddress] : [],
+      authorizers:
+        chain.authorizersAddress && state.exportSettings.authorizers
+          ? [chain.authorizersAddress]
+          : [],
       contracts: {
         AirnodeRrp: chain.airnodeAddress,
       },

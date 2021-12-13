@@ -982,6 +982,7 @@
               ></v-select>
               <v-checkbox
                 label="Authorizers"
+                @change="exportConfig()"
                 v-model="exportSettings.authorizers"
               ></v-checkbox>
               <v-checkbox
@@ -1863,7 +1864,9 @@ export default {
       }
       this.loading = false;
     },
-    updateAuthorizers() {},
+    updateAuthorizers() {
+      console.log(this.chains);
+    },
   },
 
   computed: {
