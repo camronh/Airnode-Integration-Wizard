@@ -43,15 +43,17 @@
             <v-row>
               <v-col cols="12" md="4">
                 <v-card-text>
-                  <v-select
+                  <v-autocomplete
                     :items="configNames"
+                    auto-select-first
                     :loading="gettingConfigs"
                     :disabled="gettingConfigs"
                     label="Config"
                     v-model="selectedConfig"
                     @change="getConfig"
                   />
-                  <v-select
+                  <v-autocomplete
+                    auto-select-first
                     label="Endpoint"
                     :items="endpointNames"
                     v-model="selectedEndpoint"
