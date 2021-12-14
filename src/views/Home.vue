@@ -73,9 +73,7 @@
                   >
                     <v-list-item-title>Clone Endpoint</v-list-item-title>
                   </v-list-item>
-                  <v-list-item id="addRPC" @click="extraRPC = true">
-                    <v-list-item-title>Add RPC</v-list-item-title>
-                  </v-list-item>
+
                   <v-list-item
                     id="bulkChange"
                     @click="openBulkMenu"
@@ -170,21 +168,7 @@
                 </v-tooltip>
               </v-col>
             </v-row> -->
-            <v-row align="center" justify="center" v-if="extraRPC">
-              <v-col cols="12" md="7">
-                <v-text-field
-                  v-model="RPCs[1]"
-                  placeholder="https://rinkeby.infura.io/v3/{ FILL }"
-                  label="RPC URL"
-                  autofocus
-                  @input="storeSession"
-                  :rules="serverRules"
-                  @blur="RPCs[1] ? '' : (extraRPC = false)"
-                  id="rpcURL2"
-                  required
-                ></v-text-field>
-              </v-col>
-            </v-row>
+
             <v-row align="center" justify="center">
               <v-col cols="12" md="3">
                 <v-checkbox
@@ -1233,7 +1217,6 @@ export default {
       },
       chains: [],
       RPCs: [""],
-      extraRPC: false,
       addedExtraAuth: false,
       importError: false,
       importing: false,
@@ -1306,10 +1289,10 @@ export default {
         fixed: false,
         value: "",
       },
-      required: [(v) => !!v || "Required"],
+      required: [v => !!v || "Required"],
       serverRules: [
-        (v) => !!v || "Required",
-        (v) => v.includes("://") || "Invalid Server",
+        v => !!v || "Required",
+        v => v.includes("://") || "Invalid Server",
       ],
     };
   },
@@ -1348,7 +1331,6 @@ export default {
         this.chains = session.chains;
         this.auth = session.auth;
         this.gateWayKey = session.gateWayKey;
-        this.extraRPC = session.extraRPC;
         this.extraAuth = session.extraAuth;
         this.endpoints = session.endpoints;
       }
@@ -1361,7 +1343,7 @@ export default {
       // this.ep.reservedParam = this.rp;
       // if endpoint.path exists in endpoints get index
       const duplicateIndex = this.endpoints.findIndex(
-        (v) => v.path === this.ep.path && v.method === this.ep.method
+        v => v.path === this.ep.path && v.method === this.ep.method
       );
       console.log({ duplicateIndex });
       if (duplicateIndex > -1) this.endpoints[duplicateIndex] = this.ep;
@@ -1386,7 +1368,7 @@ export default {
 
       // Check if param already exists in this.ep.params
       const duplicateIndex = this.ep.params.findIndex(
-        (v) => v.name === this.param.name && v.in === this.param.in
+        v => v.name === this.param.name && v.in === this.param.in
       );
       if (duplicateIndex > -1) {
         this.param = { name: "", in: "query", fixed: false, value: "" };
@@ -1471,7 +1453,7 @@ export default {
         const endpoint = this.endpoints[index];
         // delete paramToDel from endpoint.params
         const indexOfParam = endpoint.params.findIndex(
-          (v) => v.name === paramToDel.name && v.in === paramToDel.in
+          v => v.name === paramToDel.name && v.in === paramToDel.in
         );
         if (indexOfParam > -1) {
           endpoint.params.splice(indexOfParam, 1);
@@ -1498,7 +1480,7 @@ export default {
         }
         const endpoint = this.endpoints[index];
         const indexOfParam = endpoint.params.findIndex(
-          (v) => v.name === paramToEdit.name && v.in === paramToEdit.in
+          v => v.name === paramToEdit.name && v.in === paramToEdit.in
         );
         if (indexOfParam > -1) {
           endpoint.params[indexOfParam] = this.param;
@@ -1591,7 +1573,7 @@ export default {
           state = utils.parseConfig(json);
         }
         console.log("PARSIN", state.RPCs);
-        Object.keys(state).forEach((key) => {
+        Object.keys(state).forEach(key => {
           this[key] = state[key];
         });
         this.auth.value = apiValue;
@@ -1614,12 +1596,12 @@ export default {
       if (paths) {
         let pathParams = [];
         // remove curly braces from each path
-        paths.forEach((path) => {
+        paths.forEach(path => {
           let param = path.replace(path, path.replace(/\{|\}/g, ""));
           pathParams.push(param);
         });
         for (let param of pathParams) {
-          if (this.ep.params.find((v) => v.name === param && v.in == "path")) {
+          if (this.ep.params.find(v => v.name === param && v.in == "path")) {
             continue;
           }
           this.ep.params.push({
@@ -1682,7 +1664,6 @@ export default {
         extraAuth: this.extraAuth,
         chains: this.chains,
         gateWayKey: this.gateWayKey,
-        extraRPC: this.extraRPC,
         hasAuth: this.hasAuth,
         addedExtraAuth: this.addedExtraAuth,
         endpoints: this.endpoints,
@@ -1708,7 +1689,6 @@ export default {
       };
       this.chains = [];
       this.addedExtraAuth = false;
-      this.extraRPC = false;
       this.endpoints = [];
       localStorage.clear();
       this.storeSession();
@@ -1728,7 +1708,7 @@ export default {
     async onDrop(e) {
       this.dragover = false;
       try {
-        this.importString = await new Promise((resolve) => {
+        this.importString = await new Promise(resolve => {
           if (e.dataTransfer.files.length > 1) {
             console.log("Only 1 at a time");
           } else {
@@ -1843,7 +1823,7 @@ export default {
       this.mergingDialog = true;
       try {
         this.mergeConfigsNames = this.selectedConfigs.map(
-          (v) => this.savedConfigNames[v]
+          v => this.savedConfigNames[v]
         );
         const progressChunk = 100 / this.selectedConfigs.length;
         let mainConfig = null;
@@ -1892,14 +1872,14 @@ export default {
     },
     searchedConfigs() {
       if (!this.configSearch) return this.savedConfigNames;
-      return this.savedConfigNames.filter((config) => {
+      return this.savedConfigNames.filter(config => {
         return config.toLowerCase().includes(this.configSearch.toLowerCase());
       });
     },
 
     selectedEndpointParams() {
       let selectedEndpointParams = [];
-      this.selectedEndpoints.forEach((i) => {
+      this.selectedEndpoints.forEach(i => {
         try {
           selectedEndpointParams = selectedEndpointParams.concat(
             this.endpoints[i].params
@@ -1911,10 +1891,8 @@ export default {
       });
 
       let uniqueParams = [];
-      selectedEndpointParams.forEach((param) => {
-        if (
-          uniqueParams.find((v) => v.name === param.name && v.in === param.in)
-        )
+      selectedEndpointParams.forEach(param => {
+        if (uniqueParams.find(v => v.name === param.name && v.in === param.in))
           return;
         uniqueParams.push(param);
       });
