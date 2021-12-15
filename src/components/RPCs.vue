@@ -56,7 +56,7 @@
         <v-card-title>
           Chains
           <v-spacer></v-spacer>
-          <v-btn @click="RPCMenu = false" icon>
+          <v-btn @click="RPCMenu = false" icon id="closeRPCMenu">
             <v-icon>
               mdi-close
             </v-icon>
@@ -354,12 +354,13 @@
 import utils from "../utils/utils";
 
 export default {
-  props: ["chains"],
+  props: ["currentChains"],
   data: () => ({
     // selectedChains: [],
     // chains: [],
     RPCMenu: false,
     loading: false,
+    chains: [],
     newChainForm: false,
     selectedChain: null,
     confirmDelete: false,
@@ -378,13 +379,12 @@ export default {
       loading: false,
     },
   }),
-  watch: {
-    chains: {
-      handler: function(newVal, oldVal) {
-        console.log({ newVal, oldVal });
-      },
-    },
-  },
+  // watch: {
+  //   currentChains() {
+  //     getChains();
+  //   },
+  // },
+
   methods: {
     async getChains() {
       //   if (this.chains.length) return;
@@ -397,9 +397,9 @@ export default {
       this.loading = false;
     },
     syncChainData(configChains, dbChains, enabled = false) {
-      dbChains.forEach((dbChain) => (dbChain.enabled = enabled));
+      dbChains.forEach(dbChain => (dbChain.enabled = enabled));
       for (let chain of configChains) {
-        const i = dbChains.findIndex((dbChain) => dbChain.id === chain.id);
+        const i = dbChains.findIndex(dbChain => dbChain.id === chain.id);
         if (i > -1) {
           dbChains[i].url = chain.url;
           dbChains[i].enabled = true;
@@ -409,15 +409,15 @@ export default {
         }
       }
       // Remove chains that are duplicated by name
-      dbChains = dbChains.filter((dbChain) => {
-        const count = dbChains.filter((c) => c.name === dbChain.name).length;
+      dbChains = dbChains.filter(dbChain => {
+        const count = dbChains.filter(c => c.name === dbChain.name).length;
         return count === 1;
       });
       console.log({ dbChains });
       return dbChains;
     },
     async submitForm() {
-      let chains = this.chains.filter((chain) => chain.enabled);
+      let chains = this.chains.filter(chain => chain.enabled);
       for (let chain of chains) {
         if (!chain.enabled) continue;
         if (!chain.url) {
@@ -426,7 +426,7 @@ export default {
           chain.loading = false;
         }
       }
-      this.$emit("update:chains", chains);
+      this.$emit("update:currentChains", chains);
       this.$emit("submitted");
 
       //   this.selectedChains = chains.map((chain) => chain.name);
@@ -457,7 +457,7 @@ export default {
       if (!this.validNewRPC) return;
       this.newRPC.loading = true;
       const oldChain = this.chains.find(
-        (chain) => chain.name === this.newRPC.chain
+        chain => chain.name === this.newRPC.chain
       );
       if (!oldChain.extraRPCs) oldChain.extraRPCs = [];
       oldChain.extraRPCs.push(this.newRPC.RPC);
@@ -484,7 +484,7 @@ export default {
       if (results.status === 200) {
         // delete this.selectedChain from this.chains
         this.chains = this.chains.filter(
-          (chain) => chain.id !== this.selectedChain.id
+          chain => chain.id !== this.selectedChain.id
         );
         this.selectedChain = null;
         this.getChains();
@@ -494,9 +494,9 @@ export default {
   computed: {
     submittable() {
       if (this.newChain.loading || this.loading) return false;
-      if (this.chains.some((chain) => chain.loading)) return false;
-      let chains = this.chains.filter((chain) => chain.enabled);
-      return chains.every((chain) => this.validURL(chain.url));
+      if (this.chains.some(chain => chain.loading)) return false;
+      let chains = this.chains.filter(chain => chain.enabled);
+      return chains.every(chain => this.validURL(chain.url));
     },
     validNewChain() {
       const { name, id, RPC, airnodeAddress } = this.newChain;
@@ -513,11 +513,11 @@ export default {
       return true;
     },
     enabledChainNames() {
-      const chains = this.chains.filter((chain) => chain.enabled);
-      return chains.map((chain) => chain.name);
+      const chains = this.chains.filter(chain => chain.enabled);
+      return chains.map(chain => chain.name);
     },
     enabledChains() {
-      return this.chains.filter((chain) => chain.enabled);
+      return this.currentChains.filter(chain => chain.enabled);
     },
   },
 };
