@@ -10,12 +10,8 @@ test("Add extra RPCs to chains", async ({ page }) => {
   await page.keyboard.type("CamsCovid");
   await page.waitForTimeout(1000);
   await page.keyboard.press("Enter");
-  await page.waitForSelector("text=Loading", { visible: false });
-  await page.waitForTimeout(1000);
-  const titleValue = await page.$eval(
-    "[placeholder='Title']",
-    (el) => el.value
-  );
+  await page.waitForTimeout(1500);
+  const titleValue = await page.$eval("[placeholder='Title']", el => el.value);
   expect(titleValue).toContain("CamsCovid");
   expect(await page.isVisible("text=Rinkeby")).toBeTruthy();
   await page.click(".mdi-database-cog");
@@ -28,7 +24,7 @@ test("Add extra RPCs to chains", async ({ page }) => {
     await page.evaluate(() => {
       let found = false;
       const elements = document.querySelectorAll("input");
-      elements.forEach((element) => {
+      elements.forEach(element => {
         if (element.value.includes("testurl")) {
           found = true;
         }
@@ -43,7 +39,7 @@ test("Add extra RPCs to chains", async ({ page }) => {
     await page.evaluate(() => {
       let found = false;
       const elements = document.querySelectorAll("input");
-      elements.forEach((element) => {
+      elements.forEach(element => {
         if (element.value.includes("testurl")) {
           found = true;
         }
@@ -51,4 +47,27 @@ test("Add extra RPCs to chains", async ({ page }) => {
       return found;
     })
   ).toBeTruthy();
+});
+
+test("Closing RPC menu reverts", async ({ page }) => {
+  await page.goto("http://localhost:8080/");
+  await page.click("#menuButton");
+
+  await page.click("text=Import");
+  await page.click("text=Saved");
+  await page.waitForSelector("text=Loading", { visible: false });
+  await page.keyboard.type("CamsCovid");
+  await page.waitForTimeout(1000);
+  await page.keyboard.press("Enter");
+  await page.waitForSelector("text=Loading", { visible: false });
+  await page.waitForTimeout(1000);
+  const titleValue = await page.$eval("[placeholder='Title']", el => el.value);
+  expect(titleValue).toContain("CamsCovid");
+  expect(await page.isVisible("text=Rinkeby")).toBeTruthy();
+  await page.click(".mdi-database-cog");
+  await page.click("text=Ropsten");
+  await page.click("#closeRPCMenu", { force: true });
+  await page.waitForTimeout(1000);
+
+  expect(await page.isVisible("text=Ropsten")).toBeFalsy();
 });
