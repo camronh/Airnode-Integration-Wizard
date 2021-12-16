@@ -403,14 +403,15 @@ export default {
       );
     },
     paramsList() {
-      if (!this.config.nodeSettings) return;
-      if (!this.selectedEndpoint) return;
+      const reservedParams = ["_type", "_times", "_path"];
+
+      if (!this.config.nodeSettings) reservedParams;
+      if (!this.selectedEndpoint) return reservedParams;
       try {
         const endpoint = this.endpoints.find(
           (endpoint) => endpoint.name === this.selectedEndpoint
         );
         let params = endpoint.parameters.map((param) => param.name);
-        const reservedParams = ["_type", "_times", "_path"];
         params.push(...reservedParams);
         return params;
       } catch (error) {
@@ -447,7 +448,7 @@ export default {
     },
 
     paramsData() {
-      if (!this.config.id) return;
+      if (!this.config.nodeSettings) return;
       if (!this.selectedEndpoint) return;
       try {
         let params = this.selectedParams.map((param) => {
@@ -500,12 +501,13 @@ export default {
       }
     },
     parseStoredEndpoint() {
-      this.paramValues = {};
-      this.paramTypes = {};
-      this.selectedParams = [];
       try {
         const endpoint = JSON.parse(localStorage[this.selectedEndpoint]);
-
+        console.log({ endpoint });
+        if (!endpoint.params) return;
+        this.paramValues = {};
+        this.paramTypes = {};
+        this.selectedParams = [];
         for (let param of endpoint.params) {
           this.paramValues[param.name] = param.value;
           this.paramTypes[param.name] = param.type;
