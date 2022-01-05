@@ -108,7 +108,7 @@
               @input="storeSession"
               pattern="[a-zA-Z]+"
               class="titleField ma-1"
-              :rules="[required, onlyLetters]"
+              :rules="[required]"
               height="40px"
             ></v-text-field>
             <v-spacer></v-spacer>
