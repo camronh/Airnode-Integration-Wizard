@@ -979,7 +979,7 @@
                 @change="exportConfig()"
                 label="Stage"
                 v-model="exportSettings.stage"
-                :items="['Staging', 'Prod']"
+                :items="['dev', 'prod']"
               ></v-select>
             </v-col>
           </v-row>
@@ -1228,7 +1228,7 @@ export default {
         cloudProvider: "aws",
         authorizers: true,
         heartbeat: false,
-        stage: "Staging",
+        stage: "dev",
       },
       selectedConfig: null,
       selectedConfigs: [],
