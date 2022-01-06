@@ -95,7 +95,13 @@
                       <v-card-title>
                         Receipt
                         <v-spacer> </v-spacer>
-                        <v-chip color="primary" small outlined>
+
+                        <v-chip
+                          color="primary"
+                          small
+                          outlined
+                          @click="sponsorRequester"
+                        >
                           <v-icon left>
                             mdi-check
                           </v-icon>
@@ -184,8 +190,23 @@
                             outlined
                             @change="storeEndpoint"
                             v-model="paramValues[param]"
-                          >
-                          </v-text-field>
+                            v-if="param !== '_type'"
+                          />
+                          <v-select
+                            v-else
+                            label="Value"
+                            outlined
+                            :items="[
+                              'bytes32',
+                              'bytes',
+                              'string',
+                              'address',
+                              'int256',
+                              'uint256',
+                            ]"
+                            @change="storeEndpoint"
+                            v-model="paramValues[param]"
+                          />
                         </v-col>
                       </v-row>
                     </v-card-text>
@@ -211,10 +232,10 @@
               outlined
               tile
               color="primary"
-              @click="openEndpoint"
-              :disabled="!admin || !selectedEndpoint"
+              @click="sponsorRequester"
+              :disabled="sponsorStatus"
             >
-              Open Endpoint Auth
+              {{ sponsorStatus ? "Sponsored!" : "Sponsor Requester" }}
             </v-btn>
             <v-btn
               class="ma-2"
@@ -318,17 +339,23 @@ export default {
       requestDialogMsg: "",
       snackbarText: "",
       snackbar: false,
+      sponsorStatus: false,
       selectedConfig: "",
       selectedEndpoint: "",
       parseType: "bytes32",
       result: "",
       requestResults: "",
       address: "",
-      paramValues: {},
-      paramTypes: {},
+      paramValues: {
+        _type: "bytes32",
+      },
+      paramTypes: {
+        _path: "bytes32",
+        _type: "bytes32",
+      },
       chainID: "",
       configNames: [],
-      selectedParams: ["_path", "_type", "_times"],
+      selectedParams: ["_path", "_type"],
       receipt: {},
       config: {},
       ethers: null,
@@ -377,7 +404,7 @@ export default {
           return "0x1190a5e1f2afe4c8128fd820a7ac85a95a9e6e3e";
         case 3:
           // Ropsten Airnode Address
-          return "0xF8d32C3e53F7DA6e7CB82323f2cAB2159776b832";
+          return "0x3B35250Ca54C1Fb8c83D48F21231ef6e4fb9f79D";
       }
       throw new Error("Chain ID not found");
     },
@@ -391,7 +418,7 @@ export default {
           return "0x53fd43cc0559F35E82E53F830a35cA868874b687";
         case 3:
           // Ropsten Client Address
-          return "0xF8d32C3e53F7DA6e7CB82323f2cAB2159776b832";
+          return "0x65AEc36c42f13c1Cb17035cE827602a15a9F5DE9";
       }
       throw new Error("Chain ID not found");
     },
@@ -413,6 +440,7 @@ export default {
         );
         let params = endpoint.parameters.map((param) => param.name);
         params.push(...reservedParams);
+        console.log({ params });
         return params;
       } catch (error) {
         console.log(error);
@@ -504,7 +532,20 @@ export default {
       try {
         const endpoint = JSON.parse(localStorage[this.selectedEndpoint]);
         console.log({ endpoint });
-        if (!endpoint.params) return;
+        if (!endpoint.params) {
+          endpoint.params = [
+            {
+              name: "_type",
+              value: "string",
+              type: "string",
+            },
+            {
+              name: "_path",
+              value: "",
+              type: "bytes32",
+            },
+          ];
+        }
         this.paramValues = {};
         this.paramTypes = {};
         this.selectedParams = [];
@@ -521,6 +562,7 @@ export default {
     async getStats() {
       this.gettingConfigs = true;
       this.configNames = await utils.getConfigTitles();
+      await this.getSponsorStatus();
       this.gettingConfigs = false;
     },
     async getSponsorWalletStats({ airnodeWallet }) {
@@ -620,7 +662,7 @@ export default {
         const receipt = await exampleClient.makeRequest(
           requestObj.airnodeAddress,
           requestObj.endpointId,
-          requestObj.sponsorAddress,
+          this.address,
           this.sponsorWallet,
           airnodeAbi.encode(requestObj.params)
         );
@@ -639,7 +681,7 @@ export default {
           )
         );
         this.requestResults += "\nRequest Fulfilled!\n";
-        this.result = await exampleClient.fulfilledData(requestId);
+        this.result = await exampleClient.decodedData(requestId);
         this.requestResults += `Results: ${this.result}`;
       } catch (error) {
         console.log(error);
@@ -668,6 +710,24 @@ export default {
         this.makeSnackbar("Open Auth Failed!");
       }
       this.loading = false;
+    },
+    async sponsorRequester() {
+      const airnodeAdmin = require("@api3/airnode-admin");
+
+      const requester = await airnodeAdmin.sponsorRequester(
+        this.airnode,
+        this.requestClientAddress
+      );
+      console.log({ requester });
+    },
+    async getSponsorStatus() {
+      const airnodeAdmin = require("@api3/airnode-admin");
+
+      this.sponsorStatus = await airnodeAdmin.sponsorToRequesterToSponsorshipStatus(
+        this.airnode,
+        this.address,
+        this.requestClientAddress
+      );
     },
   },
 };
