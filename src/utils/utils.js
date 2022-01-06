@@ -287,10 +287,12 @@ function makeConfig(state) {
         schemeTitle
       ].name = auth.name;
     }
+    // Replace dashes with underscores in auth.name
+    const underScoreAuthName = auth.name ? auth.name.replace(/-/g, "_") : null;
     config.apiCredentials.push({
       oisTitle: title,
       securitySchemeName: schemeTitle,
-      securitySchemeValue: "${" + (auth.name || auth.scheme) + "}",
+      securitySchemeValue: "${" + (underScoreAuthName || auth.scheme) + "}",
     });
   }
 
@@ -501,15 +503,20 @@ async function makeZip(state) {
         if (!match[1].includes("RPC")) secrets.push(match[1]);
       }
 
-      console.log(state);
+      console.log({ state });
+
       let secretsEnv = "";
+      const underScoreAuthName = state.auth.name
+        ? state.auth.name.replace(/-/g, "_")
+        : null;
       secrets.forEach((variable) => {
+        console.log({ variable });
         switch (variable) {
           case "HTTP_GATEWAY_API_KEY":
             secretsEnv += `\n${variable}="${state.gateWayKey}"\n\n`;
             break;
-          case state.auth.name:
-            secretsEnv += `${variable}="${state.auth.value || ""}"\n`;
+          case underScoreAuthName:
+            secretsEnv += `${underScoreAuthName}="${state.auth.value || ""}"\n`;
             break;
           default:
             secretsEnv += `${variable}=""\n`;

@@ -108,7 +108,7 @@
               @input="storeSession"
               pattern="[a-zA-Z]+"
               class="titleField ma-1"
-              :rules="[required, onlyLetters]"
+              :rules="[required]"
               height="40px"
             ></v-text-field>
             <v-spacer></v-spacer>
@@ -979,7 +979,7 @@
                 @change="exportConfig()"
                 label="Stage"
                 v-model="exportSettings.stage"
-                :items="['Staging', 'Prod']"
+                :items="['dev', 'prod']"
               ></v-select>
             </v-col>
           </v-row>
@@ -1228,7 +1228,7 @@ export default {
         cloudProvider: "aws",
         authorizers: true,
         heartbeat: false,
-        stage: "Staging",
+        stage: "dev",
       },
       selectedConfig: null,
       selectedConfigs: [],
