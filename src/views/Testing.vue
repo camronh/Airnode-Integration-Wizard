@@ -719,6 +719,7 @@ export default {
         this.requestClientAddress
       );
       console.log({ requester });
+      await this.getStats();
     },
     async getSponsorStatus() {
       const airnodeAdmin = require("@api3/airnode-admin");
