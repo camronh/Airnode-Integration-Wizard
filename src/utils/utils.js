@@ -503,19 +503,21 @@ async function makeZip(state) {
         if (!match[1].includes("RPC")) secrets.push(match[1]);
       }
 
-      console.log(state);
+      console.log({ state });
+
       let secretsEnv = "";
-      // let underScoreAuthName;
+      const underScoreAuthName = state.auth.name
+        ? state.auth.name.replace(/-/g, "_")
+        : null;
       secrets.forEach((variable) => {
+        console.log({ variable });
         switch (variable) {
           case "HTTP_GATEWAY_API_KEY":
             secretsEnv += `\n${variable}="${state.gateWayKey}"\n\n`;
             break;
-          case state.auth.name: {
-            const underScoreAuthName = variable.replace(/-/g, "_");
+          case underScoreAuthName:
             secretsEnv += `${underScoreAuthName}="${state.auth.value || ""}"\n`;
             break;
-          }
           default:
             secretsEnv += `${variable}=""\n`;
             break;
