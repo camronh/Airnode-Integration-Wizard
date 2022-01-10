@@ -1687,6 +1687,7 @@ export default {
         value: "",
         type: "",
       };
+      this.gateWayKey = "";
       this.chains = [];
       this.addedExtraAuth = false;
       this.endpoints = [];
