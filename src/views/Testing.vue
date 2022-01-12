@@ -37,7 +37,7 @@
         </v-card-title>
         <v-card-text>
           <p v-if="!connected">
-            Please connect youre Metamask wallet
+            Please connect your Metamask wallet
           </p>
           <v-form v-else>
             <v-row>
@@ -96,12 +96,7 @@
                         Receipt
                         <v-spacer> </v-spacer>
 
-                        <v-chip
-                          color="primary"
-                          small
-                          outlined
-                          @click="sponsorRequester"
-                        >
+                        <v-chip color="primary" small outlined>
                           <v-icon left>
                             mdi-check
                           </v-icon>
@@ -232,10 +227,16 @@
               outlined
               tile
               color="primary"
-              @click="sponsorRequester"
-              :disabled="sponsorStatus"
+              @click="makeHttpRequest"
+              :disabled="
+                !selectedConfig ||
+                  !selectedEndpoint ||
+                  !paramsAreValid ||
+                  !receipt.api.httpGatewayUrl ||
+                  !gatewayKey
+              "
             >
-              {{ sponsorStatus ? "Sponsored!" : "Sponsor Requester" }}
+              HTTP Gateway Request
             </v-btn>
             <v-btn
               class="ma-2"
@@ -244,8 +245,8 @@
               :disabled="
                 !selectedConfig ||
                   !selectedEndpoint ||
-                  !receipt.airnodeWallet ||
-                  !paramsAreValid
+                  !paramsAreValid ||
+                  !receipt.airnodeWallet
               "
               color="primary"
               @click="makeRequest"
@@ -309,6 +310,83 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="httpRequestDialog" persistent fullscreen>
+      <v-card>
+        <v-card-title>
+          HTTP Request
+          <v-spacer></v-spacer>
+          <v-btn icon @click="httpRequestDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-subtitle>
+          <v-row dense>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="HTTP Gateway Key"
+                v-model="gatewayKey"
+                :loading="makingHttpRequest"
+              >
+              </v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-subtitle>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-card color="grey darken-3" height="100%">
+                <v-card-title>
+                  Raw Value
+                </v-card-title>
+                <v-card-text>
+                  <v-textarea
+                    readonly
+                    height="100%"
+                    :value="JSON.stringify(httpResponse.rawValue, null, 2)"
+                  >
+                  </v-textarea>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-card color="grey darken-3">
+                <v-card-title>
+                  Encoded Data
+                </v-card-title>
+                <v-card-text>
+                  {{ httpResponse.encodedValue }}
+                </v-card-text>
+              </v-card>
+              <br />
+              <v-card color="grey darken-3">
+                <v-card-title>Values</v-card-title>
+
+                <v-card-text>
+                  <v-text-field
+                    outlined
+                    dense
+                    readonly
+                    v-for="(value, i) of httpResponse.values"
+                    :key="i"
+                    :label="i.toString()"
+                    :value="value"
+                  >
+                  </v-text-field>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+          <!-- <pre>{{ JSON.stringify(config, null, 2) }}</pre> -->
+        </v-card-text>
+        <v-card-actions>
+          <v-row align="center" justify="center">
+            <v-btn tile outlined color="primary" @click="makeHttpRequest">
+              Make Request
+            </v-btn>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-snackbar v-model="snackbar">
       {{ snackbarText }}
     </v-snackbar>
@@ -332,11 +410,13 @@ export default {
       gettingConfigs: false,
       savingReceipt: false,
       makingRequest: true,
+      makingHttpRequest: true,
       sponsorWallet: "",
       loading: false,
       dragover: false,
       requestDialog: false,
       requestDialogMsg: "",
+      httpRequestDialog: true,
       snackbarText: "",
       snackbar: false,
       sponsorStatus: false,
@@ -353,11 +433,13 @@ export default {
         _path: "bytes32",
         _type: "bytes32",
       },
+      httpResponse: {},
       chainID: "",
       configNames: [],
       selectedParams: ["_path", "_type"],
       receipt: {},
       config: {},
+      gatewayKey: "",
       ethers: null,
       // web3: null,
       sponsorWalletBalance: 0,
@@ -504,6 +586,11 @@ export default {
       if (!this.endpoints) return [];
       return this.endpoints.map((endpoint) => endpoint.name);
     },
+    endpoint() {
+      return this.endpoints.find(
+        (endpoint) => endpoint.name === this.selectedEndpoint
+      );
+    },
   },
   methods: {
     makeSnackbar(message) {
@@ -524,7 +611,7 @@ export default {
     },
     parseStoredEndpoint() {
       try {
-        const endpoint = JSON.parse(localStorage[this.selectedEndpoint]);
+        let endpoint = JSON.parse(localStorage[this.selectedEndpoint]);
         console.log({ endpoint });
         if (!endpoint.params) {
           endpoint.params = [
@@ -544,10 +631,13 @@ export default {
         this.paramTypes = {};
         this.selectedParams = [];
         for (let param of endpoint.params) {
-          this.paramValues[param.name] = param.value;
-          this.paramTypes[param.name] = param.type;
           this.selectedParams.push(param.name);
+          this.paramTypes[param.name] = param.type;
+          // This doesn't work idk why
+          // this.paramValues[param.name] = param.value;
         }
+        console.log({ values: this.paramValues });
+        console.log({ types: this.paramTypes });
       } catch (error) {
         console.log("Parse Failed", error);
       }
@@ -577,6 +667,8 @@ export default {
       try {
         this.loading = true;
         this.config = await utils.getConfig(this.selectedConfig);
+        this.gatewayKey =
+          this.config.secrets.gatewayKey || this.config.secrets.gateWayKey;
         this.receipt = await utils.getReceipt(this.selectedConfig);
         console.log({ receipt: this.receipt, config: this.config });
         if (this.receipt && this.receipt.airnodeWallet)
@@ -646,7 +738,7 @@ export default {
           requestObj.artifact.abi,
           this.signer
         );
-      
+
         this.requestDialog = true;
         this.makingRequest = true;
         this.requestResults = "Making the request...";
@@ -684,6 +776,22 @@ export default {
       }
       this.makingRequest = false;
     },
+    async makeHttpRequest() {
+      this.httpRequestDialog = true;
+      this.makingHttpRequest = true;
+      let params = {};
+      this.paramsData.forEach((p) => {
+        params[p.name] = p.value;
+      });
+      this.httpResponse = await utils.makeGatewayRequest(
+        this.receipt.api.httpGatewayUrl,
+        this.endpoint.endpointId,
+        params,
+        this.gatewayKey
+      );
+      console.log(this.httpResponse);
+      this.makingHttpRequest = false;
+    },
     async openEndpoint() {
       this.loading = true;
 
@@ -706,16 +814,7 @@ export default {
       }
       this.loading = false;
     },
-    async sponsorRequester() {
-      const airnodeAdmin = require("@api3/airnode-admin");
 
-      const requester = await airnodeAdmin.sponsorRequester(
-        this.airnode,
-        this.requestClientAddress
-      );
-      console.log({ requester });
-      await this.getStats();
-    },
     async getSponsorStatus() {
       const airnodeAdmin = require("@api3/airnode-admin");
 

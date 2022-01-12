@@ -513,7 +513,7 @@ async function makeZip(state) {
         console.log({ variable });
         switch (variable) {
           case "HTTP_GATEWAY_API_KEY":
-            secretsEnv += `\n${variable}="${state.gateWayKey}"\n\n`;
+            secretsEnv += `\n${variable}="${state.gatewayKey}"\n\n`;
             break;
           case underScoreAuthName:
             secretsEnv += `${underScoreAuthName}="${state.auth.value || ""}"\n`;
@@ -741,6 +741,22 @@ async function getRPC() {
   return results.data;
 }
 
+async function makeGatewayRequest(
+  gatewayUrl,
+  endpointId,
+  parameters,
+  gatewayKey
+) {
+  console.log({ gatewayUrl, endpointId, parameters, gatewayKey });
+  const results = await axios.post(`${apiUrl}/gatewayRequest`, {
+    gatewayUrl,
+    endpointId,
+    parameters,
+    gatewayKey,
+  });
+  return results.data;
+}
+
 // Get chain options
 async function getChains(enabled = true) {
   const results = await axios.get(`${apiUrl}/RPC/chains`);
@@ -792,5 +808,6 @@ module.exports = {
   newRPC,
   saveChain,
   deleteChain,
+  makeGatewayRequest,
   // openEndpoint,
 };

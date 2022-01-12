@@ -1223,7 +1223,7 @@ export default {
       savedConfigNames: [],
       exportType: "oas",
       exporting: false,
-      gateWayKey: "",
+      gatewayKey: "",
       exportSettings: {
         cloudProvider: "aws",
         authorizers: false,
@@ -1330,7 +1330,7 @@ export default {
         this.addedExtraAuth = session.addedExtraAuth;
         this.chains = session.chains;
         this.auth = session.auth;
-        this.gateWayKey = session.gateWayKey;
+        this.gatewayKey = session.gatewayKey;
         this.extraAuth = session.extraAuth;
         this.endpoints = session.endpoints;
       }
@@ -1523,7 +1523,7 @@ export default {
     },
     exportConfig() {
       this.mergingConfigs = false;
-      if (!this.gateWayKey) this.gateWayKey = uuid();
+      if (!this.gatewayKey) this.gatewayKey = uuid();
       // const chains = this.chains;
       this.oas = utils.makeOAS(this);
       this.exportStr = utils.makeConfig(this);
@@ -1642,8 +1642,8 @@ export default {
         this.chains = config.secrets.chains;
         // If v0.2 and no secrets
       }
-      if (config.secrets && config.secrets.gateWayKey) {
-        this.gateWayKey = config.secrets.gateWayKey;
+      if (config.secrets && config.secrets.gatewayKey) {
+        this.gatewayKey = config.secrets.gatewayKey;
       }
       if (config.secrets.auth) this.auth = config.secrets.auth;
       if (config.secrets.extraAuth) {
@@ -1663,7 +1663,7 @@ export default {
         auth: this.auth,
         extraAuth: this.extraAuth,
         chains: this.chains,
-        gateWayKey: this.gateWayKey,
+        gatewayKey: this.gatewayKey,
         hasAuth: this.hasAuth,
         addedExtraAuth: this.addedExtraAuth,
         endpoints: this.endpoints,
@@ -1687,7 +1687,7 @@ export default {
         value: "",
         type: "",
       };
-      this.gateWayKey = "";
+      this.gatewayKey = "";
       this.chains = [];
       this.addedExtraAuth = false;
       this.endpoints = [];
@@ -1740,10 +1740,10 @@ export default {
       this.loading = true;
       try {
         let config = JSON.parse(this.exportStr);
-        if (!this.gateWayKey) this.gateWayKey = uuid();
+        if (!this.gatewayKey) this.gatewayKey = uuid();
         config.secrets = {
           chains: this.chains,
-          gateWayKey: this.gateWayKey,
+          gatewayKey: this.gatewayKey,
         };
         if (this.hasAuth && this.auth.value) config.secrets.auth = this.auth;
         if (this.addedExtraAuth && this.extraAuth.value) {
