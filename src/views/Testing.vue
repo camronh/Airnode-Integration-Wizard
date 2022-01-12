@@ -652,6 +652,13 @@ export default {
           requestObj.artifact.abi,
           this.signer
         );
+        console.log({ exampleClient });
+        console.log(
+          "Decoded Data:",
+          await exampleClient.decodedData(
+            "0x0ff3c902d5ff5deb5b29d476bc2f13550bc848ea25012cb4726e5d24f68515b1"
+          )
+        );
         this.requestDialog = true;
         this.makingRequest = true;
         this.requestResults = "Making the request...";
@@ -685,7 +692,7 @@ export default {
         this.requestResults += `Results: ${this.result}`;
       } catch (error) {
         console.log(error);
-        this.requestDialog = false;
+        // this.requestDialog = false;
       }
       this.makingRequest = false;
     },

@@ -1226,7 +1226,7 @@ export default {
       gateWayKey: "",
       exportSettings: {
         cloudProvider: "aws",
-        authorizers: true,
+        authorizers: false,
         heartbeat: false,
         stage: "dev",
       },
