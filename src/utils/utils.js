@@ -494,6 +494,10 @@ async function makeZip(state) {
       configZip.folder("config");
       configZip.file("config/config.json", state.exportStr);
 
+      // Make an output folder
+      configZip.folder("output");
+      configZip.file("output/receipt.json", JSON.stringify({}));
+
       // Make secrets.env
       // Find all occurrences of ${} in state.exportStr
       let secrets = [];
