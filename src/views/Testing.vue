@@ -416,7 +416,7 @@ export default {
       dragover: false,
       requestDialog: false,
       requestDialogMsg: "",
-      httpRequestDialog: true,
+      httpRequestDialog: false,
       snackbarText: "",
       snackbar: false,
       sponsorStatus: false,
