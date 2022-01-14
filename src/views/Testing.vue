@@ -644,10 +644,12 @@ export default {
     },
 
     async getStats() {
+      console.log("Getting Stats");
       this.gettingConfigs = true;
       this.configNames = await utils.getConfigTitles();
       await this.getSponsorStatus();
       this.gettingConfigs = false;
+      console.log("Got Stats");
     },
     async getSponsorWalletStats({ airnodeWallet }) {
       const airnodeAdmin = require("@api3/airnode-admin");
