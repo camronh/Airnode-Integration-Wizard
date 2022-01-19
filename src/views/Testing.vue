@@ -175,6 +175,7 @@
                             ]"
                             label="Type"
                             @change="storeEndpoint"
+                            :readonly="param[0] == '_'"
                             v-model="paramTypes[param]"
                           >
                           </v-select>
