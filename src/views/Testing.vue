@@ -647,6 +647,7 @@ export default {
       console.log("Getting Stats");
       this.gettingConfigs = true;
       this.configNames = await utils.getConfigTitles();
+      console.log("Got Configs");
       await this.getSponsorStatus();
       this.gettingConfigs = false;
       console.log("Got Stats");

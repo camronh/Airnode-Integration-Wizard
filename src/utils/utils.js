@@ -242,8 +242,8 @@ function makeConfig(state) {
     endpoint.name = `${endpoint.method.toUpperCase()} ${endpoint.path}`;
     const endpointId = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-        ["string"],
-        [`${title}/${endpoint.method}-${endpoint.name}`]
+        ["string", "string"],
+        [title, endpoint.name]
       )
     );
     return {
