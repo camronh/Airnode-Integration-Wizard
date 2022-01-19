@@ -327,6 +327,8 @@
                 label="HTTP Gateway Key"
                 v-model="gatewayKey"
                 :loading="makingHttpRequest"
+                append-icon="mdi-floppy"
+                @click:append="saveGatewayKey"
               >
               </v-text-field>
             </v-col>
@@ -388,7 +390,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar v-model="snackbar">
+    <v-snackbar v-model="snackbar" :color="snackbarColor" light>
       {{ snackbarText }}
     </v-snackbar>
   </v-container>
@@ -420,6 +422,7 @@ export default {
       httpRequestDialog: false,
       snackbarText: "",
       snackbar: false,
+      snackbarColor: "",
       sponsorStatus: false,
       selectedConfig: "",
       selectedEndpoint: "",
@@ -595,8 +598,9 @@ export default {
     },
   },
   methods: {
-    makeSnackbar(message) {
+    makeSnackbar(message, color = "grey darken-3") {
       this.snackbarText = message;
+      this.snackbarColor = color;
       this.snackbar = true;
     },
     storeEndpoint() {
@@ -709,12 +713,26 @@ export default {
         receipt.title = this.selectedConfig;
         await utils.saveReceipt(receipt);
         this.receipt = receipt;
-        this.makeSnackbar("Saved!");
+        this.makeSnackbar("Saved!", "primary");
       } catch (error) {
         console.log(error);
-        this.makeSnackbar("Failed to store receipt!");
+        this.makeSnackbar("Failed to store receipt!", "error");
       }
       this.savingReceipt = false;
+    },
+    async saveGatewayKey() {
+      try {
+        console.log(this.config);
+        const gatewayKey = this.gatewayKey;
+        delete this.config.secrets.gateWayKey;
+        this.config.secrets.gatewayKey = gatewayKey;
+        console.log(this.config);
+        await utils.saveConfig(JSON.stringify(this.config));
+        console.log("Saved Successfully!");
+        this.makeSnackbar("Saved Gateway Key!", "success");
+      } catch (error) {
+        this.makeSnackbar("Failed to Save Gateway Key", "error");
+      }
     },
     async makeRequest() {
       try {
@@ -782,42 +800,25 @@ export default {
       this.makingRequest = false;
     },
     async makeHttpRequest() {
-      this.httpRequestDialog = true;
-      this.makingHttpRequest = true;
-      let params = {};
-      this.paramsData.forEach((p) => {
-        params[p.name] = p.value;
-      });
-      this.httpResponse = await utils.makeGatewayRequest(
-        this.receipt.api.httpGatewayUrl,
-        this.endpoint.endpointId,
-        params,
-        this.gatewayKey
-      );
-      console.log(this.httpResponse);
-      this.makingHttpRequest = false;
-    },
-    async openEndpoint() {
-      this.loading = true;
-
       try {
-        const airnodeAdmin = require("@api3/airnode-admin");
-
-        const endpoint = this.endpoints.find(
-          (endpoint) => endpoint.name === this.selectedEndpoint
+        this.httpRequestDialog = true;
+        this.makingHttpRequest = true;
+        let params = {};
+        this.paramsData.forEach((p) => {
+          params[p.name] = p.value;
+        });
+        this.httpResponse = await utils.makeGatewayRequest(
+          this.receipt.api.httpGatewayUrl,
+          this.endpoint.endpointId,
+          params,
+          this.gatewayKey
         );
-        const airnode = this.airnode;
-        await airnodeAdmin.updateAuthorizers(
-          airnode,
-          this.receipt.providerId,
-          endpoint.endpointId,
-          [this.ethers.constants.AddressZero]
-        );
-        this.makeSnackbar(`Successfully opened Auth for '${endpoint.name}'!`);
+        console.log(this.httpResponse);
       } catch (error) {
-        this.makeSnackbar("Open Auth Failed!");
+        console.log({ error });
+        this.makeSnackbar(`Request Failed`, "error");
       }
-      this.loading = false;
+      this.makingHttpRequest = false;
     },
 
     async getSponsorStatus() {
