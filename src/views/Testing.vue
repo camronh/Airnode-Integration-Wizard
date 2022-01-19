@@ -433,6 +433,7 @@ export default {
       paramTypes: {
         _path: "bytes32",
         _type: "bytes32",
+        _times: "bytes32",
       },
       httpResponse: {},
       chainID: "",
