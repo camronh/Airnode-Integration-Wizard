@@ -267,29 +267,9 @@ function makeConfig(state) {
           url: server,
         },
       ],
-      security: {
-        // relayChainId: [],
-        // relaySponsor: [],
-        // relayRequester: [],
-      },
+      security: {},
       components: {
-        securitySchemes: {
-          // relayChainId: {
-          //   in: "header",
-          //   type: "relayChainId",
-          //   name: "_chainId",
-          // },
-          // relaySponsor: {
-          //   in: "header",
-          //   type: "relaySponsorAddress",
-          //   name: "_sponsorAddress",
-          // },
-          // relayRequester: {
-          //   in: "header",
-          //   type: "relayRequesterAddress",
-          //   name: "_requesterAddress",
-          // },
-        },
+        securitySchemes: {},
       },
       paths: {},
     },
@@ -342,7 +322,6 @@ function makeConfig(state) {
   }
 
   // Add default Relay Metadata Security Schemes
-
   let {
     security,
     components: { securitySchemes },
@@ -357,7 +336,7 @@ function makeConfig(state) {
     type: "relayChainId",
     name: "chainId",
   };
-  
+
   securitySchemes.relaySponsor = {
     in: "header",
     type: "relaySponsorAddress",
@@ -446,10 +425,23 @@ function parseConfig(config) {
     server: ois.apiSpecifications.servers[0].url,
     // RPCs: [],
   };
-  const securitySchemes = Object.keys(
-    ois.apiSpecifications.components.securitySchemes
-  );
+
+  // Delete default Relay Metadata Security Schemes
+  // delete ois.apiSpecifications.components.securitySchemes.relayChainId;
+  // delete ois.apiSpecifications.components.securitySchemes.relayRequester;
+  // delete ois.apiSpecifications.components.securitySchemes.relaySponsor;
+  const {
+    relayChainId,
+    relayRequester,
+    relaySponsor,
+    ...otherSchemes
+  } = ois.apiSpecifications.components.securitySchemes;
+
+  console.log({ relayChainId, relayRequester, relaySponsor });
+
+  const securitySchemes = Object.keys(otherSchemes);
   console.log({ securitySchemes });
+
   if (securitySchemes.length > 0) {
     state.hasAuth = true;
     const secScheme =

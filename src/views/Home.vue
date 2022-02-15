@@ -1570,8 +1570,6 @@ export default {
 
         if (!json.ois) {
           state = await utils.parseOAS(json);
-        } else if (!json.chains) {
-          state = utils.parseV3Config(json);
         } else {
           state = utils.parseConfig(json);
         }

@@ -34,4 +34,10 @@ test("Exports", async ({ page }) => {
   expect(security.relaySponsor).toBeTruthy();
   expect(securitySchemes.relayChainId).toBeTruthy();
   expect(securitySchemes.relaySponsor).toBeTruthy();
+  const correctSecurityScheme = {
+    type: "apiKey",
+    in: "query",
+    name: "Auth_Token",
+  };
+  expect(securitySchemes.CamsCSRNG_Auth_Token).toEqual(correctSecurityScheme);
 });

@@ -32,14 +32,10 @@ test("HTTP Works", async ({ page }) => {
   const correctSecurityScheme = {
     type: "http",
     scheme: "basic",
-    in: "header",
   };
   expect(
-    config.ois[0].apiSpecifications.components.securitySchemes
-      .TesterForge_basic
+    config.ois[0].apiSpecifications.components.securitySchemes.TesterForge_basic
   ).toEqual(correctSecurityScheme);
-  // expect(await page.isVisible('text=scheme')).toBeTruthy();
-  // expect(await page.isVisible('text="basic"')).toBeTruthy();
 });
 
 test("Addition Auth Works", async ({ page }) => {
