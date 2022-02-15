@@ -268,27 +268,27 @@ function makeConfig(state) {
         },
       ],
       security: {
-        relayChainId: [],
-        relaySponsor: [],
-        relayRequester: [],
+        // relayChainId: [],
+        // relaySponsor: [],
+        // relayRequester: [],
       },
       components: {
         securitySchemes: {
-          relayChainId: {
-            in: "header",
-            type: "relayChainId",
-            name: "_chainId",
-          },
-          relaySponsor: {
-            in: "header",
-            type: "relaySponsorAddress",
-            name: "_sponsorAddress",
-          },
-          relayRequester: {
-            in: "header",
-            type: "relayRequesterAddress",
-            name: "_requesterAddress",
-          },
+          // relayChainId: {
+          //   in: "header",
+          //   type: "relayChainId",
+          //   name: "_chainId",
+          // },
+          // relaySponsor: {
+          //   in: "header",
+          //   type: "relaySponsorAddress",
+          //   name: "_sponsorAddress",
+          // },
+          // relayRequester: {
+          //   in: "header",
+          //   type: "relayRequesterAddress",
+          //   name: "_requesterAddress",
+          // },
         },
       },
       paths: {},
@@ -341,9 +341,39 @@ function makeConfig(state) {
     }
   }
 
+  // Add default Relay Metadata Security Schemes
+
+  let {
+    security,
+    components: { securitySchemes },
+  } = config.ois[0].apiSpecifications;
+
+  security.relayChainId = [];
+  security.relaySponsor = [];
+  security.relayRequester = [];
+
+  securitySchemes.relayChainId = {
+    in: "header",
+    type: "relayChainId",
+    name: "chainId",
+  };
+  
+  securitySchemes.relaySponsor = {
+    in: "header",
+    type: "relaySponsorAddress",
+    name: "sponsorAddress",
+  };
+
+  securitySchemes.relayRequester = {
+    in: "header",
+    type: "relayRequesterAddress",
+    name: "requesterAddress",
+  };
+
   for (let endpoint of endpoints) {
-    if (!config.ois[0].apiSpecifications.paths[endpoint.path])
+    if (!config.ois[0].apiSpecifications.paths[endpoint.path]) {
       config.ois[0].apiSpecifications.paths[endpoint.path] = {};
+    }
     config.ois[0].apiSpecifications.paths[endpoint.path][endpoint.method] = {
       parameters: endpoint.params.map((param) => {
         return {

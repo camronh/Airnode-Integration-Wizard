@@ -20,15 +20,31 @@ test("HTTP Works", async ({ page }) => {
   await page.click("text=Scheme");
   await page.click("text=basic");
   await page.click("#menuButton");
-  await page.click("text=Export");
-  expect(await page.isVisible("text=http")).toBeTruthy();
+  const config = await new Promise(async (resolve, reject) => {
+    page.on("console", async (msg) => {
+      for (const arg of msg.args()) {
+        const value = await arg.jsonValue();
+        if (value && value.config) resolve(value.config);
+      }
+    });
+    await page.click("text=Export");
+  });
+  const correctSecurityScheme = {
+    type: "http",
+    scheme: "basic",
+    in: "header",
+  };
+  expect(
+    config.ois[0].apiSpecifications.components.securitySchemes
+      .TesterForge_basic
+  ).toEqual(correctSecurityScheme);
   // expect(await page.isVisible('text=scheme')).toBeTruthy();
   // expect(await page.isVisible('text="basic"')).toBeTruthy();
 });
 
 test("Addition Auth Works", async ({ page }) => {
   let config = null;
-  page.on("console", msg => {
+  page.on("console", (msg) => {
     try {
       let validJson = JSON.parse(msg.text());
       config = validJson;
@@ -64,5 +80,5 @@ test("Addition Auth Works", async ({ page }) => {
   const securitySchemes = Object.keys(
     config.ois[0].apiSpecifications.components.securitySchemes
   );
-  expect(securitySchemes.length).toBe(2);
+  expect(securitySchemes.length).toBe(5);
 });
