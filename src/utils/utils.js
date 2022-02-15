@@ -257,6 +257,8 @@ function makeConfig(state) {
     };
   });
 
+  config.triggers.http = config.triggers.rrp;
+
   config.ois[0] = {
     oisFormat: "1.0.0",
     title,
