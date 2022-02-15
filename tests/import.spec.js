@@ -54,6 +54,6 @@ test("Import Saved Config", async ({ page }) => {
     (el) => el.value
   );
   expect(titleValue).toContain("CamsCSRNG");
-  expect(await page.isVisible("text=rinkeby1")).toBeTruthy();
+  expect(await page.isVisible("text=Goerli")).toBeTruthy();
 
 });

@@ -1565,10 +1565,13 @@ export default {
         const json = JSON.parse(this.importString);
         if (json.host) json.servers = [{ url: json.host }];
         console.log("Parsing");
+
         let state;
 
         if (!json.ois) {
           state = await utils.parseOAS(json);
+        } else if (!json.chains) {
+          state = utils.parseV3Config(json);
         } else {
           state = utils.parseConfig(json);
         }

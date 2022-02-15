@@ -60,7 +60,7 @@ test("Addition Auth Works", async ({ page }) => {
   await page.click("#menuButton");
   await page.click("text=Export");
   const security = Object.keys(config.ois[0].apiSpecifications.security);
-  expect(security.length).toBe(2);
+  expect(security.length).toBe(5);
   const securitySchemes = Object.keys(
     config.ois[0].apiSpecifications.components.securitySchemes
   );

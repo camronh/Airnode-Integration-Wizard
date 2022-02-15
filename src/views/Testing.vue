@@ -90,7 +90,7 @@
                         {{ sponsorWalletBalance }} ETH
                       </v-card-title>
                       <v-card-subtitle align="left">
-                        Address: {{ sponsorWallet }}
+                        Address: {{ sponsorWalletAddress }}
                       </v-card-subtitle>
                       <v-card-title>
                         Receipt
@@ -414,7 +414,6 @@ export default {
       savingReceipt: false,
       makingRequest: true,
       makingHttpRequest: true,
-      sponsorWallet: "",
       loading: false,
       dragover: false,
       requestDialog: false,
@@ -448,7 +447,8 @@ export default {
       ethers: null,
       // web3: null,
       sponsorWalletBalance: 0,
-      sponsorWalletAddress: "0xC22376E2Dd4537D78F088B349Cbf2b9Ce79Fe016",
+      sponsorWalletAddress: "",
+      sponsorAddress: "0xC22376E2Dd4537D78F088B349Cbf2b9Ce79Fe016",
     };
   },
   async mounted() {
@@ -661,12 +661,14 @@ export default {
     async getSponsorWalletStats({ airnodeWallet }) {
       const airnodeAdmin = require("@api3/airnode-admin");
 
-      this.sponsorWallet = await airnodeAdmin.deriveSponsorWalletAddress(
+      this.sponsorWalletAddress = await airnodeAdmin.deriveSponsorWalletAddress(
         airnodeWallet.airnodeXpub,
         airnodeWallet.airnodeAddress,
+        this.sponsorAddress
+      );
+      const balanceInWei = await this.provider.getBalance(
         this.sponsorWalletAddress
       );
-      const balanceInWei = await this.provider.getBalance(this.sponsorWallet);
       const balance = this.ethers.utils.formatEther(balanceInWei.toString());
       this.sponsorWalletBalance = Math.round(balance * 1e4) / 1e4;
     },
@@ -743,7 +745,7 @@ export default {
           airnodeAddress: this.receipt.airnodeWallet.airnodeAddress,
           endpointId: endpoint.endpointId,
           clientAddress: this.requestClientAddress,
-          sponsorAddress: this.sponsorWalletAddress,
+          sponsorAddress: this.sponsorAddress,
           artifact: require("../utils/TestClient.json"),
         };
         let params = this.selectedParams.map((param) => {
@@ -772,8 +774,8 @@ export default {
         const receipt = await exampleClient.makeRequest(
           requestObj.airnodeAddress,
           requestObj.endpointId,
+          this.sponsorAddress,
           this.sponsorWalletAddress,
-          this.sponsorWallet,
           airnodeAbi.encode(requestObj.params)
         );
         const requestId = await new Promise((resolve) =>
@@ -826,7 +828,7 @@ export default {
 
       this.sponsorStatus = await airnodeAdmin.sponsorToRequesterToSponsorshipStatus(
         this.airnode,
-        this.sponsorWalletAddress,
+        this.sponsorAddress,
         this.requestClientAddress
       );
     },

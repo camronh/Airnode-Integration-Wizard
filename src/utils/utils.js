@@ -224,6 +224,10 @@ function makeConfig(state) {
           url: "${" + chain.name + "_RPC}",
         },
       },
+      options: {
+        txType: "eip1559",
+      },
+      maxConcurrency: 5,
       type: "evm",
     };
     if (chain.extraRPCs) {
@@ -263,9 +267,29 @@ function makeConfig(state) {
           url: server,
         },
       ],
-      security: {},
+      security: {
+        relayChainId: [],
+        relaySponsor: [],
+        relayRequester: [],
+      },
       components: {
-        securitySchemes: {},
+        securitySchemes: {
+          relayChainId: {
+            in: "header",
+            type: "relayChainId",
+            name: "_chainId",
+          },
+          relaySponsor: {
+            in: "header",
+            type: "relaySponsorAddress",
+            name: "_sponsorAddress",
+          },
+          relayRequester: {
+            in: "header",
+            type: "relayRequesterAddress",
+            name: "_requesterAddress",
+          },
+        },
       },
       paths: {},
     },
@@ -384,6 +408,103 @@ function makeConfig(state) {
 // parse config to state variables
 function parseConfig(config) {
   console.log({ config });
+
+  const ois = config.ois[0];
+  let state = {
+    title: ois.title,
+    version: ois.version,
+    server: ois.apiSpecifications.servers[0].url,
+    // RPCs: [],
+  };
+  const securitySchemes = Object.keys(
+    ois.apiSpecifications.components.securitySchemes
+  );
+  console.log({ securitySchemes });
+  if (securitySchemes.length > 0) {
+    state.hasAuth = true;
+    const secScheme =
+      ois.apiSpecifications.components.securitySchemes[securitySchemes[0]];
+
+    state.auth = {
+      type: secScheme.type,
+      in: secScheme.in,
+      name: secScheme.name,
+    };
+    if (secScheme.scheme) state.auth.scheme = secScheme.scheme;
+    if (securitySchemes.length > 1) {
+      state.addedExtraAuth = true;
+      const secScheme =
+        ois.apiSpecifications.components.securitySchemes[securitySchemes[1]];
+
+      state.extraAuth = {
+        type: secScheme.type,
+        in: secScheme.in,
+        name: secScheme.name,
+      };
+      if (secScheme.scheme) state.extraAuth.scheme = secScheme.scheme;
+    }
+  } else state.hasAuth = false;
+
+  state.endpoints = [];
+  for (let endpoint of ois.endpoints) {
+    let ep = {
+      path: endpoint.operation.path,
+      name: endpoint.name == endpoint.operation.path ? "" : endpoint.name,
+      method: endpoint.operation.method,
+      params: [],
+    };
+    for (let param of endpoint.parameters) {
+      ep.params.push({
+        name: param.name,
+        in: param.operationParameter.in,
+        fixed: false,
+        value: "",
+      });
+    }
+    for (let param of endpoint.fixedOperationParameters) {
+      ep.params.push({
+        name: param.operationParameter.name,
+        in: param.operationParameter.in,
+        fixed: true,
+        value: param.value,
+      });
+    }
+    state.endpoints.push(ep);
+  }
+
+  // If pre-alpha parse RPC
+  if (config.nodeSettings.chains) {
+    state.chains = config.nodeSettings.chains.map((chain) => {
+      return {
+        id: chain.id,
+        name: chain.providers[0].name,
+        url: chain.providers[0].url,
+        airnodeAddress: chain.contracts.Airnode,
+        enabled: true,
+        loading: false,
+      };
+    });
+    // If v0.2 and includes secrets
+  } else if (config.chains) {
+    state.chains = config.chains.map((chain) => {
+      const chainName = Object.keys(chain.providers)[0];
+      return {
+        id: chain.id,
+        name: chainName,
+        url: "",
+        airnodeAddress: chain.contracts.AirnodeRrp,
+        enabled: true,
+        loading: false,
+        authorizersAddress: chain.authorizers[0],
+      };
+    });
+  }
+  return state;
+}
+
+function parseV3Config(config) {
+  console.log({ config });
+
   const ois = config.ois[0];
   let state = {
     title: ois.title,
@@ -813,5 +934,6 @@ module.exports = {
   saveChain,
   deleteChain,
   makeGatewayRequest,
+  parseV3Config,
   // openEndpoint,
 };
