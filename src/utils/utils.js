@@ -276,20 +276,24 @@ function makeConfig(state) {
   };
 
   if (hasAuth) {
-    let schemeTitle = `${title}_${auth.name || auth.scheme}`;
+    let schemeTitle = `${title}_${
+      auth.type == "http" ? auth.scheme : auth.name
+    }`;
     config.ois[0].apiSpecifications.security[schemeTitle] = [];
-    config.ois[0].apiSpecifications.components.securitySchemes[schemeTitle] = {
-      type: auth.type,
-      in: auth.in,
-    };
+
+    let { securitySchemes } = config.ois[0].apiSpecifications.components;
+
     if (auth.type == "http") {
-      config.ois[0].apiSpecifications.components.securitySchemes[
-        schemeTitle
-      ].scheme = auth.scheme;
+      securitySchemes[schemeTitle] = {
+        type: "http",
+        scheme: auth.scheme,
+      };
     } else {
-      config.ois[0].apiSpecifications.components.securitySchemes[
-        schemeTitle
-      ].name = auth.name;
+      securitySchemes[schemeTitle] = {
+        type: auth.type,
+        in: auth.in,
+        name: auth.name,
+      };
     }
     // Replace dashes with underscores in auth.name
     const underScoreAuthName = auth.name ? auth.name.replace(/-/g, "_") : null;
@@ -301,24 +305,36 @@ function makeConfig(state) {
   }
 
   if (state.addedExtraAuth) {
-    config.ois[0].apiSpecifications.security[
-      `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
-    ] = [];
-    config.ois[0].apiSpecifications.components.securitySchemes[
-      `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
-    ] = {
-      type: state.extraAuth.type,
-      in: state.extraAuth.in,
-    };
+    let schemeTitle = `${title}_${
+      extraAuth.type == "http" ? extraAuth.scheme : extraAuth.name
+    }`;
+    config.ois[0].apiSpecifications.security[schemeTitle] = [];
+
+    let { securitySchemes } = config.ois[0].apiSpecifications.components;
+
     if (extraAuth.type == "http") {
-      config.ois[0].apiSpecifications.components.securitySchemes[
-        `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
-      ].scheme = extraAuth.scheme;
+      securitySchemes[schemeTitle] = {
+        type: "http",
+        scheme: extraAuth.scheme,
+      };
     } else {
-      config.ois[0].apiSpecifications.components.securitySchemes[
-        `${title}_${state.extraAuth.name || state.extraAuth.scheme}`
-      ].name = extraAuth.name;
+      securitySchemes[schemeTitle] = {
+        type: extraAuth.type,
+        in: extraAuth.in,
+        name: extraAuth.name,
+      };
     }
+
+    // Replace dashes with underscores in auth.name
+    const underScoreAuthName = extraAuth.name
+      ? extraAuth.name.replace(/-/g, "_")
+      : null;
+    config.apiCredentials.push({
+      oisTitle: title,
+      securitySchemeName: schemeTitle,
+      securitySchemeValue:
+        "${" + (underScoreAuthName || extraAuth.scheme) + "}",
+    });
   }
 
   // Add default Relay Metadata Security Schemes

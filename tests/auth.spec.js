@@ -33,6 +33,7 @@ test("HTTP Works", async ({ page }) => {
     type: "http",
     scheme: "basic",
   };
+  // console.log(config.ois[0].apiSpecifications.components.securitySchemes);
   expect(
     config.ois[0].apiSpecifications.components.securitySchemes.TesterForge_basic
   ).toEqual(correctSecurityScheme);
