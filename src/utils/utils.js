@@ -190,7 +190,7 @@ function makeConfig(state) {
       airnodeWalletMnemonic: "${MNEMONIC}",
       logFormat: "plain",
       logLevel: "INFO",
-      nodeVersion: "0.3.1",
+      nodeVersion: "0.4.0",
       stage: exportSettings.stage,
       heartbeat: {
         enabled: false,
@@ -400,7 +400,6 @@ function makeConfig(state) {
       ],
       fixedOperationParameters: [],
       parameters: [],
-      testable: true,
     };
     for (let param of endpoint.params) {
       if (param.fixed) {
