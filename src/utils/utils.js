@@ -18,7 +18,7 @@ function makeOAS(state) {
   };
   if (version) oas.info.version = version;
   for (let endpoint of endpoints) {
-    let params = endpoint.params.map((param) => {
+    let params = endpoint.params.map(param => {
       return {
         name: param.name,
         in: param.in,
@@ -237,7 +237,7 @@ function makeConfig(state) {
     config.chains.push(chainObj);
   }
 
-  config.triggers.rrp = endpoints.map((endpoint) => {
+  config.triggers.rrp = endpoints.map(endpoint => {
     endpoint.path = endpoint.path.replace(/ /g, "");
     endpoint.name = `${endpoint.method.toUpperCase()} ${endpoint.path}`;
     const endpointId = ethers.utils.keccak256(
@@ -321,7 +321,7 @@ function makeConfig(state) {
     if (!config.ois[0].apiSpecifications.paths[endpoint.path])
       config.ois[0].apiSpecifications.paths[endpoint.path] = {};
     config.ois[0].apiSpecifications.paths[endpoint.path][endpoint.method] = {
-      parameters: endpoint.params.map((param) => {
+      parameters: endpoint.params.map(param => {
         return {
           name: param.name.replace(/ /g, ""),
           in: param.in,
@@ -329,7 +329,7 @@ function makeConfig(state) {
       }),
     };
   }
-  config.ois[0].endpoints = endpoints.map((endpoint) => {
+  config.ois[0].endpoints = endpoints.map(endpoint => {
     let ep = {
       name: `${endpoint.method.toUpperCase()} ${endpoint.path}`,
       operation: {
@@ -449,7 +449,7 @@ function parseConfig(config) {
 
   // If pre-alpha parse RPC
   if (config.nodeSettings.chains) {
-    state.chains = config.nodeSettings.chains.map((chain) => {
+    state.chains = config.nodeSettings.chains.map(chain => {
       return {
         id: chain.id,
         name: chain.providers[0].name,
@@ -461,7 +461,7 @@ function parseConfig(config) {
     });
     // If v0.2 and includes secrets
   } else if (config.chains) {
-    state.chains = config.chains.map((chain) => {
+    state.chains = config.chains.map(chain => {
       const chainName = Object.keys(chain.providers)[0];
       return {
         id: chain.id,
@@ -477,6 +477,48 @@ function parseConfig(config) {
   return state;
 }
 
+function makeSecretsEnv(state) {
+  // Make secrets.env
+  // Find all occurrences of ${} in state.exportStr
+  let secrets = [];
+  let regex = /\$\{([^}]+)\}/g;
+  let match;
+  while ((match = regex.exec(state.exportStr)) !== null) {
+    if (!match[1].includes("RPC")) secrets.push(match[1]);
+  }
+
+  let secretsEnv = "";
+  const underScoreAuthName = state.auth.name
+    ? state.auth.name.replace(/-/g, "_")
+    : null;
+  secrets.forEach(variable => {
+    console.log({ variable });
+    switch (variable) {
+      case "HTTP_GATEWAY_API_KEY":
+        secretsEnv += `\n${variable}="${state.gatewayKey}"\n\n`;
+        break;
+      case underScoreAuthName:
+        secretsEnv += `${underScoreAuthName}="${state.auth.value || ""}"\n`;
+        break;
+      default:
+        secretsEnv += `${variable}=""\n`;
+        break;
+    }
+  });
+
+  for (let chain of state.chains) {
+    if (!chain.enabled) continue;
+    secretsEnv += `\n${chain.name}_RPC="${chain.url}"`;
+    if (chain.extraRPCs) {
+      chain.extraRPCs.forEach((rpc, i) => {
+        secretsEnv += `\n${chain.name}${i + 2}_RPC="${rpc}"`;
+      });
+    }
+  }
+  console.log({ secretsEnv });
+  return secretsEnv;
+}
+
 // Download Zip
 async function makeZip(state) {
   console.log(state.RPCs);
@@ -487,7 +529,7 @@ async function makeZip(state) {
   const config = JSON.parse(state.exportStr);
   if (downloadOptions.includes("Deployment")) {
     //   Add Deployment Package
-    await new Promise((resolve) => {
+    await new Promise(resolve => {
       let configZip = new JSZip();
 
       // Make a config folder
@@ -498,46 +540,8 @@ async function makeZip(state) {
       configZip.folder("output");
       configZip.file("output/receipt.json", JSON.stringify({}));
 
-      // Make secrets.env
-      // Find all occurrences of ${} in state.exportStr
-      let secrets = [];
-      let regex = /\$\{([^}]+)\}/g;
-      let match;
-      while ((match = regex.exec(state.exportStr)) !== null) {
-        if (!match[1].includes("RPC")) secrets.push(match[1]);
-      }
-
       console.log({ state });
-
-      let secretsEnv = "";
-      const underScoreAuthName = state.auth.name
-        ? state.auth.name.replace(/-/g, "_")
-        : null;
-      secrets.forEach((variable) => {
-        console.log({ variable });
-        switch (variable) {
-          case "HTTP_GATEWAY_API_KEY":
-            secretsEnv += `\n${variable}="${state.gatewayKey}"\n\n`;
-            break;
-          case underScoreAuthName:
-            secretsEnv += `${underScoreAuthName}="${state.auth.value || ""}"\n`;
-            break;
-          default:
-            secretsEnv += `${variable}=""\n`;
-            break;
-        }
-      });
-
-      for (let chain of state.chains) {
-        if (!chain.enabled) continue;
-        secretsEnv += `\n${chain.name}_RPC="${chain.url}"`;
-        if (chain.extraRPCs) {
-          chain.extraRPCs.forEach((rpc, i) => {
-            secretsEnv += `\n${chain.name}${i + 2}_RPC="${rpc}"`;
-          });
-        }
-      }
-      console.log({ secretsEnv });
+      const secretsEnv = makeSecretsEnv(state);
       configZip.file("config/secrets.env", secretsEnv);
       configZip.file("aws.env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_ACCESS_KEY=`);
       configZip.generateAsync({ type: "blob" }).then(function(content) {
@@ -566,15 +570,15 @@ async function makeZip(state) {
 
 async function makeReadme(config) {
   // Create Markup Endpoints
-  let endpoints = config.triggers.rrp.map((endpoint) => {
+  let endpoints = config.triggers.rrp.map(endpoint => {
     let endpoints = config.ois[0].endpoints;
-    let correctParams = endpoints.find((e) => e.name == endpoint.endpointName);
+    let correctParams = endpoints.find(e => e.name == endpoint.endpointName);
     if (!correctParams) return endpoint.endpointName;
     return {
       endpointName: endpoint.endpointName,
       endpointId: endpoint.endpointId,
-      parameters: correctParams.parameters.map((p) => p.name),
-      fixedParams: correctParams.fixedOperationParameters.map((p) => {
+      parameters: correctParams.parameters.map(p => p.name),
+      fixedParams: correctParams.fixedOperationParameters.map(p => {
         return {
           name: p.operationParameter.name,
           value: p.value,
@@ -635,7 +639,7 @@ Read the [Airnode developer documentation](https://docs.api3.org/d/call-an-airno
   );
   configStr += `\n# Endpoints\n${tableOfContents.join("\n")}\n---`;
 
-  endpoints.forEach((endpoint) => {
+  endpoints.forEach(endpoint => {
     configStr += `\n## ${endpoint.endpointName} <a name="${endpoint.endpointId}"></a>
 
 {{ Describe the endpoint. Explain what it does and, if possible, deep link to the Web2 documentation. }}
@@ -648,7 +652,7 @@ You'll need the **Endpoint ID** to call this endpoint.
 
 [Request Parameters](https://docs.api3.org/airnode/v0.3/grp-developers/call-an-airnode.html#request-parameters)`;
     let endpointStrs = endpoint.parameters.map(
-      (e) => `${e}\t\t// Parameter Description...`
+      e => `${e}\t\t// Parameter Description...`
     );
     if (endpointStrs.length) {
       configStr += "\n\n```solidity\n" + endpointStrs.join("\n") + "\n```";
@@ -656,7 +660,7 @@ You'll need the **Endpoint ID** to call this endpoint.
 
     if (endpoint.fixedParams.length) {
       let fixedParamStrs = endpoint.fixedParams.map(
-        (e) =>
+        e =>
           `${e.name} = '${e.value}';\t\t// The ${e.name} parameter is fixed to ${e.value}`
       );
       configStr +=
@@ -758,13 +762,14 @@ async function makeGatewayRequest(
     parameters,
     gatewayKey,
   });
+  console.log({ results });
   return results.data;
 }
 
 // Get chain options
 async function getChains(enabled = true) {
   const results = await axios.get(`${apiUrl}/RPC/chains`);
-  return results.data.chains.map((chain) => {
+  return results.data.chains.map(chain => {
     return {
       ...chain,
       enabled,
@@ -813,5 +818,6 @@ module.exports = {
   saveChain,
   deleteChain,
   makeGatewayRequest,
+  makeSecretsEnv,
   // openEndpoint,
 };
