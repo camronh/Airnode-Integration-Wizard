@@ -35,7 +35,7 @@ test("HTTP Works", async ({ page }) => {
   };
   // console.log(config.ois[0].apiSpecifications.components.securitySchemes);
   expect(
-    config.ois[0].apiSpecifications.components.securitySchemes.TesterForge_basic
+    config.ois[0].apiSpecifications.components.securitySchemes.BASIC
   ).toEqual(correctSecurityScheme);
 });
 

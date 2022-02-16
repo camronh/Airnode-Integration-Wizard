@@ -39,5 +39,5 @@ test("Exports", async ({ page }) => {
     in: "query",
     name: "Auth_Token",
   };
-  expect(securitySchemes.CamsCSRNG_Auth_Token).toEqual(correctSecurityScheme);
+  expect(securitySchemes.Auth_Token).toEqual(correctSecurityScheme);
 });
