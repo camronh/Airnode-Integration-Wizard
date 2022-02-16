@@ -277,9 +277,12 @@ function makeConfig(state) {
     },
   };
 
+  // Replace whitespaces with underscores in title
+  const validTitle = title.replace(/ /g, "_");
+
   if (hasAuth) {
-    let schemeTitle = `${title}_${
-      auth.type == "http" ? auth.scheme : auth.name
+    let schemeTitle = `${
+      auth.type == "http" ? auth.scheme.toUpperCase() : auth.name
     }`;
     config.ois[0].apiSpecifications.security[schemeTitle] = [];
 
@@ -302,13 +305,14 @@ function makeConfig(state) {
     config.apiCredentials.push({
       oisTitle: title,
       securitySchemeName: schemeTitle,
-      securitySchemeValue: "${" + (underScoreAuthName || auth.scheme) + "}",
+      securitySchemeValue:
+        "${" + validTitle + "_" + (auth.scheme || underScoreAuthName) + "}",
     });
   }
 
   if (state.addedExtraAuth) {
-    let schemeTitle = `${title}_${
-      extraAuth.type == "http" ? extraAuth.scheme : extraAuth.name
+    let schemeTitle = `${
+      extraAuth.type == "http" ? extraAuth.scheme.toUpperCase() : extraAuth.name
     }`;
     config.ois[0].apiSpecifications.security[schemeTitle] = [];
 
@@ -335,7 +339,11 @@ function makeConfig(state) {
       oisTitle: title,
       securitySchemeName: schemeTitle,
       securitySchemeValue:
-        "${" + (underScoreAuthName || extraAuth.scheme) + "}",
+        "${" +
+        validTitle +
+        "_" +
+        (extraAuth.scheme || underScoreAuthName) +
+        "}",
     });
   }
 
@@ -541,100 +549,50 @@ function parseConfig(config) {
   return state;
 }
 
-function parseV3Config(config) {
-  console.log({ config });
-
-  const ois = config.ois[0];
-  let state = {
-    title: ois.title,
-    version: ois.version,
-    server: ois.apiSpecifications.servers[0].url,
-    // RPCs: [],
-  };
-  const securitySchemes = Object.keys(
-    ois.apiSpecifications.components.securitySchemes
-  );
-  console.log({ securitySchemes });
-  if (securitySchemes.length > 0) {
-    state.hasAuth = true;
-    const secScheme =
-      ois.apiSpecifications.components.securitySchemes[securitySchemes[0]];
-
-    state.auth = {
-      type: secScheme.type,
-      in: secScheme.in,
-      name: secScheme.name,
-    };
-    if (secScheme.scheme) state.auth.scheme = secScheme.scheme;
-    if (securitySchemes.length > 1) {
-      state.addedExtraAuth = true;
-      const secScheme =
-        ois.apiSpecifications.components.securitySchemes[securitySchemes[1]];
-
-      state.extraAuth = {
-        type: secScheme.type,
-        in: secScheme.in,
-        name: secScheme.name,
-      };
-      if (secScheme.scheme) state.extraAuth.scheme = secScheme.scheme;
-    }
-  } else state.hasAuth = false;
-
-  state.endpoints = [];
-  for (let endpoint of ois.endpoints) {
-    let ep = {
-      path: endpoint.operation.path,
-      name: endpoint.name == endpoint.operation.path ? "" : endpoint.name,
-      method: endpoint.operation.method,
-      params: [],
-    };
-    for (let param of endpoint.parameters) {
-      ep.params.push({
-        name: param.name,
-        in: param.operationParameter.in,
-        fixed: false,
-        value: "",
-      });
-    }
-    for (let param of endpoint.fixedOperationParameters) {
-      ep.params.push({
-        name: param.operationParameter.name,
-        in: param.operationParameter.in,
-        fixed: true,
-        value: param.value,
-      });
-    }
-    state.endpoints.push(ep);
+function makeSecretsEnv(state) {
+  // Make secrets.env
+  // Find all occurrences of ${} in state.exportStr
+  let secrets = [];
+  let regex = /\$\{([^}]+)\}/g;
+  let match;
+  while ((match = regex.exec(state.exportStr)) !== null) {
+    if (!match[1].includes("RPC")) secrets.push(match[1]);
   }
 
-  // If pre-alpha parse RPC
-  if (config.nodeSettings.chains) {
-    state.chains = config.nodeSettings.chains.map((chain) => {
-      return {
-        id: chain.id,
-        name: chain.providers[0].name,
-        url: chain.providers[0].url,
-        airnodeAddress: chain.contracts.Airnode,
-        enabled: true,
-        loading: false,
-      };
-    });
-    // If v0.2 and includes secrets
-  } else if (config.chains) {
-    state.chains = config.chains.map((chain) => {
-      const chainName = Object.keys(chain.providers)[0];
-      return {
-        id: chain.id,
-        name: chainName,
-        url: "",
-        airnodeAddress: chain.contracts.AirnodeRrp,
-        enabled: true,
-        loading: false,
-        authorizersAddress: chain.authorizers[0],
-      };
-    });
+  let secretsEnv = "";
+  const underScoreAuthName = state.auth.name
+    ? state.auth.name.replace(/-/g, "_")
+    : null;
+
+  // Replace whitespaces with underscores in title
+  const validTitle = state.title.replace(/ /g, "_");
+  secrets.forEach((variable) => {
+    console.log({ variable });
+    switch (variable) {
+      case "HTTP_GATEWAY_API_KEY":
+        secretsEnv += `\n${variable}="${state.gatewayKey}"\n\n`;
+        break;
+      case `${validTitle}_${state.auth.scheme || underScoreAuthName}`:
+        secretsEnv += `${validTitle}_${state.auth.scheme ||
+          underScoreAuthName}="${state.auth.value || ""}"\n`;
+        break;
+      default:
+        secretsEnv += `${variable}=""\n`;
+        break;
+    }
+  });
+
+  for (let chain of state.chains) {
+    if (!chain.enabled) continue;
+    secretsEnv += `\n${chain.name}_RPC="${chain.url}"`;
+    if (chain.extraRPCs) {
+      chain.extraRPCs.forEach((rpc, i) => {
+        secretsEnv += `\n${chain.name}${i + 2}_RPC="${rpc}"`;
+      });
+    }
   }
-  return state;
+  console.log({ secretsEnv });
+  return secretsEnv;
 }
 
 // Download Zip
@@ -658,46 +616,8 @@ async function makeZip(state) {
       configZip.folder("output");
       configZip.file("output/receipt.json", JSON.stringify({}));
 
-      // Make secrets.env
-      // Find all occurrences of ${} in state.exportStr
-      let secrets = [];
-      let regex = /\$\{([^}]+)\}/g;
-      let match;
-      while ((match = regex.exec(state.exportStr)) !== null) {
-        if (!match[1].includes("RPC")) secrets.push(match[1]);
-      }
-
       console.log({ state });
-
-      let secretsEnv = "";
-      const underScoreAuthName = state.auth.name
-        ? state.auth.name.replace(/-/g, "_")
-        : null;
-      secrets.forEach((variable) => {
-        console.log({ variable });
-        switch (variable) {
-          case "HTTP_GATEWAY_API_KEY":
-            secretsEnv += `\n${variable}="${state.gatewayKey}"\n\n`;
-            break;
-          case underScoreAuthName:
-            secretsEnv += `${underScoreAuthName}="${state.auth.value || ""}"\n`;
-            break;
-          default:
-            secretsEnv += `${variable}=""\n`;
-            break;
-        }
-      });
-
-      for (let chain of state.chains) {
-        if (!chain.enabled) continue;
-        secretsEnv += `\n${chain.name}_RPC="${chain.url}"`;
-        if (chain.extraRPCs) {
-          chain.extraRPCs.forEach((rpc, i) => {
-            secretsEnv += `\n${chain.name}${i + 2}_RPC="${rpc}"`;
-          });
-        }
-      }
-      console.log({ secretsEnv });
+      const secretsEnv = makeSecretsEnv(state);
       configZip.file("config/secrets.env", secretsEnv);
       configZip.file("aws.env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_ACCESS_KEY=`);
       configZip.generateAsync({ type: "blob" }).then(function(content) {
@@ -918,6 +838,7 @@ async function makeGatewayRequest(
     parameters,
     gatewayKey,
   });
+  console.log({ results });
   return results.data;
 }
 
@@ -973,6 +894,6 @@ module.exports = {
   saveChain,
   deleteChain,
   makeGatewayRequest,
-  parseV3Config,
+  makeSecretsEnv,
   // openEndpoint,
 };
