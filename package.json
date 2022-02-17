@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test": "npx playwright test --retries=1 --timeout 10000"
+    "test": "npx playwright test --retries=1 --timeout 11000"
   },
   "dependencies": {
     "@api3/airnode-abi": "^0.4.0",

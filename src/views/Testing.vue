@@ -58,6 +58,8 @@
                     :items="endpointNames"
                     v-model="selectedEndpoint"
                     @change="parseStoredEndpoint"
+                    append-icon="mdi-delete"
+                    @click:append="clearEndpointStorage"
                   />
                 </v-card-text>
               </v-col>
@@ -158,51 +160,26 @@
                   <v-card color="grey darken-3">
                     <v-card-text>
                       <v-row justify="center" align="center">
-                        <v-col cols="12" md="7">
-                          <v-card-title class="text-no-wrap paramTitle">
-                            {{ param }}
-                          </v-card-title>
-                        </v-col>
-                        <v-col cols="12" md="5">
-                          <v-select
-                            :items="[
-                              'bytes32',
-                              'string32',
-                              'bytes',
-                              'string',
-                              'address',
-                              'int256',
-                              'uint256',
-                            ]"
-                            label="Type"
-                            @change="storeEndpoint"
-                            v-model="paramTypes[param]"
-                          >
-                          </v-select>
-                        </v-col>
+                        <v-col cols="12" md="5"> </v-col>
                         <v-col cols="12" md="11">
                           <v-text-field
-                            label="Value"
+                            :label="param"
                             outlined
+                            dense
                             @change="storeEndpoint"
                             v-model="paramValues[param]"
                             v-if="param !== '_type'"
                           />
                           <v-select
                             v-else
-                            label="Value"
+                            :label="param"
                             outlined
-                            :items="[
-                              'bytes32',
-                              'string32',
-                              'bytes',
-                              'string',
-                              'address',
-                              'int256',
-                              'uint256',
-                            ]"
+                            readonly
+                            dense
+                            :items="['string']"
+                            value="string"
                             @change="storeEndpoint"
-                            v-model="paramValues[param]"
+                            :v-model="paramValues[param]"
                           />
                         </v-col>
                       </v-row>
@@ -431,13 +408,9 @@ export default {
       requestResults: "",
       address: "",
       paramValues: {
-        _type: "string32",
+        _type: "string",
       },
-      paramTypes: {
-        _path: "string32",
-        _type: "string32",
-        _times: "string32",
-      },
+
       httpResponse: {},
       chainID: "",
       configNames: [],
@@ -532,7 +505,7 @@ export default {
     paramsAreValid() {
       for (let param of this.selectedParams) {
         if (!this.paramValues[param]) return false;
-        if (!this.paramTypes[param]) return false;
+        // if (!this.paramTypes[param]) return false;
       }
       return true;
     },
@@ -565,7 +538,7 @@ export default {
           return {
             name: param,
             value: this.paramValues[param],
-            type: this.paramTypes[param],
+            type: "string32",
           };
         });
         return params;
@@ -625,7 +598,7 @@ export default {
             {
               name: "_type",
               value: "string",
-              type: "string",
+              type: "string32",
             },
             {
               name: "_path",
@@ -635,16 +608,15 @@ export default {
           ];
         }
         this.paramValues = {};
-        this.paramTypes = {};
         this.selectedParams = [];
         for (let param of endpoint.params) {
           this.selectedParams.push(param.name);
-          this.paramTypes[param.name] = param.type;
+          // this.paramTypes[param.name] = "string32";
           // This doesn't work idk why
           // this.paramValues[param.name] = param.value;
         }
         console.log({ values: this.paramValues });
-        console.log({ types: this.paramTypes });
+        // console.log({ types: this.paramTypes });
       } catch (error) {
         console.log("Parse Failed", error);
       }
@@ -753,7 +725,7 @@ export default {
           return {
             name: param,
             value: this.paramValues[param],
-            type: this.paramTypes[param],
+            type: "string32",
           };
         });
         requestObj.params = params;
@@ -832,6 +804,10 @@ export default {
         this.sponsorAddress,
         this.requestClientAddress
       );
+    },
+    clearEndpointStorage() {
+      localStorage[this.selectedEndpoint] = "";
+      this.parseStoredEndpoint();
     },
   },
 };
