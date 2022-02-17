@@ -167,6 +167,7 @@
                           <v-select
                             :items="[
                               'bytes32',
+                              'string32',
                               'bytes',
                               'string',
                               'address',
@@ -175,7 +176,6 @@
                             ]"
                             label="Type"
                             @change="storeEndpoint"
-                            :readonly="param[0] == '_'"
                             v-model="paramTypes[param]"
                           >
                           </v-select>
@@ -194,6 +194,7 @@
                             outlined
                             :items="[
                               'bytes32',
+                              'string32',
                               'bytes',
                               'string',
                               'address',
@@ -425,17 +426,17 @@ export default {
       sponsorStatus: false,
       selectedConfig: "",
       selectedEndpoint: "",
-      parseType: "bytes32",
+      parseType: "string32",
       result: "",
       requestResults: "",
       address: "",
       paramValues: {
-        _type: "bytes32",
+        _type: "string32",
       },
       paramTypes: {
-        _path: "bytes32",
-        _type: "bytes32",
-        _times: "bytes32",
+        _path: "string32",
+        _type: "string32",
+        _times: "string32",
       },
       httpResponse: {},
       chainID: "",
@@ -448,7 +449,7 @@ export default {
       // web3: null,
       sponsorWalletBalance: 0,
       sponsorWalletAddress: "",
-      sponsorAddress: "0xC22376E2Dd4537D78F088B349Cbf2b9Ce79Fe016",
+      sponsorAddress: "0xe2dB4f54F8FAB66e44386e49aFcB3EF4a87a8787",
     };
   },
   async mounted() {
@@ -500,13 +501,13 @@ export default {
       switch (Number(this.chainID)) {
         case 4:
           // Rinkeby Client Address
-          return "0xfB5797F644D79d053CCC1F9aaD40b8C6806C430f";
+          return "0x1080Be09F5a44212e807ea31F85E18C92AdCc5B7";
         case 31:
           // RSK Client Address
           return "0x53fd43cc0559F35E82E53F830a35cA868874b687";
         case 3:
           // Ropsten Client Address
-          return "0x65AEc36c42f13c1Cb17035cE827602a15a9F5DE9";
+          return "0x3d0c6D6131A9AAE4FE5B78405bE5544d62039Be4";
       }
       throw new Error("Chain ID not found");
     },
@@ -629,7 +630,7 @@ export default {
             {
               name: "_path",
               value: "",
-              type: "bytes32",
+              type: "string32",
             },
           ];
         }
@@ -746,7 +747,7 @@ export default {
           endpointId: endpoint.endpointId,
           clientAddress: this.requestClientAddress,
           sponsorAddress: this.sponsorAddress,
-          artifact: require("../utils/TestClient.json"),
+          artifact: require("../utils/Requester.json"),
         };
         let params = this.selectedParams.map((param) => {
           return {
