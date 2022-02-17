@@ -157,34 +157,31 @@
                   cols="12"
                   md="4"
                 >
-                  <v-card color="grey darken-3">
-                    <v-card-text>
-                      <v-row justify="center" align="center">
-                        <v-col cols="12" md="5"> </v-col>
-                        <v-col cols="12" md="11">
-                          <v-text-field
-                            :label="param"
-                            outlined
-                            dense
-                            @change="storeEndpoint"
-                            v-model="paramValues[param]"
-                            v-if="param !== '_type'"
-                          />
-                          <v-select
-                            v-else
-                            :label="param"
-                            outlined
-                            readonly
-                            dense
-                            :items="['string']"
-                            value="string"
-                            @change="storeEndpoint"
-                            :v-model="paramValues[param]"
-                          />
-                        </v-col>
-                      </v-row>
-                    </v-card-text>
-                  </v-card>
+                  <v-card-text>
+                    <v-row justify="center" align="center">
+                      <v-col cols="12" md="11">
+                        <v-text-field
+                          :label="param"
+                          outlined
+                          dense
+                          @change="storeEndpoint"
+                          v-model="paramValues[param]"
+                          v-if="param !== '_type'"
+                        />
+                        <v-select
+                          v-else
+                          :label="param"
+                          outlined
+                          readonly
+                          dense
+                          :items="['string']"
+                          value="string"
+                          @change="storeEndpoint"
+                          :v-model="paramValues[param]"
+                        />
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
                 </v-col>
               </v-row>
             </v-card-text>
