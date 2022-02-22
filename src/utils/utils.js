@@ -740,7 +740,7 @@ You'll need the **Endpoint ID** to call this endpoint.
           `${e.name} = '${e.value}';\t\t// The ${e.name} parameter is fixed to ${e.value}`
       );
       configStr +=
-        "[Fixed Parameters](https://docs.api3.org/airnode/v0.3/grp-providers/guides/build-an-airnode/api-integration.html#fixedoperationparameters)\n\n```solidity\n" +
+        "\n\n[Fixed Parameters](https://docs.api3.org/airnode/v0.3/grp-providers/guides/build-an-airnode/api-integration.html#fixedoperationparameters)\n\n```solidity\n" +
         fixedParamStrs.join("\n") +
         "\n```";
     }
