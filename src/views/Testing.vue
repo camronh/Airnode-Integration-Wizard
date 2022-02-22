@@ -680,7 +680,7 @@ export default {
           }
         });
         console.log({ receipt });
-        if (receipt.providerId || !receipt.airnodeWallet)
+        if (!receipt.providerId && !receipt.airnodeWallet)
           throw "Invalid Receipt";
         receipt.title = this.selectedConfig;
         await utils.saveReceipt(receipt);
