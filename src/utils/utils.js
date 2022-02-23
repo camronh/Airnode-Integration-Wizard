@@ -644,8 +644,7 @@ async function makeZip(state) {
       removalZip.file("old-receipt.json", JSON.stringify(receipt));
       // Need to include this extremely long string to make it work. Cant figure out a workaround for
       // using fs.readFileSync in webpack
-      const removalInstructions =
-        '## Airnode Removal Instructions (Pre-Alpha)\n\n1. Add AWS Credentials to .env file\n\n2. In a terminal opened to this directory, run:\n\nLinux/Mac:\n```\ndocker run -it --rm --env-file .env --env COMMAND=remove-with-receipt --env RECEIPT_FILENAME="old-receipt.json" -v "$(pwd):/airnode/out" api3/airnode-deployer:pre-alpha\n```\n\nWindows:\n```\ndocker run -it --rm --env-file .env --env COMMAND=remove-with-receipt --env RECEIPT_FILENAME="old-receipt.json" -v "%cd%:/airnode/out" api3/airnode-deployer:pre-alpha\n```\n';
+      const { removalInstructions } = require("./markdowns");
       removalZip.file("Removal-Instructions.md", removalInstructions);
 
       // Make an output folder
