@@ -680,9 +680,9 @@ async function makeReadme(config) {
 
 Read the [Airnode developer documentation](https://docs.api3.org/d/call-an-airnode) to learn how to call Airnode APIs. You'll need the **Provider ID** to call any endpoint in this API.
 
-**AirnodeAddress:** ${receipt.airnodeAddress || "{ ************ }"}
+**AirnodeAddress:** ${receipt.airnodeWallet.airnodeAddress || "{ ************ }"}
 
-**Airnode XPub:** ${receipt.airnodeXpub || "{ ************ }"} 
+**Airnode XPub:** ${receipt.airnodeWallet.airnodeXpub || "{ ************ }"} 
 
 [Reserved Parameters](https://docs.api3.org/r/reserved-parameters) are used to control Airnode behavior and are available for all endpoints.
 
