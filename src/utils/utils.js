@@ -1,7 +1,6 @@
 // const { v4: uuid } = require("uuid");
 const ethers = require("ethers");
 const axios = require("axios");
-
 // const apiUrl = "http://localhost:3000";
 const apiUrl = "https://clb5462t8j.execute-api.us-east-1.amazonaws.com/latest";
 
@@ -37,7 +36,7 @@ function makeOAS(state) {
           description: "API Endpoint",
           parameters: params,
           responses: {
-            "200": {
+            200: {
               description: "Auto generated using Swagger Maker",
               content: {
                 "application/json;charset=utf-8": {
@@ -455,12 +454,8 @@ function parseConfig(config) {
   // delete ois.apiSpecifications.components.securitySchemes.relayChainId;
   // delete ois.apiSpecifications.components.securitySchemes.relayRequester;
   // delete ois.apiSpecifications.components.securitySchemes.relaySponsor;
-  const {
-    relayChainId,
-    relayRequester,
-    relaySponsor,
-    ...otherSchemes
-  } = ois.apiSpecifications.components.securitySchemes;
+  const { relayChainId, relayRequester, relaySponsor, ...otherSchemes } =
+    ois.apiSpecifications.components.securitySchemes;
 
   console.log({ relayChainId, relayRequester, relaySponsor });
 
@@ -573,8 +568,9 @@ function makeSecretsEnv(state) {
         secretsEnv += `\n${variable}="${state.gatewayKey}"\n\n`;
         break;
       case `${validTitle}_${state.auth.scheme || underScoreAuthName}`:
-        secretsEnv += `${validTitle}_${state.auth.scheme ||
-          underScoreAuthName}="${state.auth.value || ""}"\n`;
+        secretsEnv += `${validTitle}_${
+          state.auth.scheme || underScoreAuthName
+        }="${state.auth.value || ""}"\n`;
         break;
       default:
         secretsEnv += `${variable}=""\n`;
@@ -620,7 +616,7 @@ async function makeZip(state) {
       const secretsEnv = makeSecretsEnv(state);
       configZip.file("config/secrets.env", secretsEnv);
       configZip.file("aws.env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_ACCESS_KEY=`);
-      configZip.generateAsync({ type: "blob" }).then(function(content) {
+      configZip.generateAsync({ type: "blob" }).then(function (content) {
         console.log("Generated");
         zip.file(`${state.title}-Deployment.zip`, content);
         resolve();
@@ -635,11 +631,32 @@ async function makeZip(state) {
     const oas = makeOAS(state);
     zip.file(`oas.json`, oas);
   }
-  if (downloadOptions.includes("OIS")) {
-    const ois = config.ois[0];
-    zip.file(`ois.json`, JSON.stringify(ois, null, 2));
+  if (downloadOptions.includes("Removal")) {
+    const receipt = await getReceipt(config.ois[0].title);
+
+    await new Promise((resolve) => {
+      let removalZip = new JSZip();
+
+      // Make a config folder
+      removalZip.file("config.json", JSON.stringify({}));
+      removalZip.file("security.json", JSON.stringify({}));
+      removalZip.file(".env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_ACCESS_KEY=`);
+      removalZip.file("old-receipt.json", JSON.stringify(receipt));
+      // Need to include this extremely long string to make it work. Cant figure out a workaround for
+      // using fs.readFileSync in webpack
+      const removalInstructions =
+        '## Airnode Removal Instructions (Pre-Alpha)\n\n1. Add AWS Credentials to .env file\n\n2. In a terminal opened to this directory, run:\n\nLinux/Mac:\n```\ndocker run -it --rm --env-file .env --env COMMAND=remove-with-receipt --env RECEIPT_FILENAME="old-receipt.json" -v "$(pwd):/airnode/out" api3/airnode-deployer:pre-alpha\n```\n\nWindows:\n```\ndocker run -it --rm --env-file .env --env COMMAND=remove-with-receipt --env RECEIPT_FILENAME="old-receipt.json" -v "%cd%:/airnode/out" api3/airnode-deployer:pre-alpha\n```\n';
+      removalZip.file("Removal-Instructions.md", removalInstructions);
+
+      // Make an output folder
+      removalZip.generateAsync({ type: "blob" }).then(function (content) {
+        console.log("Generated");
+        zip.file(`${state.title}-Removal-Package.zip`, content);
+        resolve();
+      });
+    });
   }
-  zip.generateAsync({ type: "blob" }).then(function(content) {
+  zip.generateAsync({ type: "blob" }).then(function (content) {
     FileSaver.saveAs(content, `${state.title}-Export.zip`);
   });
 }
@@ -680,7 +697,9 @@ async function makeReadme(config) {
 
 Read the [Airnode developer documentation](https://docs.api3.org/d/call-an-airnode) to learn how to call Airnode APIs. You'll need the **Provider ID** to call any endpoint in this API.
 
-**AirnodeAddress:** ${receipt.airnodeWallet.airnodeAddress || "{ ************ }"}
+**AirnodeAddress:** ${
+    receipt.airnodeWallet.airnodeAddress || "{ ************ }"
+  }
 
 **Airnode XPub:** ${receipt.airnodeWallet.airnodeXpub || "{ ************ }"} 
 
@@ -763,26 +782,13 @@ async function getOISs() {
     for (let OIS of OISs) {
       zip.file(`${OIS.title}/ois.json`, JSON.stringify(OIS, null, 2));
     }
-    zip.generateAsync({ type: "blob" }).then(function(content) {
+    zip.generateAsync({ type: "blob" }).then(function (content) {
       FileSaver.saveAs(content, `Export-${Date.now()}.zip`);
     });
   } catch (error) {
     return error;
   }
 }
-
-// async function openEndpoint(providerId, endpointId) {
-//   const airnode = await evm.getAirnode();
-//   await airnodeAdmin.updateAuthorizers(
-//     airnode,
-//     params.providerId,
-//     params.endpointId,
-//     [ethers.constants.AddressZero]
-//   );
-//   console.log(
-//     `Updated authorizers of endpoint with ID ${params.endpointId} to allow all public requests`
-//   );
-// }
 
 async function saveConfig(configStr) {
   const config = JSON.parse(configStr);

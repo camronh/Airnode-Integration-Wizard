@@ -1112,23 +1112,23 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="downloading" max-width="400px">
+    <v-dialog v-model="downloading" max-width="500px">
       <v-card>
         <v-card-title>
           Download Options
         </v-card-title>
         <v-card-text>
           <v-row align="center" justify="center">
-            <v-col cols="12" md="5">
+            <v-col cols="12" md="6">
               <v-checkbox
                 label="OAS"
                 v-model="downloadOptions"
                 value="OAS"
               ></v-checkbox>
               <v-checkbox
-                label="OIS"
+                label="Removal Package"
                 v-model="downloadOptions"
-                value="OIS"
+                value="Removal"
               ></v-checkbox>
             </v-col>
             <v-col cols="12" md="6">
@@ -1138,7 +1138,7 @@
                 value="Readme"
               ></v-checkbox>
               <v-checkbox
-                label="Deployment Pkg"
+                label="Deployment Package"
                 v-model="downloadOptions"
                 value="Deployment"
               ></v-checkbox>
@@ -1276,7 +1276,7 @@ export default {
       creatingRPC: false,
       editing: false,
       paramTypes: ["query", "header", "path", "cookie"],
-      downloadOptions: ["OAS", "OIS", "Readme", "Deployment"],
+      downloadOptions: ["OAS", "Removal", "Readme", "Deployment"],
       exportJson: {},
       editingConfig: false,
       bulkEditParamMenu: false,
