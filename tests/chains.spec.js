@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-test("CRUD a Chain", async ({ page }) => {
+test.skip("CRUD a Chain", async ({ page }) => {
   await page.goto("http://localhost:8080/");
   await page.click(".mdi-database-cog");
   await page.click("text=Create New Chain");

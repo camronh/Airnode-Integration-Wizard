@@ -599,6 +599,8 @@ async function makeZip(state) {
   const FileSaver = require("file-saver");
   let zip = new JSZip();
   const config = JSON.parse(state.exportStr);
+  const receipt = await getReceipt(config.ois[0].title);
+
   if (downloadOptions.includes("Deployment")) {
     //   Add Deployment Package
     await new Promise((resolve) => {
@@ -627,13 +629,31 @@ async function makeZip(state) {
     const readme = makeReadme(config);
     zip.file(`${state.title}-Endpoints.md`, readme);
   }
-  if (downloadOptions.includes("OAS")) {
-    const oas = makeOAS(state);
-    zip.file(`oas.json`, oas);
+  if (downloadOptions.includes("Testing") && receipt.api) {
+    const { endpointId } = config.triggers.http[0];
+    const url = `${receipt.api.httpGatewayUrl}/${endpointId}`;
+    const gatewayKey = state.gatewayKey;
+
+    const body = {
+      parameters: {
+        _path: "path.to.value",
+        _type: "string",
+      },
+    };
+    const param = config.ois[0].endpoints[0].parameters[0];
+    if (param) body.parameters[param.name] = "paramValue";
+
+    const curlCommand = `curl -X POST -H 'Content-Type: application/json' \
+-H 'x-api-key: ${gatewayKey}' -d '${JSON.stringify(body)}' '${url}'`;
+    console.log({ curlCommand });
+    const { makeTestingInstructions } = require("./markdowns");
+    const testingInstructions = makeTestingInstructions(
+      state.title,
+      curlCommand
+    );
+    zip.file(`${state.title}-Testing-Guide.md`, testingInstructions);
   }
   if (downloadOptions.includes("Removal")) {
-    const receipt = await getReceipt(config.ois[0].title);
-
     await new Promise((resolve) => {
       let removalZip = new JSZip();
 

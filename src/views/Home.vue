@@ -606,20 +606,6 @@
               <v-card-title>
                 Import API Specs
 
-                <!-- <v-btn-toggle
-            v-model="importType"
-            tile
-            color="primary"
-            group
-            @change="parseImport"
-          >
-            <v-btn value="OAS">
-              OAS / Swagger
-            </v-btn>
-            <v-btn value=".Config">
-              Config
-            </v-btn>
-          </v-btn-toggle> -->
               </v-card-title>
               <v-card-subtitle>
                 Paste or Drop an API Spec (OAS/Swagger/Config)
@@ -1121,9 +1107,9 @@
           <v-row align="center" justify="center">
             <v-col cols="12" md="6">
               <v-checkbox
-                label="OAS"
+                label="Testing Info"
                 v-model="downloadOptions"
-                value="OAS"
+                value="Testing"
               ></v-checkbox>
               <v-checkbox
                 label="Removal Package"
@@ -1276,7 +1262,7 @@ export default {
       creatingRPC: false,
       editing: false,
       paramTypes: ["query", "header", "path", "cookie"],
-      downloadOptions: ["OAS", "Removal", "Readme", "Deployment"],
+      downloadOptions: ["Testing", "Removal", "Readme", "Deployment"],
       exportJson: {},
       editingConfig: false,
       bulkEditParamMenu: false,
