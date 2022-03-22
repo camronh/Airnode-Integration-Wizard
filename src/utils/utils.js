@@ -165,7 +165,6 @@ async function parseOAS(oas) {
   return state;
 }
 
-// V0.2
 function makeConfig(state) {
   const {
     title,
@@ -184,12 +183,12 @@ function makeConfig(state) {
     nodeSettings: {
       cloudProvider: {
         type: exportSettings.cloudProvider,
-        // region: "us-east-1",
+        disableConcurrencyReservations: true,
       },
       airnodeWalletMnemonic: "${MNEMONIC}",
       logFormat: "plain",
       logLevel: "INFO",
-      nodeVersion: "0.4.0",
+      nodeVersion: "0.5.0",
       stage: exportSettings.stage,
       heartbeat: {
         enabled: false,
@@ -198,9 +197,13 @@ function makeConfig(state) {
         enabled: true,
         apiKey: "${HTTP_GATEWAY_API_KEY}", // In secrets.env
       },
+      httpSignedDataGateway: {
+        enabled: false,
+      },
     },
     triggers: {
       rrp: [],
+      httpSignedData: [],
     },
     ois: [],
     apiCredentials: [],

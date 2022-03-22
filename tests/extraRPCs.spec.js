@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-test("Add extra RPCs to chains", async ({ page }) => {
+test.skip("Add extra RPCs to chains", async ({ page }) => {
   await page.goto("http://localhost:8080/");
   await page.click("#menuButton");
 
