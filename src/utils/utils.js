@@ -706,32 +706,34 @@ async function makeReadme(config) {
 
   // Create Markup String
 
-  let configStr = `# How to use ${config.ois[0].title} on Web3
+  let configStr = `# ${config.ois[0].title} - Web3 API Docs
 
-> [Airnode](https://api3.org/airnode) API Documentation
+> [Airnode](https://docs.api3.org/airnode/v0.5/) API Documentation
 
-{{ Give an overview of the API. Describe what it does. }}
+{ Give an overview of the API. Describe what it does. }
 
-**Home Page:** {{ URL to API home page }}  
-**Web2 Docs:** {{ URL to API documentation }}
+**Home Page:** { URL to API home page }  
+**Web2 Docs:** { URL to API documentation }
 
-## Call this Airnode API
+## Sponsor your Smart Contract
 
-Read the [Airnode developer documentation](https://docs.api3.org/d/call-an-airnode) to learn how to call Airnode APIs. You'll need the **Provider ID** to call any endpoint in this API.
+The Airnode Address and Xpub are used to [derive a Sponsor Wallet](https://docs.api3.org/airnode/v0.5/grp-developers/requesters-sponsors.html#how-to-derive-a-sponsor-wallet).
 
 **AirnodeAddress:** ${
-    receipt.airnodeWallet.airnodeAddress || "{ ************ }"
-  }
+  receipt.airnodeWallet.airnodeAddress || "{ ************ }"
+}
 
 **Airnode XPub:** ${receipt.airnodeWallet.airnodeXpub || "{ ************ }"} 
 
-[Reserved Parameters](https://docs.api3.org/r/reserved-parameters) are used to control Airnode behavior and are available for all endpoints.
+## Making Airnode Requests
+
+Read the [Airnode developer documentation](https://docs.api3.org/airnode/v0.5/grp-developers/call-an-airnode.html) to learn how to call Airnode APIs. You'll need the **AirnodeAddress** to call any endpoint in this API. 
+
+[Reserved Parameters](https://docs.api3.org/ois/v1.0.0/reserved-parameters.html) are used to control Airnode behavior and are available for all endpoints. The \`_path\` defines the value to be returned on-chain, and the \`_type\` defines the [Solidity type](https://docs.soliditylang.org/en/latest/abi-spec.html#types); both are required.
 
 ## Available on Networks:
 
-> Find more information on each chain [Here](https://ethereum.org/en/developers/docs/networks/).
-
-| Chain                                | Airnode RRP Contract                       |
+| Chain                                | Airnode RRP Contract Address                    |
 | ------------------------------------ | ------------------------------------------ |\n`;
   let chains = [];
   for (let chain of config.chains) {
@@ -742,6 +744,7 @@ Read the [Airnode developer documentation](https://docs.api3.org/d/call-an-airno
     const address = chain.contracts.AirnodeRrp;
     configStr += `| ${name}                                 | ${address}                                 |\n`;
   }
+  configStr += `\n> Find more information on each chain [Here](https://ethereum.org/en/developers/docs/networks/).`;
 
   // const chain = ethers.providers.getNetwork(4);
   // console.log({ chain });
@@ -759,36 +762,31 @@ Read the [Airnode developer documentation](https://docs.api3.org/d/call-an-airno
   endpoints.forEach((endpoint) => {
     configStr += `\n## ${endpoint.endpointName} <a name="${endpoint.endpointId}"></a>
 
-{{ Describe the endpoint. Explain what it does and, if possible, deep link to the Web2 documentation. }}
+{ Describe the endpoint. Explain what it does and, if possible, deep link to the Web2 documentation. }
 
-**Web2 Docs:** {{ URL to endpoint documentation }}
+**Web2 Docs:** { URL to endpoint documentation }
 
-You'll need the **Endpoint ID** to call this endpoint.
+**EndpointId:** ${endpoint.endpointId}`;
 
-**Endpoint ID:** ${endpoint.endpointId}
-
-[Request Parameters](https://docs.api3.org/airnode/v0.3/grp-developers/call-an-airnode.html#request-parameters)`;
     let endpointStrs = endpoint.parameters.map(
-      (e) => `${e}\t\t// Parameter Description...`
+      (e) => `|${e}| { Parameter Description... }`
     );
     if (endpointStrs.length) {
-      configStr += "\n\n```solidity\n" + endpointStrs.join("\n") + "\n```";
-    } else configStr += "\n\n```solidity\nNone\n```";
-
+      configStr +=
+        `\n\n|[Parameters](https://docs.api3.org/airnode/v0.5/reference/specifications/airnode-abi-specifications.html#api3-airnode-abi) | Description |\n|---|---|\n` +
+        endpointStrs.join("\n");
+    }
     if (endpoint.fixedParams.length) {
       let fixedParamStrs = endpoint.fixedParams.map(
-        (e) =>
-          `${e.name} = '${e.value}';\t\t// The ${e.name} parameter is fixed to ${e.value}`
+        (e) => `|${e.name}|${e.value}|`
       );
       configStr +=
-        "\n\n[Fixed Parameters](https://docs.api3.org/airnode/v0.3/grp-providers/guides/build-an-airnode/api-integration.html#fixedoperationparameters)\n\n```solidity\n" +
-        fixedParamStrs.join("\n") +
-        "\n```";
+        "\n\n|[Fixed Parameters](https://docs.api3.org/airnode/v0.3/grp-providers/guides/build-an-airnode/api-integration.html#fixedoperationparameters)|Fixed Value|\n|---|---|\n" +
+        fixedParamStrs.join("\n");
     }
     configStr +=
-      "\n\n[Response](https://docs.api3.org/airnode/v0.3/reference/specifications/reserved-parameters.html#path)\n\n```json\n{ Add example response json here }\n```\n----";
+      "\n\n[Response](https://docs.api3.org/ois/v1.0.0/reserved-parameters.html#path)\n\n```json\n{ Add example response json here }\n```\n----";
   });
-  // console.log(configStr);
   return configStr;
 }
 // const config = require("./RNGconfig.json");
