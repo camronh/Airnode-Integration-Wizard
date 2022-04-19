@@ -663,7 +663,7 @@ async function makeZip(state) {
       // Make a config folder
       removalZip.file("config.json", JSON.stringify({}));
       removalZip.file("security.json", JSON.stringify({}));
-      removalZip.file(".env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_ACCESS_KEY=`);
+      removalZip.file(".env", `AWS_ACCESS_KEY_ID=\nAWS_SECRET_KEY=`);
       removalZip.file("old-receipt.json", JSON.stringify(receipt));
       // Need to include this extremely long string to make it work. Cant figure out a workaround for
       // using fs.readFileSync in webpack
