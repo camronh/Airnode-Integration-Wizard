@@ -24,6 +24,8 @@ test("Exports", async ({ page }) => {
 
   expect(config.chains[0].maxConcurrency).toBeTruthy();
   expect(config.chains[0].options.txType).toBe("eip1559");
+  expect(config.chains[0].options.priorityFee.value).toBe(3.12);
+  expect(config.chains[0].blockHistoryLimit).toBe(300);
 
   const {
     security,

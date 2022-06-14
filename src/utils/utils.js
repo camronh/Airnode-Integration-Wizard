@@ -188,7 +188,7 @@ function makeConfig(state) {
       airnodeWalletMnemonic: "${MNEMONIC}",
       logFormat: "plain",
       logLevel: "INFO",
-      nodeVersion: "0.5.0",
+      nodeVersion: "0.6.5",
       stage: exportSettings.stage,
       heartbeat: {
         enabled: false,
@@ -196,6 +196,7 @@ function makeConfig(state) {
       httpGateway: {
         enabled: true,
         apiKey: "${HTTP_GATEWAY_API_KEY}", // In secrets.env
+        maxConcurrency: 20,
       },
       httpSignedDataGateway: {
         enabled: false,
@@ -228,8 +229,16 @@ function makeConfig(state) {
       },
       options: {
         txType: "eip1559",
+        priorityFee: {
+          value: 3.12,
+          unit: "gwei",
+        },
+        baseFeeMultiplier: 2,
+        fulfillmentGasLimit: 500000,
       },
-      maxConcurrency: 5,
+      maxConcurrency: 100,
+      blockHistoryLimit: 300,
+      minConfirmations: 0,
       type: "evm",
     };
     if (chain.extraRPCs) {
@@ -720,8 +729,8 @@ async function makeReadme(config) {
 The Airnode Address and Xpub are used to [derive a Sponsor Wallet](https://docs.api3.org/airnode/v0.5/grp-developers/requesters-sponsors.html#how-to-derive-a-sponsor-wallet).
 
 **AirnodeAddress:** ${
-  receipt.airnodeWallet.airnodeAddress || "{ ************ }"
-}
+    receipt.airnodeWallet.airnodeAddress || "{ ************ }"
+  }
 
 **Airnode XPub:** ${receipt.airnodeWallet.airnodeXpub || "{ ************ }"} 
 
