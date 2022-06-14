@@ -15,7 +15,6 @@ test("Export works", async ({ page }) => {
   );
   expect(titleValue).toContain("Forge");
 
-  expect(await page.isVisible("text=rsk-tn")).toBeTruthy();
   await page.click("#menuButton");
 
   await page.click("text=Export");

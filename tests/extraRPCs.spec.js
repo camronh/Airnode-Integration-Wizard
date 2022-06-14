@@ -49,7 +49,7 @@ test.skip("Add extra RPCs to chains", async ({ page }) => {
   ).toBeTruthy();
 });
 
-test("Closing RPC menu reverts", async ({ page }) => {
+test.skip("Closing RPC menu reverts", async ({ page }) => {
   await page.goto("http://localhost:8080/");
   await page.click("#menuButton");
 

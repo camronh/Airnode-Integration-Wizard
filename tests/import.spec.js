@@ -30,7 +30,9 @@ test("Import Config", async ({ page }) => {
   );
   expect(titleValue).toContain("Forge");
 
-  expect(await page.isVisible("text=rsk-tn")).toBeTruthy();
+  expect(await page.isChecked("text=Rinkeby")).toBeTruthy();
+
+  // expect(await page.isVisible("text=rsk-tn")).toBeTruthy();
 
   await page.click("#menuButton");
   await page.click("text=Export");
@@ -55,5 +57,4 @@ test("Import Saved Config", async ({ page }) => {
   );
   expect(titleValue).toContain("CamsCSRNG");
   expect(await page.isVisible("text=Goerli")).toBeTruthy();
-
 });

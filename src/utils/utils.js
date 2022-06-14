@@ -3,6 +3,7 @@ const ethers = require("ethers");
 const axios = require("axios");
 // const apiUrl = "http://localhost:3000";
 const apiUrl = "https://clb5462t8j.execute-api.us-east-1.amazonaws.com/latest";
+const airnodeProtocol = require("@api3/airnode-protocol");
 
 function makeOAS(state) {
   const { title, version, server, hasAuth, auth, endpoints } = state;
@@ -212,21 +213,20 @@ function makeConfig(state) {
   if (exportSettings.cloudProvider === "aws") {
     config.nodeSettings.cloudProvider.region = "us-east-1";
   }
-  for (let chain of state.chains) {
+  for (let chainId of state.selectedChains) {
     let chainObj = {
-      authorizers:
-        chain.authorizersAddress && exportSettings.authorizers
-          ? [chain.authorizersAddress]
-          : [],
+      authorizers: exportSettings.authorizers
+        ? [airnodeProtocol.RequesterAuthorizerWithAirnodeAddresses[chainId]]
+        : [],
       contracts: {
-        AirnodeRrp: chain.airnodeAddress,
+        AirnodeRrp: airnodeProtocol.AirnodeRrpAddresses[chainId],
       },
-      id: chain.id,
-      providers: {
-        [chain.name]: {
-          url: "${" + chain.name + "_RPC}",
-        },
-      },
+      id: chainId,
+      // providers: {
+      //   [chain.name]: {
+      //     url: "${" + chain.name + "_RPC}",
+      //   },
+      // },
       options: {
         txType: "eip1559",
         priorityFee: {
@@ -241,13 +241,25 @@ function makeConfig(state) {
       minConfirmations: 0,
       type: "evm",
     };
-    if (chain.extraRPCs) {
-      chain.extraRPCs.forEach((rpc, i) => {
-        const count = `${i + 2}`;
-        chainObj.providers[chain.name + count] = {
-          url: "${" + chain.name + count + "_RPC}",
-        };
-      });
+    if (Number(chainId) == 80001) {
+      chainObj.providers = {
+        Mumbai_1: {
+          url: "${Mumbai_1_RPC}",
+        },
+        Mumbai_2: {
+          url: "${Mumbai_2_RPC}",
+        },
+        Mumbai_3: {
+          url: "${Mumbai_3_RPC}",
+        },
+      };
+    } else {
+      chainObj.providers = {
+        [ethers.providers.getNetwork(Number(chainId)).name]: {
+          url:
+            "${" + ethers.providers.getNetwork(Number(chainId)).name + "_RPC}",
+        },
+      };
     }
     config.chains.push(chainObj);
   }
@@ -528,30 +540,11 @@ function parseConfig(config) {
 
   // If pre-alpha parse RPC
   if (config.nodeSettings.chains) {
-    state.chains = config.nodeSettings.chains.map((chain) => {
-      return {
-        id: chain.id,
-        name: chain.providers[0].name,
-        url: chain.providers[0].url,
-        airnodeAddress: chain.contracts.Airnode,
-        enabled: true,
-        loading: false,
-      };
-    });
-    // If v0.2 and includes secrets
+    state.selectedChains = config.nodeSettings.chains.map(
+      (chain) => `${chain.id}`
+    );
   } else if (config.chains) {
-    state.chains = config.chains.map((chain) => {
-      const chainName = Object.keys(chain.providers)[0];
-      return {
-        id: chain.id,
-        name: chainName,
-        url: "",
-        airnodeAddress: chain.contracts.AirnodeRrp,
-        enabled: true,
-        loading: false,
-        authorizersAddress: chain.authorizers[0],
-      };
-    });
+    state.selectedChains = config.chains.map((chain) => chain.id);
   }
   return state;
 }
@@ -590,14 +583,18 @@ function makeSecretsEnv(state) {
     }
   });
 
-  for (let chain of state.chains) {
-    if (!chain.enabled) continue;
-    secretsEnv += `\n${chain.name}_RPC="${chain.url}"`;
-    if (chain.extraRPCs) {
-      chain.extraRPCs.forEach((rpc, i) => {
-        secretsEnv += `\n${chain.name}${i + 2}_RPC="${rpc}"`;
-      });
-    }
+  for (let chainId of state.selectedChains) {
+    if (Number(chainId) == 80001) {
+      secretsEnv += `\nMumbai_1_RPC="https://rpc-mumbai.matic.today"`;
+      secretsEnv += `\nMumbai_2_RPC="https://matic-mumbai.chainstacklabs.com"`;
+      secretsEnv += `\nMumbai_3_RPC="https://rpc-mumbai.maticvigil.com"`;
+    } else
+      secretsEnv += `\n${ethers.providers.getNetwork(Number(chainId)).name}_RPC=""`;
+    // if (chain.extraRPCs) {
+    //   chain.extraRPCs.forEach((rpc, i) => {
+    //     secretsEnv += `\n${chain.name}${i + 2}_RPC="${rpc}"`;
+    //   });
+    // }
   }
   console.log({ secretsEnv });
   return secretsEnv;

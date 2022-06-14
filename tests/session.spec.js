@@ -13,6 +13,5 @@ test("Session stores", async ({ page }) => {
   await page.click("[type='submit']");
 
   await page.reload();
-  const RPCURLs = await page.$$(".v-size--small");
-  expect(RPCURLs.length).toBe(2);
+  expect(await page.isChecked("text=Rinkeby")).toBeTruthy();
 });

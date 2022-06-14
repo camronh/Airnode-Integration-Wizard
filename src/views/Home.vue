@@ -2,9 +2,7 @@
   <v-container>
     <v-app-bar app color="dark" dark>
       <div class="d-flex align-center">
-        <h1>
-          A I W
-        </h1>
+        <h1>A I W</h1>
       </div>
       <v-spacer></v-spacer>
       <!-- <v-btn icon color="primary" @click="infoDialog = true">
@@ -38,9 +36,7 @@
             <v-menu bottom left v-if="!selectingEndpoint">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn icon v-bind="attrs" v-on="on" id="menuButton">
-                  <v-icon>
-                    mdi-dots-vertical
-                  </v-icon>
+                  <v-icon> mdi-dots-vertical </v-icon>
                 </v-btn>
               </template>
 
@@ -49,9 +45,7 @@
                   <v-list-item id="import" @click="importing = true">
                     <v-list-item-title
                       >Import
-                      <v-icon right>
-                        mdi-import
-                      </v-icon>
+                      <v-icon right> mdi-import </v-icon>
                     </v-list-item-title>
                   </v-list-item>
                   <v-list-item
@@ -94,9 +88,7 @@
               </v-list>
             </v-menu>
             <v-btn icon v-else @click="selectingEndpoint = false">
-              <v-icon>
-                mdi-close
-              </v-icon>
+              <v-icon> mdi-close </v-icon>
             </v-btn>
           </v-card-title>
           <v-card-title>
@@ -135,7 +127,54 @@
                 ></v-text-field>
               </v-col>
             </v-row>
-            <RPCs :currentChains.sync="chains" @submitted="storeSession" />
+
+            <v-row align="center" justify="center" class="display: flex">
+              <v-col cols="12" md="2">
+                <v-checkbox
+                  v-model="selectedChains"
+                  value="80001"
+                  label="Mumbai"
+                  @change="storeSession"
+                ></v-checkbox>
+              </v-col>
+
+              <v-col cols="12" md="2">
+                <v-checkbox
+                  v-model="selectedChains"
+                  value="4"
+                  @change="storeSession"
+                  label="Rinkeby"
+                ></v-checkbox>
+              </v-col>
+
+              <v-col cols="12" md="2">
+                <v-checkbox
+                  v-model="selectedChains"
+                  value="3"
+                  @change="storeSession"
+                  label="Ropsten"
+                ></v-checkbox>
+              </v-col>
+
+              <v-col cols="12" md="2">
+                <v-checkbox
+                  v-model="selectedChains"
+                  value="42"
+                  @change="storeSession"
+                  label="Kovan"
+                ></v-checkbox>
+              </v-col>
+
+              <v-col cols="12" md="1">
+                <v-checkbox
+                  v-model="selectedChains"
+                  value="5"
+                  @change="storeSession"
+                  label="Goerli"
+                ></v-checkbox>
+              </v-col>
+            </v-row>
+            <!-- <RPCs :currentChains.sync="chains" @submitted="storeSession" /> -->
             <!-- <v-row align="center" justify="center">
               <v-col cols="12" md="7">
                 <v-text-field
@@ -264,9 +303,7 @@
                     @click="addedExtraAuth = false"
                     id="trashAuthBtn"
                   >
-                    <v-icon>
-                      mdi-delete
-                    </v-icon>
+                    <v-icon> mdi-delete </v-icon>
                   </v-btn>
                 </v-col>
               </v-row>
@@ -371,9 +408,7 @@
           <v-spacer></v-spacer>
 
           <v-btn @click="endpointMenu = false" icon>
-            <v-icon>
-              mdi-close
-            </v-icon>
+            <v-icon> mdi-close </v-icon>
           </v-btn>
         </v-card-title>
         <v-card-text>
@@ -405,9 +440,7 @@
           <v-row>
             <v-col cols="12" md="12">
               <v-card height="100%" flat>
-                <v-card-title>
-                  Params
-                </v-card-title>
+                <v-card-title> Params </v-card-title>
 
                 <v-card-text>
                   <v-row align="center">
@@ -442,9 +475,7 @@
                             v-bind="attrs"
                             v-on="on"
                           >
-                            <v-icon>
-                              mdi-plus
-                            </v-icon>
+                            <v-icon> mdi-plus </v-icon>
                           </v-btn>
                         </template>
                         <span>Add Param</span>
@@ -485,9 +516,7 @@
               {{ p.name }} - {{ p.in }}
             </v-chip>
           </template>
-          <p v-else>
-            No params...
-          </p>
+          <p v-else>No params...</p>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -547,9 +576,7 @@
                   text
                   block
                 >
-                  <v-icon>
-                    mdi-magnify
-                  </v-icon>
+                  <v-icon> mdi-magnify </v-icon>
                 </v-btn>
               </v-col>
               <v-col cols="12" md="6">
@@ -561,9 +588,7 @@
                   text
                   block
                 >
-                  <v-icon>
-                    mdi-download
-                  </v-icon>
+                  <v-icon> mdi-download </v-icon>
                 </v-btn>
               </v-col>
             </v-row>
@@ -578,12 +603,8 @@
             <v-col cols="12" md="5">
               <v-tabs v-model="tab" fixed-tabs>
                 <v-tabs-slider color="accent"></v-tabs-slider>
-                <v-tab>
-                  Import
-                </v-tab>
-                <v-tab @click="getConfigNames">
-                  Saved
-                </v-tab>
+                <v-tab> Import </v-tab>
+                <v-tab @click="getConfigNames"> Saved </v-tab>
               </v-tabs>
             </v-col>
             <v-col cols="12" md="1"> </v-col>
@@ -603,10 +624,7 @@
         <v-tabs-items v-model="tab">
           <v-tab-item>
             <template>
-              <v-card-title>
-                Import API Specs
-
-              </v-card-title>
+              <v-card-title> Import API Specs </v-card-title>
               <v-card-subtitle>
                 Paste or Drop an API Spec (OAS/Swagger/Config)
               </v-card-subtitle>
@@ -638,9 +656,7 @@
                   block
                 >
                   Import
-                  <v-icon right>
-                    mdi-import
-                  </v-icon>
+                  <v-icon right> mdi-import </v-icon>
                 </v-btn>
               </v-card-text>
             </template>
@@ -671,9 +687,7 @@
                         </v-list-item-content>
                         <v-list-item-action v-if="hover || selectedConfig == i">
                           <v-btn icon @click="deleteConfig(configName)" small>
-                            <v-icon color="red" small>
-                              mdi-close
-                            </v-icon>
+                            <v-icon color="red" small> mdi-close </v-icon>
                           </v-btn>
                         </v-list-item-action>
                       </v-list-item>
@@ -709,15 +723,13 @@
                 <v-btn
                   fixed
                   right
-                  style="bottom:64px"
+                  style="bottom: 64px"
                   bottom
                   v-bind="attrs"
                   v-on="on"
                   @click="mergingConfigs = true"
                 >
-                  <v-icon>
-                    mdi-merge
-                  </v-icon>
+                  <v-icon> mdi-merge </v-icon>
                 </v-btn>
               </template>
               <span>Merge Configs</span>
@@ -727,16 +739,14 @@
                 <v-btn
                   fixed
                   right
-                  style="bottom:64px"
+                  style="bottom: 64px"
                   bottom
                   :disabled="selectedConfigs.length < 2"
                   v-bind="attrs"
                   v-on="on"
                   @click="mergeConfigs"
                 >
-                  <v-icon>
-                    mdi-merge
-                  </v-icon>
+                  <v-icon> mdi-merge </v-icon>
                 </v-btn>
               </template>
               <span>Merge!</span>
@@ -751,9 +761,7 @@
                   v-on="on"
                   @click="exportAllOIS"
                 >
-                  <v-icon>
-                    mdi-database-export-outline
-                  </v-icon>
+                  <v-icon> mdi-database-export-outline </v-icon>
                 </v-btn>
               </template>
               <span>Export All OIS's</span>
@@ -771,9 +779,7 @@
                     selectedConfigs = [];
                   "
                 >
-                  <v-icon>
-                    mdi-close
-                  </v-icon>
+                  <v-icon> mdi-close </v-icon>
                 </v-btn>
               </template>
               <span>Cancel Merge</span>
@@ -785,9 +791,7 @@
 
     <v-dialog v-model="confirmCreateRPC" max-width="400px">
       <v-card class="overflow-hidden">
-        <v-card-title>
-          Create RPC
-        </v-card-title>
+        <v-card-title> Create RPC </v-card-title>
         <v-card-subtitle>
           Are you sure you want to generate a new RPC URL?
         </v-card-subtitle>
@@ -819,9 +823,7 @@
           Bulk Changes
           <v-spacer></v-spacer>
           <v-btn icon @click="bulkMenu = false">
-            <v-icon>
-              mdi-close
-            </v-icon>
+            <v-icon> mdi-close </v-icon>
           </v-btn>
         </v-card-title>
         <v-card-subtitle>
@@ -838,9 +840,7 @@
               >
                 Deselect All
               </a>
-              <a v-else @click="openBulkMenu">
-                Select All
-              </a>
+              <a v-else @click="openBulkMenu"> Select All </a>
             </v-card-subtitle>
           </v-card-title>
           <v-row>
@@ -859,9 +859,7 @@
           </v-row>
         </v-card-text>
         <v-card-text>
-          <v-card-title>
-            Params
-          </v-card-title>
+          <v-card-title> Params </v-card-title>
           <v-row>
             <v-col cols="12" md="12">
               <v-chip-group
@@ -893,9 +891,7 @@
               </v-btn>
             </v-col>
             <v-col cols="12" md="4">
-              <v-btn block text @click="openBulkEditMenu">
-                Edit Param
-              </v-btn>
+              <v-btn block text @click="openBulkEditMenu"> Edit Param </v-btn>
             </v-col>
           </v-row>
         </v-card-actions>
@@ -912,9 +908,7 @@
             @click="saveConfig"
             v-if="!mergingConfigs"
           >
-            <v-icon>
-              mdi-floppy
-            </v-icon>
+            <v-icon> mdi-floppy </v-icon>
           </v-btn>
           <v-btn
             icon
@@ -924,14 +918,10 @@
             "
             v-else
           >
-            <v-icon>
-              mdi-close
-            </v-icon>
+            <v-icon> mdi-close </v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-subtitle>
-          Edit your config.json
-        </v-card-subtitle>
+        <v-card-subtitle> Edit your config.json </v-card-subtitle>
         <v-card-text>
           <v-row>
             <v-col cols="12" md="9">
@@ -968,9 +958,7 @@
                 :items="['dev', 'prod']"
               ></v-select>
               <v-btn block outlined color="primary" @click="secretsMenu = true">
-                <v-icon>
-                  mdi-magnify
-                </v-icon>
+                <v-icon> mdi-magnify </v-icon>
                 Secrets.env
               </v-btn>
             </v-col>
@@ -1087,9 +1075,7 @@
 
         <v-card-actions>
           <v-row justify="center" align="center">
-            <v-btn text color="red" @click="bulkDeleteParam">
-              Delete
-            </v-btn>
+            <v-btn text color="red" @click="bulkDeleteParam"> Delete </v-btn>
 
             <v-btn text color="primary" @click="confirmDelete = false">
               Cancel
@@ -1100,9 +1086,7 @@
     </v-dialog>
     <v-dialog v-model="downloading" max-width="500px">
       <v-card>
-        <v-card-title>
-          Download Options
-        </v-card-title>
+        <v-card-title> Download Options </v-card-title>
         <v-card-text>
           <v-row align="center" justify="center">
             <v-col cols="12" md="6">
@@ -1136,18 +1120,14 @@
             @click="download"
             :disabled="!downloadOptions.length"
           >
-            <v-icon>
-              mdi-download
-            </v-icon>
+            <v-icon> mdi-download </v-icon>
           </v-btn>
         </v-card-text>
       </v-card>
     </v-dialog>
     <v-dialog v-model="confirmClear" max-width="400px" max-height="1000px">
       <v-card height="100%">
-        <v-card-title>
-          Are you sure you want to clear data?
-        </v-card-title>
+        <v-card-title> Are you sure you want to clear data? </v-card-title>
         <v-card-text>
           <v-row align="center" justify="center">
             <v-checkbox
@@ -1158,12 +1138,8 @@
         </v-card-text>
         <v-card-text>
           <v-row justify="center" align="center">
-            <v-btn text @click="confirmClear = false">
-              Close
-            </v-btn>
-            <v-btn text color="red" @click="clear">
-              Clear All
-            </v-btn>
+            <v-btn text @click="confirmClear = false"> Close </v-btn>
+            <v-btn text color="red" @click="clear"> Clear All </v-btn>
           </v-row>
         </v-card-text>
       </v-card>
@@ -1173,9 +1149,7 @@
         <v-card-title>
           Secrets.env
           <v-spacer></v-spacer>
-          <v-icon @click="secretsMenu = false">
-            mdi-close
-          </v-icon>
+          <v-icon @click="secretsMenu = false"> mdi-close </v-icon>
         </v-card-title>
         <v-divider></v-divider>
         <v-card-text>
@@ -1200,14 +1174,14 @@ import utils from "../utils/utils";
 import VJsoneditor from "v-jsoneditor/src/index";
 import yaml from "yaml";
 import SwaggerParser from "@apidevtools/swagger-parser";
-import RPCs from "../components/RPCs.vue";
+// import RPCs from "../components/RPCs.vue";
 import { v4 as uuid } from "uuid";
 
 export default {
   name: "Home",
   components: {
     VJsoneditor,
-    RPCs,
+    // RPCs,
   },
   data() {
     return {
@@ -1230,6 +1204,7 @@ export default {
         enableTransform: false,
       },
       chains: [],
+      selectedChains: ["80001"],
       RPCs: [""],
       addedExtraAuth: false,
       importError: false,
@@ -1343,7 +1318,7 @@ export default {
         this.version = session.version;
         this.hasAuth = session.hasAuth;
         this.addedExtraAuth = session.addedExtraAuth;
-        this.chains = session.chains;
+        this.selectedChains = session.chains;
         this.auth = session.auth;
         this.gatewayKey = session.gatewayKey;
         this.extraAuth = session.extraAuth;
@@ -1679,7 +1654,7 @@ export default {
         version: this.version,
         auth: this.auth,
         extraAuth: this.extraAuth,
-        chains: this.chains,
+        chains: this.selectedChains,
         gatewayKey: this.gatewayKey,
         hasAuth: this.hasAuth,
         addedExtraAuth: this.addedExtraAuth,
@@ -1732,7 +1707,7 @@ export default {
           } else {
             const file = e.dataTransfer.files[0];
             let reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = function (event) {
               const uploadString = event.target.result;
               resolve(uploadString);
             };

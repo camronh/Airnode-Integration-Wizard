@@ -1,6 +1,6 @@
 const { test, expect } = require("@playwright/test");
 
-test("RPC component works", async ({ page }) => {
+test.skip("RPC component works", async ({ page }) => {
   await page.goto("http://localhost:8080/");
   await page.click("#menuButton");
 
