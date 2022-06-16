@@ -213,6 +213,8 @@ function makeConfig(state) {
   if (exportSettings.cloudProvider === "aws") {
     config.nodeSettings.cloudProvider.region = "us-east-1";
   }
+
+  console.log({ chains: state.selectedChains });
   for (let chainId of state.selectedChains) {
     let chainObj = {
       authorizers: exportSettings.authorizers
@@ -589,7 +591,9 @@ function makeSecretsEnv(state) {
       secretsEnv += `\nMumbai_2_RPC="https://matic-mumbai.chainstacklabs.com"`;
       secretsEnv += `\nMumbai_3_RPC="https://rpc-mumbai.maticvigil.com"`;
     } else
-      secretsEnv += `\n${ethers.providers.getNetwork(Number(chainId)).name}_RPC=""`;
+      secretsEnv += `\n${
+        ethers.providers.getNetwork(Number(chainId)).name
+      }_RPC=""`;
     // if (chain.extraRPCs) {
     //   chain.extraRPCs.forEach((rpc, i) => {
     //     secretsEnv += `\n${chain.name}${i + 2}_RPC="${rpc}"`;
@@ -852,10 +856,10 @@ async function getReceipt(title) {
   return results.data;
 }
 
-async function getRPC() {
-  const results = await axios.get(`${apiUrl}/RPC`);
-  return results.data;
-}
+// async function getRPC() {
+//   const results = await axios.get(`${apiUrl}/RPC`);
+//   return results.data;
+// }
 
 async function makeGatewayRequest(
   gatewayUrl,
@@ -874,36 +878,36 @@ async function makeGatewayRequest(
   return results.data;
 }
 
-// Get chain options
-async function getChains(enabled = true) {
-  const results = await axios.get(`${apiUrl}/RPC/chains`);
-  return results.data.chains.map((chain) => {
-    return {
-      ...chain,
-      enabled,
-      url: "",
-      loading: false,
-    };
-  });
-}
+// // Get chain options
+// async function getChains(enabled = true) {
+//   const results = await axios.get(`${apiUrl}/RPC/chains`);
+//   return results.data.chains.map((chain) => {
+//     return {
+//       ...chain,
+//       enabled,
+//       url: "",
+//       loading: false,
+//     };
+//   });
+// }
 
-// Create a new RPC URL for the chain
-async function newRPC(chain, RPC) {
-  const results = await axios.post(`${apiUrl}/RPC`, { chain, RPC });
-  return results.data.url;
-}
+// // Create a new RPC URL for the chain
+// async function newRPC(chain, RPC) {
+//   const results = await axios.post(`${apiUrl}/RPC`, { chain, RPC });
+//   return results.data.url;
+// }
 
-// Create a new RPC URL for the chain
-async function saveChain(chain) {
-  const results = await axios.post(`${apiUrl}/RPC/chains`, { ...chain });
-  return results;
-}
+// // Create a new RPC URL for the chain
+// async function saveChain(chain) {
+//   const results = await axios.post(`${apiUrl}/RPC/chains`, { ...chain });
+//   return results;
+// }
 
-// Delete chain from DB
-async function deleteChain(chain) {
-  const results = await axios.delete(`${apiUrl}/RPC/chains/${chain.name}`);
-  return results;
-}
+// // Delete chain from DB
+// async function deleteChain(chain) {
+//   const results = await axios.delete(`${apiUrl}/RPC/chains/${chain.name}`);
+//   return results;
+// }
 
 module.exports = {
   makeOAS,
@@ -918,13 +922,13 @@ module.exports = {
   getConfig,
   getReceipt,
   getOISs,
-  getRPC,
+  // getRPC,
   deleteConfig,
   makeReadme,
-  getChains,
-  newRPC,
-  saveChain,
-  deleteChain,
+  // getChains,
+  // newRPC,
+  // saveChain,
+  // deleteChain,
   makeGatewayRequest,
   makeSecretsEnv,
   // openEndpoint,

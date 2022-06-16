@@ -1291,16 +1291,13 @@ export default {
       console.log("Changed");
       this.exportStr = JSON.stringify(this.exportJson, null, 2);
       this.importString = this.exportStr;
-      const chains = this.chains;
+      const chains = this.selectedChains;
       await this.parseImport();
-      this.chains = chains;
+      this.selectedChains = chains;
     },
 
     storeSessions() {
       localStorage.storeSessions = this.storeSessions;
-    },
-    chains() {
-      this.storeSession();
     },
   },
   mounted() {
@@ -1318,12 +1315,13 @@ export default {
         this.version = session.version;
         this.hasAuth = session.hasAuth;
         this.addedExtraAuth = session.addedExtraAuth;
-        this.selectedChains = session.chains;
+        this.selectedChains = session.selectedChains;
         this.auth = session.auth;
         this.gatewayKey = session.gatewayKey;
         this.extraAuth = session.extraAuth;
         this.endpoints = session.endpoints;
       }
+      console.log("Storage:", this.selectedChains);
     } catch (error) {
       console.log(error);
     }
@@ -1654,7 +1652,7 @@ export default {
         version: this.version,
         auth: this.auth,
         extraAuth: this.extraAuth,
-        chains: this.selectedChains,
+        selectedChains: this.selectedChains,
         gatewayKey: this.gatewayKey,
         hasAuth: this.hasAuth,
         addedExtraAuth: this.addedExtraAuth,

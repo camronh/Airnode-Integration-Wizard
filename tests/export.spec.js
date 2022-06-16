@@ -26,6 +26,8 @@ test("Exports", async ({ page }) => {
   expect(config.chains[0].options.txType).toBe("eip1559");
   expect(config.chains[0].options.priorityFee.value).toBe(3.12);
   expect(config.chains[0].blockHistoryLimit).toBe(300);
+  expect(config.chains[0].id).toBe("4");
+  expect(config.chains.length).toBe(3);
 
   const {
     security,
