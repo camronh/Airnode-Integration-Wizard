@@ -551,9 +551,10 @@ export default {
       //   "0xF9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC";
       // const RSKAirnodeAddress = "0x1190a5e1f2afe4c8128fd820a7ac85a95a9e6e3e";
       console.log(this.chainID, this.airnodeAddress);
+      
       return new this.ethers.Contract(
         this.airnodeAddress,
-        airnodeProtocol.AirnodeRrpFactory.abi,
+        airnodeProtocol.AirnodeRrpV0Factory.abi,
         this.signer
       );
     },
